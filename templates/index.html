@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Recommendation Dashboard</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 2rem; }
+        h1 { text-align: center; color: #444; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .stock { border-bottom: 1px solid #eee; padding: 1.5rem 0; }
+        .stock:last-child { border-bottom: none; }
+        .stock-header { display: flex; justify-content: space-between; align-items: center; }
+        .ticker { font-size: 2rem; font-weight: bold; }
+        .recommendation { padding: 0.5rem 1rem; border-radius: 20px; color: white; font-weight: bold; }
+        .buy { background-color: #28a745; }
+        .sell { background-color: #dc3545; }
+        .hold { background-color: #6c757d; }
+        .metrics { display: flex; gap: 2rem; margin-top: 1rem; }
+        .metric { background: #f0f0f0; padding: 0.5rem; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Stock Recommendation Dashboard</h1>
+        {% for stock in stocks %}
+        <div class="stock">
+            <div class="stock-header">
+                <div class="ticker">{{ stock.ticker }}</div>
+                <div class="recommendation {{ stock.recommendation.lower() }}">{{ stock.recommendation }}</div>
+            </div>
+            <div class="metrics">
+                <div class="metric"><strong>Latest RSI:</strong> {{ '%.2f'|format(stock.rsi) }}</div>
+                <div class="metric"><strong>Avg. News Sentiment:</strong> {{ '%.2f'|format(stock.sentiment) }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
