@@ -1,33 +1,32 @@
-# data_collector.py
-
 import yfinance as yf
-import pandas as pd
 from pymongo import MongoClient
+import os
+from dotenv import load_dotenv
+from nifty50 import TICKERS
 
 def run():
     """
-    Connects to MongoDB, fetches the latest 1-year historical data for a 
-    predefined list of Indian stock tickers, and stores it in the database.
+    Connects to MongoDB, fetches 1-year historical data for all Nifty 50 stocks,
+    and stores it, using environment variables for configuration.
     """
     # --- SETUP ---
-    TICKERS = ['RELIANCE.NS', 'TCS.NS', 'HDFCBANK.NS', 'INFY.NS']
-    client = MongoClient('mongodb://localhost:27017/')
+    load_dotenv()
+    MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+    client = MongoClient(MONGO_URI)
     db = client['stock_market_db']
     collection = db['historical_data']
 
-    print("Starting data collection for Indian stocks...")
+    print("Starting data collection for all Nifty 50 stocks...")
 
     for ticker in TICKERS:
         try:
-            # Fetch data using yfinance for the last year
-            # The FutureWarning is a notice and can be ignored
-            data = yf.download(ticker, period="1y", interval="1d")
+            # Fetch data for the last year
+            data = yf.download(ticker, period="1y", interval="1d", progress=False)
 
             if data.empty:
                 print(f"No data found for {ticker}, it may be delisted.")
                 continue
 
-            # --- DATA FORMATTING & STORAGE ---
             records_to_insert = []
             for date, row in data.iterrows():
                 record = {
@@ -42,7 +41,7 @@ def run():
                 records_to_insert.append(record)
 
             if records_to_insert:
-                # To avoid duplicates, remove old data first
+                # Remove old data to prevent duplicates
                 collection.delete_many({'ticker': ticker})
                 collection.insert_many(records_to_insert)
                 print(f"Successfully inserted {len(records_to_insert)} records for {ticker}.")
@@ -53,6 +52,5 @@ def run():
     print("Data collection finished.")
     client.close()
 
-# This block ensures that run() is called only when the script is executed directly
 if __name__ == "__main__":
     run()

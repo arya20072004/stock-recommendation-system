@@ -3,38 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Recommendation Dashboard</title>
+    <title>Advanced Stock Recommendation System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 2rem; }
-        h1 { text-align: center; color: #444; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .stock { border-bottom: 1px solid #eee; padding: 1.5rem 0; }
-        .stock:last-child { border-bottom: none; }
-        .stock-header { display: flex; justify-content: space-between; align-items: center; }
-        .ticker { font-size: 2rem; font-weight: bold; }
-        .recommendation { padding: 0.5rem 1rem; border-radius: 20px; color: white; font-weight: bold; }
-        .buy { background-color: #28a745; }
-        .sell { background-color: #dc3545; }
-        .hold { background-color: #6c757d; }
-        .metrics { display: flex; gap: 2rem; margin-top: 1rem; }
-        .metric { background: #f0f0f0; padding: 0.5rem; border-radius: 5px; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e1e1e; }
+        ::-webkit-scrollbar-thumb { background: #4f4f4f; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6f6f6f; }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>Stock Recommendation Dashboard</h1>
-        {% for stock in stocks %}
-        <div class="stock">
-            <div class="stock-header">
-                <div class="ticker">{{ stock.ticker }}</div>
-                <div class="recommendation {{ stock.recommendation.lower() }}">{{ stock.recommendation }}</div>
+<body class="text-gray-200">
+    <div class="container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl">
+        <header class="flex flex-col sm:flex-row justify-between items-center pb-6 mb-6 border-b border-gray-800">
+            <h1 class="text-2xl md:text-3xl font-bold text-white mb-4 sm:mb-0">
+                ML-Powered Stock Analysis
+            </h1>
+            <div class="relative w-full sm:w-auto">
+                 <select id="stockSelector" class="w-full sm:w-64 appearance-none bg-gray-900 border border-gray-700 text-white py-2 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-gray-800 focus:border-cyan-500 transition-all duration-300">
+                 </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                </div>
             </div>
-            <div class="metrics">
-                <div class="metric"><strong>Latest RSI:</strong> {{ '%.2f'|format(stock.rsi) }}</div>
-                <div class="metric"><strong>Avg. News Sentiment:</strong> {{ '%.2f'|format(stock.sentiment) }}</div>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-gray-900/50 p-4 rounded-xl shadow-2xl shadow-black/20 border border-gray-800 min-h-[550px]">
+                <div id="chartContainer" class="w-full h-[550px]"></div>
             </div>
-        </div>
-        {% endfor %}
+            <aside id="infoPanel" class="bg-gray-900/50 p-6 rounded-xl shadow-2xl shadow-black/20 border border-gray-800 flex flex-col justify-between min-h-[550px]">
+            </aside>
+        </main>
+        
+        <footer class="text-center mt-8 text-gray-600 text-sm">
+            <p>All data is for informational purposes only. Not financial advice.</p>
+        </footer>
     </div>
+
+    <script>
+        const stockSelector = document.getElementById('stockSelector');
+        const infoPanel = document.getElementById('infoPanel');
+        const chartContainer = document.getElementById('chartContainer');
+        const API_BASE_URL = 'http://127.0.0.1:5000';
+        let chart;
+
+        function showLoadingState(ticker) {
+            infoPanel.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full text-center">
+                    <svg class="animate-spin h-8 w-8 text-cyan-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="text-lg font-semibold text-white">Fetching ${ticker}...</p>
+                    <p class="text-gray-400">Analyzing market data and sentiment.</p>
+                </div>`;
+            if (chart) {
+                chart.remove();
+                chart = null;
+            }
+        }
+
+        function showErrorState(message) {
+            infoPanel.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full text-center p-4 bg-red-900/20 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <p class="text-lg font-bold text-red-400">An Error Occurred</p>
+                    <p class="text-red-300/80 text-sm">${message}</p>
+                    <p class="text-gray-500 mt-2 text-xs">The model for this stock might need to be trained.</p>
+                </div>`;
+            chartContainer.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-500">Chart data unavailable.</div>';
+        }
+
+        function updateInfoPanel(recommendation, latestData) {
+            const recClasses = {
+                'BUY': 'bg-green-500/10 text-green-400 border-green-500/30',
+                'HOLD': 'bg-gray-500/10 text-gray-400 border-gray-500/30',
+                'SELL': 'bg-red-500/10 text-red-400 border-red-500/30'
+            };
+            const recClass = recClasses[recommendation] || recClasses['HOLD'];
+
+            const change = ((latestData.close - latestData.open) / latestData.open * 100).toFixed(2);
+            const changeColor = change >= 0 ? 'text-green-500' : 'text-red-500';
+
+            infoPanel.innerHTML = `
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-1">${stockSelector.value}</h2>
+                    <p class="text-gray-400 text-sm mb-6">Latest Available Data</p>
+                    
+                    <div class="space-y-4 text-sm">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Last Close</span>
+                            <span class="font-mono text-white">${latestData.close.toFixed(2)}</span>
+                        </div>
+                         <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Day's Change</span>
+                            <span class="font-mono ${changeColor}">${change}%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Day's High</span>
+                            <span class="font-mono text-white">${latestData.high.toFixed(2)}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Day's Low</span>
+                            <span class="font-mono text-white">${latestData.low.toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 text-center">
+                    <p class="text-sm text-gray-500 mb-2">ML Model Recommendation</p>
+                    <div class="recommendation ${recClass} text-2xl font-bold py-3 px-6 rounded-lg border">
+                        ${recommendation}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderChart(chartData) {
+            if (chart) chart.remove();
+            
+            chart = LightweightCharts.createChart(chartContainer, {
+                width: chartContainer.clientWidth, height: chartContainer.clientHeight,
+                layout: { backgroundColor: 'transparent', textColor: 'rgba(255, 255, 255, 0.7)' },
+                grid: { vertLines: { color: 'rgba(255, 255, 255, 0.05)' }, horzLines: { color: 'rgba(255, 255, 255, 0.05)' } },
+                timeScale: { borderColor: 'rgba(255, 255, 255, 0.2)', timeVisible: true, secondsVisible: false, },
+                crosshair: { mode: LightweightCharts.CrosshairMode.Normal, },
+            });
+
+            const candleSeries = chart.addCandlestickSeries({
+                upColor: '#22c55e', downColor: '#ef4444', 
+                borderDownColor: '#ef4444', borderUpColor: '#22c55e',
+                wickDownColor: '#ef4444', wickUpColor: '#22c55e',
+            });
+            
+            const formattedData = chartData.map(d => ({
+                time: (new Date(d.date).getTime() / 1000),
+                open: d.open, high: d.high, low: d.low, close: d.close
+            }));
+
+            candleSeries.setData(formattedData);
+            chart.timeScale().fitContent();
+        }
+
+        async function fetchStockList() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/stocks`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const stocks = await response.json();
+                
+                stockSelector.innerHTML = '';
+                stocks.forEach(stock => {
+                    const option = document.createElement('option');
+                    option.value = stock;
+                    option.textContent = stock;
+                    stockSelector.appendChild(option);
+                });
+                
+                if (stocks.length > 0) await fetchStockData(stocks[0]);
+                else showErrorState("No stocks available from the API.");
+
+            } catch (error) {
+                console.error("Error loading stock list:", error);
+                showErrorState("Could not load the list of stocks.");
+            }
+        }
+
+        async function fetchStockData(ticker) {
+            showLoadingState(ticker);
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/stocks/${ticker}`);
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+                
+                renderChart(data.chartData);
+                const latestDataPoint = data.chartData[data.chartData.length - 1];
+                updateInfoPanel(data.recommendation, latestDataPoint);
+
+            } catch (error) {
+                console.error(`Error fetching data for ${ticker}:`, error);
+                showErrorState(error.message);
+            }
+        }
+        
+        stockSelector.addEventListener('change', (event) => fetchStockData(event.target.value));
+
+        new ResizeObserver(entries => {
+            if (chart && entries.length > 0 && entries[0].contentRect.width > 0) {
+                const { width, height } = entries[0].contentRect;
+                chart.applyOptions({ width, height });
+            }
+        }).observe(chartContainer);
+
+        fetchStockList();
+    </script>
 </body>
 </html>
+
