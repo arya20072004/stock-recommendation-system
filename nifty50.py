@@ -45,7 +45,7 @@ NIFTY50_TICKER_MAP = {
     'SUNPHARMA.NS': 'Sun Pharmaceutical Industries Ltd.',
     'TCS.NS': 'Tata Consultancy Services Ltd.',
     'TATACONSUM.NS': 'Tata Consumer Products Ltd.',
-    'TATAMOTORS.NS': 'Tata Motors Ltd.',
+    'TRENT.NS': 'Trent Ltd.',
     'TATASTEEL.NS': 'Tata Steel Ltd.',
     'TECHM.NS': 'Tech Mahindra Ltd.',
     'TITAN.NS': 'Titan Company Ltd.',

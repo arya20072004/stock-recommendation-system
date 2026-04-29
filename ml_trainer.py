@@ -2,7 +2,7 @@ import pandas as pd
 import pandas_ta as ta
 import yfinance as yf
 from pymongo import MongoClient
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split, GridSearchCV, TimeSeriesSplit
 from xgboost import XGBClassifier
 from sklearn.metrics import classification_report
 from imblearn.over_sampling import SMOTE
@@ -38,21 +38,29 @@ def create_dataset(ticker, client):
     news_df = pd.DataFrame(list(db.news_articles.find({'ticker': ticker})))
     if not news_df.empty:
         news_df['date'] = pd.to_datetime(news_df['published_at'].dt.date)
-        sentiment_df = news_df.groupby('date')['sentiment'].apply(lambda x: x.str['score'].mean()).to_frame()
+        sentiment_df = news_df.groupby('date')['compound'].mean().to_frame(name='sentiment')
         df = df.join(sentiment_df, how='left')
     else:
         df['sentiment'] = 0.0
 
     df.fillna(0, inplace=True)
     
+    # Technical indicators with proper lagging to prevent data leakage
     df.ta.rsi(length=14, append=True)
     df.ta.macd(append=True)
     df.ta.bbands(append=True)
     df.ta.atr(append=True)
-    df['sentiment_7d_avg'] = df['sentiment'].rolling(window=7).mean()
-    df['price_change_1d'] = df['close'].pct_change(1)
-    df['price_change_5d'] = df['close'].pct_change(5)
-    df['market_correlation'] = df['return'].rolling(window=30).corr(df['nifty_return'])
+    
+    # Shift technical indicator columns to use only past data
+    for col in df.columns:
+        if 'RSI' in col or 'MACD' in col or 'BBL' in col or 'BBM' in col or 'BBU' in col or 'ATR' in col:
+            df[col] = df[col].shift(1)
+    
+    df['sentiment_7d_avg'] = df['sentiment'].shift(1).rolling(window=7).mean()
+    df['price_change_1d'] = df['close'].shift(1).pct_change(1)
+    df['price_change_5d'] = df['close'].shift(1).pct_change(5)
+    df['market_correlation'] = df['return'].shift(1).rolling(window=30).corr(df['nifty_return'])
+
     
     future_price_5d = df['close'].shift(-5)
     price_change = (future_price_5d - df['close']) / df['close']
@@ -94,7 +102,7 @@ def train_model(df, ticker):
     smote = SMOTE(random_state=42)
     X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
     
-    xgb = XGBClassifier(objective='multi:softmax', num_class=3, eval_metric='mlogloss', use_label_encoder=False)
+    xgb = XGBClassifier(objective='multi:softmax', num_class=3, eval_metric='mlogloss')
     
     param_grid = {
         'max_depth': [3, 5],
@@ -103,7 +111,8 @@ def train_model(df, ticker):
         'gamma': [0.1, 0.2]
     }
     
-    grid_search = GridSearchCV(estimator=xgb, param_grid=param_grid, cv=3, scoring='f1_weighted', verbose=0, n_jobs=-1)
+    tscv = TimeSeriesSplit(n_splits=5)
+    grid_search = GridSearchCV(estimator=xgb, param_grid=param_grid, cv=tscv, scoring='f1_weighted', verbose=0, n_jobs=-1)
     grid_search.fit(X_train_resampled, y_train_resampled)
     
     best_model = grid_search.best_estimator_

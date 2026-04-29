@@ -1,4 +1,9 @@
 # config.py
+import os
+from dotenv import load_dotenv
 
-ALPHA_VANTAGE_API_KEY = "QB9JMPHM6OYUU0P9"
-NEWS_API_KEY = "1cc12ebae44748acb64131dc141d000f"
+load_dotenv()
+
+ALPHA_VANTAGE_API_KEY = os.getenv('ALPHA_VANTAGE_API_KEY')
+NEWS_API_KEY = os.getenv('NEWS_API_KEY')
+MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')

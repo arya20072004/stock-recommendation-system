@@ -1,3 +1,4 @@
+import pandas as pd
 import yfinance as yf
 from pymongo import MongoClient
 import os
@@ -21,7 +22,9 @@ def run():
     for ticker in TICKERS:
         try:
             # Fetch data for the last year
-            data = yf.download(ticker, period="1y", interval="1d", progress=False)
+            data = yf.download(ticker, period="5y", interval="1d", progress=False)
+            if isinstance(data.columns, pd.MultiIndex):
+                data.columns = data.columns.get_level_values(0)
 
             if data.empty:
                 print(f"No data found for {ticker}, it may be delisted.")
