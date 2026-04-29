@@ -199,4 +199,8 @@ If you encounter any issues or have questions:
 ---
 
 **Remember**: Always invest responsibly and never risk more than you can afford to lose.</content>
+<<<<<<< HEAD
 <parameter name="filePath">c:\Users\aryab\Coding\stock_recommendations\README.md
+=======
+<parameter name="filePath">c:\Users\aryab\Coding\stock_recommendations\README.md
+>>>>>>> 91d31e8afbfd2eb4397f1c46851a2c203b84ff68
