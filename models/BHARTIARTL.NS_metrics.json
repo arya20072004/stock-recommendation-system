@@ -1,0 +1,46 @@
+{
+  "ticker": "BHARTIARTL.NS",
+  "f1_macro": 0.33988130298051455,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.4,
+      "recall": 0.21052631578947367,
+      "f1": 0.27586206896551724,
+      "support": 76
+    },
+    "HOLD": {
+      "precision": 0.29411764705882354,
+      "recall": 0.273972602739726,
+      "f1": 0.28368794326241137,
+      "support": 73
+    },
+    "BUY": {
+      "precision": 0.3858267716535433,
+      "recall": 0.5697674418604651,
+      "f1": 0.460093896713615,
+      "support": 86
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 336,
+    "1": 339,
+    "2": 496
+  },
+  "optuna": {
+    "best_value": 0.32637294472375367,
+    "best_params": {
+      "n_estimators": 524,
+      "max_depth": 8,
+      "learning_rate": 0.12468318418438323,
+      "subsample": 0.9692928260564024,
+      "colsample_bytree": 0.6144590166150794,
+      "min_child_weight": 7
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

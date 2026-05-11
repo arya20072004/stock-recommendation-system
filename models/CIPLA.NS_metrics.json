@@ -1,0 +1,46 @@
+{
+  "ticker": "CIPLA.NS",
+  "f1_macro": 0.3507473017905591,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.3629032258064516,
+      "recall": 0.5487804878048781,
+      "f1": 0.4368932038834951,
+      "support": 82
+    },
+    "HOLD": {
+      "precision": 0.37142857142857144,
+      "recall": 0.1625,
+      "f1": 0.22608695652173913,
+      "support": 80
+    },
+    "BUY": {
+      "precision": 0.3815789473684211,
+      "recall": 0.3972602739726027,
+      "f1": 0.38926174496644295,
+      "support": 73
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 371,
+    "1": 362,
+    "2": 438
+  },
+  "optuna": {
+    "best_value": 0.35659584173224196,
+    "best_params": {
+      "n_estimators": 511,
+      "max_depth": 8,
+      "learning_rate": 0.2951055232384035,
+      "subsample": 0.673518531529978,
+      "colsample_bytree": 0.7250780727694306,
+      "min_child_weight": 6
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

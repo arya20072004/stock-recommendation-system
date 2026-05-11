@@ -1,0 +1,46 @@
+{
+  "ticker": "INDUSINDBK.NS",
+  "f1_macro": 0.30191301393136255,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.3076923076923077,
+      "recall": 0.17142857142857143,
+      "f1": 0.22018348623853212,
+      "support": 70
+    },
+    "HOLD": {
+      "precision": 0.27419354838709675,
+      "recall": 0.22972972972972974,
+      "f1": 0.25,
+      "support": 74
+    },
+    "BUY": {
+      "precision": 0.3656716417910448,
+      "recall": 0.5384615384615384,
+      "f1": 0.43555555555555553,
+      "support": 91
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 355,
+    "1": 380,
+    "2": 436
+  },
+  "optuna": {
+    "best_value": 0.3695308992607603,
+    "best_params": {
+      "n_estimators": 621,
+      "max_depth": 4,
+      "learning_rate": 0.01672870468534965,
+      "subsample": 0.9985866537476502,
+      "colsample_bytree": 0.8840412777799799,
+      "min_child_weight": 3
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

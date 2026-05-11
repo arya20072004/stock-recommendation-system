@@ -1,0 +1,46 @@
+{
+  "ticker": "NTPC.NS",
+  "f1_macro": 0.3060226481367635,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.42424242424242425,
+      "recall": 0.2,
+      "f1": 0.27184466019417475,
+      "support": 70
+    },
+    "HOLD": {
+      "precision": 0.36363636363636365,
+      "recall": 0.13186813186813187,
+      "f1": 0.1935483870967742,
+      "support": 91
+    },
+    "BUY": {
+      "precision": 0.3254437869822485,
+      "recall": 0.7432432432432432,
+      "f1": 0.45267489711934156,
+      "support": 74
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 327,
+    "1": 363,
+    "2": 481
+  },
+  "optuna": {
+    "best_value": 0.31605396954780984,
+    "best_params": {
+      "n_estimators": 512,
+      "max_depth": 9,
+      "learning_rate": 0.08365257113492124,
+      "subsample": 0.7624102418485238,
+      "colsample_bytree": 0.8263724838267424,
+      "min_child_weight": 4
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

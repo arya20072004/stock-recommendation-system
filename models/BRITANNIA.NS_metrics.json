@@ -1,0 +1,46 @@
+{
+  "ticker": "BRITANNIA.NS",
+  "f1_macro": 0.2706374866175116,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.27522935779816515,
+      "recall": 0.43478260869565216,
+      "f1": 0.33707865168539325,
+      "support": 69
+    },
+    "HOLD": {
+      "precision": 0.3333333333333333,
+      "recall": 0.30952380952380953,
+      "f1": 0.32098765432098764,
+      "support": 84
+    },
+    "BUY": {
+      "precision": 0.20833333333333334,
+      "recall": 0.12195121951219512,
+      "f1": 0.15384615384615385,
+      "support": 82
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 364,
+    "1": 390,
+    "2": 417
+  },
+  "optuna": {
+    "best_value": 0.33451566969430424,
+    "best_params": {
+      "n_estimators": 186,
+      "max_depth": 7,
+      "learning_rate": 0.27376909012722955,
+      "subsample": 0.607506080309838,
+      "colsample_bytree": 0.633724268688568,
+      "min_child_weight": 3
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

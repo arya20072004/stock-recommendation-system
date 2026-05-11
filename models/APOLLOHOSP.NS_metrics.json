@@ -1,0 +1,46 @@
+{
+  "ticker": "APOLLOHOSP.NS",
+  "f1_macro": 0.34656047764400855,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.4807692307692308,
+      "recall": 0.2777777777777778,
+      "f1": 0.352112676056338,
+      "support": 90
+    },
+    "HOLD": {
+      "precision": 0.22580645161290322,
+      "recall": 0.21875,
+      "f1": 0.2222222222222222,
+      "support": 64
+    },
+    "BUY": {
+      "precision": 0.3884297520661157,
+      "recall": 0.5802469135802469,
+      "f1": 0.46534653465346537,
+      "support": 81
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 349,
+    "1": 367,
+    "2": 455
+  },
+  "optuna": {
+    "best_value": 0.3220974243453535,
+    "best_params": {
+      "n_estimators": 327,
+      "max_depth": 2,
+      "learning_rate": 0.014067938295123697,
+      "subsample": 0.6408133514046612,
+      "colsample_bytree": 0.6786804488718311,
+      "min_child_weight": 6
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

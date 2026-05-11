@@ -1,0 +1,46 @@
+{
+  "ticker": "EICHERMOT.NS",
+  "f1_macro": 0.35611487353818644,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.3709677419354839,
+      "recall": 0.32857142857142857,
+      "f1": 0.3484848484848485,
+      "support": 70
+    },
+    "HOLD": {
+      "precision": 0.3541666666666667,
+      "recall": 0.43037974683544306,
+      "f1": 0.38857142857142857,
+      "support": 79
+    },
+    "BUY": {
+      "precision": 0.35064935064935066,
+      "recall": 0.313953488372093,
+      "f1": 0.3312883435582822,
+      "support": 86
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 358,
+    "1": 354,
+    "2": 459
+  },
+  "optuna": {
+    "best_value": 0.30052072457562357,
+    "best_params": {
+      "n_estimators": 565,
+      "max_depth": 10,
+      "learning_rate": 0.08757424107488089,
+      "subsample": 0.7276224378682618,
+      "colsample_bytree": 0.7637102490945448,
+      "min_child_weight": 9
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

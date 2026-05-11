@@ -1,0 +1,46 @@
+{
+  "ticker": "GRASIM.NS",
+  "f1_macro": 0.36742471371627383,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.4,
+      "recall": 0.5866666666666667,
+      "f1": 0.4756756756756757,
+      "support": 75
+    },
+    "HOLD": {
+      "precision": 0.2972972972972973,
+      "recall": 0.14102564102564102,
+      "f1": 0.19130434782608696,
+      "support": 78
+    },
+    "BUY": {
+      "precision": 0.42045454545454547,
+      "recall": 0.45121951219512196,
+      "f1": 0.43529411764705883,
+      "support": 82
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 377,
+    "1": 331,
+    "2": 463
+  },
+  "optuna": {
+    "best_value": 0.30149684368534,
+    "best_params": {
+      "n_estimators": 364,
+      "max_depth": 10,
+      "learning_rate": 0.2569564054516011,
+      "subsample": 0.659699799827303,
+      "colsample_bytree": 0.9021582951674353,
+      "min_child_weight": 10
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

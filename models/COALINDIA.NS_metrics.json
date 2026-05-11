@@ -1,0 +1,46 @@
+{
+  "ticker": "COALINDIA.NS",
+  "f1_macro": 0.3247501469723692,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.3111111111111111,
+      "recall": 0.3888888888888889,
+      "f1": 0.345679012345679,
+      "support": 72
+    },
+    "HOLD": {
+      "precision": 0.3220338983050847,
+      "recall": 0.25675675675675674,
+      "f1": 0.2857142857142857,
+      "support": 74
+    },
+    "BUY": {
+      "precision": 0.3488372093023256,
+      "recall": 0.33707865168539325,
+      "f1": 0.34285714285714286,
+      "support": 89
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 347,
+    "1": 361,
+    "2": 463
+  },
+  "optuna": {
+    "best_value": 0.2985784126873082,
+    "best_params": {
+      "n_estimators": 275,
+      "max_depth": 4,
+      "learning_rate": 0.25482117156271455,
+      "subsample": 0.6604866177102654,
+      "colsample_bytree": 0.7469125405379443,
+      "min_child_weight": 6
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

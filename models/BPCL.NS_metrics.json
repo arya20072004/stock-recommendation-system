@@ -1,0 +1,46 @@
+{
+  "ticker": "BPCL.NS",
+  "f1_macro": 0.37379240968787064,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.3409090909090909,
+      "recall": 0.4225352112676056,
+      "f1": 0.37735849056603776,
+      "support": 71
+    },
+    "HOLD": {
+      "precision": 0.3088235294117647,
+      "recall": 0.29577464788732394,
+      "f1": 0.302158273381295,
+      "support": 71
+    },
+    "BUY": {
+      "precision": 0.4810126582278481,
+      "recall": 0.40860215053763443,
+      "f1": 0.4418604651162791,
+      "support": 93
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 405,
+    "1": 319,
+    "2": 447
+  },
+  "optuna": {
+    "best_value": 0.31549017427898524,
+    "best_params": {
+      "n_estimators": 663,
+      "max_depth": 8,
+      "learning_rate": 0.2244261707930581,
+      "subsample": 0.9016936937224881,
+      "colsample_bytree": 0.7627776460147104,
+      "min_child_weight": 1
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

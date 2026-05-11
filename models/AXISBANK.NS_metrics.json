@@ -1,0 +1,46 @@
+{
+  "ticker": "AXISBANK.NS",
+  "f1_macro": 0.3355971628417449,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.3137254901960784,
+      "recall": 0.41025641025641024,
+      "f1": 0.35555555555555557,
+      "support": 78
+    },
+    "HOLD": {
+      "precision": 0.28888888888888886,
+      "recall": 0.17567567567567569,
+      "f1": 0.2184873949579832,
+      "support": 74
+    },
+    "BUY": {
+      "precision": 0.42045454545454547,
+      "recall": 0.4457831325301205,
+      "f1": 0.4327485380116959,
+      "support": 83
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 380,
+    "1": 332,
+    "2": 459
+  },
+  "optuna": {
+    "best_value": 0.3814291935703795,
+    "best_params": {
+      "n_estimators": 113,
+      "max_depth": 10,
+      "learning_rate": 0.010379252419172695,
+      "subsample": 0.8878940393287613,
+      "colsample_bytree": 0.6059904757989445,
+      "min_child_weight": 10
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

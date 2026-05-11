@@ -1,0 +1,46 @@
+{
+  "ticker": "KOTAKBANK.NS",
+  "f1_macro": 0.3186625530407128,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.37209302325581395,
+      "recall": 0.5581395348837209,
+      "f1": 0.44651162790697674,
+      "support": 86
+    },
+    "HOLD": {
+      "precision": 0.2916666666666667,
+      "recall": 0.3181818181818182,
+      "f1": 0.30434782608695654,
+      "support": 66
+    },
+    "BUY": {
+      "precision": 0.35294117647058826,
+      "recall": 0.14457831325301204,
+      "f1": 0.20512820512820512,
+      "support": 83
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 398,
+    "1": 352,
+    "2": 421
+  },
+  "optuna": {
+    "best_value": 0.36106754765513366,
+    "best_params": {
+      "n_estimators": 479,
+      "max_depth": 8,
+      "learning_rate": 0.12664510436322096,
+      "subsample": 0.6302682524505476,
+      "colsample_bytree": 0.7656680456235438,
+      "min_child_weight": 9
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

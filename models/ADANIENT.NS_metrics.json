@@ -1,0 +1,46 @@
+{
+  "ticker": "ADANIENT.NS",
+  "f1_macro": 0.31497056711128163,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.4036697247706422,
+      "recall": 0.5238095238095238,
+      "f1": 0.45595854922279794,
+      "support": 84
+    },
+    "HOLD": {
+      "precision": 0.25,
+      "recall": 0.08450704225352113,
+      "f1": 0.12631578947368421,
+      "support": 71
+    },
+    "BUY": {
+      "precision": 0.3235294117647059,
+      "recall": 0.4125,
+      "f1": 0.3626373626373626,
+      "support": 80
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 363,
+    "1": 383,
+    "2": 425
+  },
+  "optuna": {
+    "best_value": 0.350707548545372,
+    "best_params": {
+      "n_estimators": 193,
+      "max_depth": 3,
+      "learning_rate": 0.015368138655490554,
+      "subsample": 0.9362003275489827,
+      "colsample_bytree": 0.9072130379229347,
+      "min_child_weight": 1
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

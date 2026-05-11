@@ -1,0 +1,46 @@
+{
+  "ticker": "MARUTI.NS",
+  "f1_macro": 0.23629490915275428,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.2047244094488189,
+      "recall": 0.4642857142857143,
+      "f1": 0.28415300546448086,
+      "support": 56
+    },
+    "HOLD": {
+      "precision": 0.20454545454545456,
+      "recall": 0.12162162162162163,
+      "f1": 0.15254237288135594,
+      "support": 74
+    },
+    "BUY": {
+      "precision": 0.359375,
+      "recall": 0.21904761904761905,
+      "f1": 0.27218934911242604,
+      "support": 105
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 380,
+    "1": 343,
+    "2": 448
+  },
+  "optuna": {
+    "best_value": 0.3707645234378632,
+    "best_params": {
+      "n_estimators": 321,
+      "max_depth": 10,
+      "learning_rate": 0.026361170769448723,
+      "subsample": 0.7404524687886701,
+      "colsample_bytree": 0.8205900021532002,
+      "min_child_weight": 6
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

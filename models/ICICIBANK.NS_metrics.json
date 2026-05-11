@@ -1,0 +1,46 @@
+{
+  "ticker": "ICICIBANK.NS",
+  "f1_macro": 0.36890573311150154,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.422680412371134,
+      "recall": 0.4659090909090909,
+      "f1": 0.44324324324324327,
+      "support": 88
+    },
+    "HOLD": {
+      "precision": 0.3793103448275862,
+      "recall": 0.1527777777777778,
+      "f1": 0.21782178217821782,
+      "support": 72
+    },
+    "BUY": {
+      "precision": 0.3761467889908257,
+      "recall": 0.5466666666666666,
+      "f1": 0.44565217391304346,
+      "support": 75
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 380,
+    "1": 336,
+    "2": 455
+  },
+  "optuna": {
+    "best_value": 0.3235917878267119,
+    "best_params": {
+      "n_estimators": 110,
+      "max_depth": 6,
+      "learning_rate": 0.28791066041685964,
+      "subsample": 0.7558069885888686,
+      "colsample_bytree": 0.8334901489701507,
+      "min_child_weight": 9
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

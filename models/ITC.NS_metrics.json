@@ -1,0 +1,46 @@
+{
+  "ticker": "ITC.NS",
+  "f1_macro": 0.3698951156804911,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.46153846153846156,
+      "recall": 0.26666666666666666,
+      "f1": 0.3380281690140845,
+      "support": 90
+    },
+    "HOLD": {
+      "precision": 0.3548387096774194,
+      "recall": 0.3055555555555556,
+      "f1": 0.3283582089552239,
+      "support": 72
+    },
+    "BUY": {
+      "precision": 0.35537190082644626,
+      "recall": 0.589041095890411,
+      "f1": 0.44329896907216493,
+      "support": 73
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 372,
+    "1": 347,
+    "2": 452
+  },
+  "optuna": {
+    "best_value": 0.322107458618364,
+    "best_params": {
+      "n_estimators": 624,
+      "max_depth": 4,
+      "learning_rate": 0.13103508177929893,
+      "subsample": 0.7823599490952771,
+      "colsample_bytree": 0.9813519769636067,
+      "min_child_weight": 5
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

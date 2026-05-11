@@ -1,0 +1,46 @@
+{
+  "ticker": "BAJFINANCE.NS",
+  "f1_macro": 0.3046899735474053,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.4036144578313253,
+      "recall": 0.7701149425287356,
+      "f1": 0.5296442687747036,
+      "support": 87
+    },
+    "HOLD": {
+      "precision": 0.25,
+      "recall": 0.09375,
+      "f1": 0.13636363636363635,
+      "support": 64
+    },
+    "BUY": {
+      "precision": 0.35555555555555557,
+      "recall": 0.19047619047619047,
+      "f1": 0.24806201550387597,
+      "support": 84
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 402,
+    "1": 315,
+    "2": 454
+  },
+  "optuna": {
+    "best_value": 0.3925517445032238,
+    "best_params": {
+      "n_estimators": 432,
+      "max_depth": 3,
+      "learning_rate": 0.2146588883787125,
+      "subsample": 0.879431676649193,
+      "colsample_bytree": 0.9229335002271069,
+      "min_child_weight": 6
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "ticker": "HDFCLIFE.NS",
+  "f1_macro": 0.227271361018523,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.23863636363636365,
+      "recall": 0.22826086956521738,
+      "f1": 0.23333333333333334,
+      "support": 92
+    },
+    "HOLD": {
+      "precision": 0.26881720430107525,
+      "recall": 0.35714285714285715,
+      "f1": 0.3067484662576687,
+      "support": 70
+    },
+    "BUY": {
+      "precision": 0.16666666666666666,
+      "recall": 0.1232876712328767,
+      "f1": 0.14173228346456693,
+      "support": 73
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 407,
+    "1": 378,
+    "2": 386
+  },
+  "optuna": {
+    "best_value": 0.38141887007842484,
+    "best_params": {
+      "n_estimators": 110,
+      "max_depth": 10,
+      "learning_rate": 0.013959821943010596,
+      "subsample": 0.7203570441215595,
+      "colsample_bytree": 0.9936303307626657,
+      "min_child_weight": 1
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

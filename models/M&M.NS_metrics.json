@@ -1,0 +1,46 @@
+{
+  "ticker": "M&M.NS",
+  "f1_macro": 0.3478505291005291,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.3425925925925926,
+      "recall": 0.5138888888888888,
+      "f1": 0.4111111111111111,
+      "support": 72
+    },
+    "HOLD": {
+      "precision": 0.2916666666666667,
+      "recall": 0.0945945945945946,
+      "f1": 0.14285714285714285,
+      "support": 74
+    },
+    "BUY": {
+      "precision": 0.4563106796116505,
+      "recall": 0.5280898876404494,
+      "f1": 0.4895833333333333,
+      "support": 89
+    }
+  },
+  "train_size": 936,
+  "test_size": 235,
+  "total_rows_after_features": 1171,
+  "label_distribution": {
+    "0": 365,
+    "1": 317,
+    "2": 489
+  },
+  "optuna": {
+    "best_value": 0.33614184640206757,
+    "best_params": {
+      "n_estimators": 380,
+      "max_depth": 7,
+      "learning_rate": 0.06426003630689243,
+      "subsample": 0.8417123438386255,
+      "colsample_bytree": 0.7895233434529089,
+      "min_child_weight": 2
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}
