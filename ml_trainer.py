@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 import joblib
 import optuna
 import pandas as pd
+import numpy as np
 import pandas_ta as ta
 import yfinance as yf
 from dotenv import load_dotenv
@@ -195,8 +196,8 @@ def create_dataset(ticker, client):
         .rolling(window=30)
         .corr(df["nifty_return"].shift(1))
     )
-    df["future_5d_return"] = df["close"].shift(-5) / df["close"] - 1
-    threshold = 0.5 * df["atr_pct"]
+    df["future_5d_return"] = df["close"].shift(-10) / df["close"] - 1
+    threshold = np.maximum(1.0 * df["atr_pct"], 0.01)
     df["target"] = 1
     df.loc[df["future_5d_return"] > threshold, "target"] = 2
     df.loc[df["future_5d_return"] < -threshold, "target"] = 0

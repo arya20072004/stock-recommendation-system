@@ -1,0 +1,46 @@
+{
+  "ticker": "ONGC.NS",
+  "f1_macro": 0.2739121811056968,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.17777777777777778,
+      "recall": 0.1509433962264151,
+      "f1": 0.16326530612244897,
+      "support": 53
+    },
+    "HOLD": {
+      "precision": 0.4666666666666667,
+      "recall": 0.13333333333333333,
+      "f1": 0.2074074074074074,
+      "support": 105
+    },
+    "BUY": {
+      "precision": 0.3333333333333333,
+      "recall": 0.6973684210526315,
+      "f1": 0.451063829787234,
+      "support": 76
+    }
+  },
+  "train_size": 934,
+  "test_size": 234,
+  "total_rows_after_features": 1168,
+  "label_distribution": {
+    "0": 271,
+    "1": 462,
+    "2": 435
+  },
+  "optuna": {
+    "best_value": 0.3507979200746566,
+    "best_params": {
+      "n_estimators": 280,
+      "max_depth": 7,
+      "learning_rate": 0.011592102508215052,
+      "subsample": 0.9846880063785857,
+      "colsample_bytree": 0.99823574181562,
+      "min_child_weight": 6
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "ticker": "SBILIFE.NS",
+  "f1_macro": 0.26444136087984377,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.2191780821917808,
+      "recall": 0.7619047619047619,
+      "f1": 0.3404255319148936,
+      "support": 42
+    },
+    "HOLD": {
+      "precision": 0.5151515151515151,
+      "recall": 0.288135593220339,
+      "f1": 0.3695652173913043,
+      "support": 118
+    },
+    "BUY": {
+      "precision": 0.18181818181818182,
+      "recall": 0.05405405405405406,
+      "f1": 0.08333333333333333,
+      "support": 74
+    }
+  },
+  "train_size": 934,
+  "test_size": 234,
+  "total_rows_after_features": 1168,
+  "label_distribution": {
+    "0": 291,
+    "1": 487,
+    "2": 390
+  },
+  "optuna": {
+    "best_value": 0.3306902254695795,
+    "best_params": {
+      "n_estimators": 656,
+      "max_depth": 6,
+      "learning_rate": 0.0952453742560287,
+      "subsample": 0.6393466988278416,
+      "colsample_bytree": 0.8642724187277009,
+      "min_child_weight": 10
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "ticker": "ULTRACEMCO.NS",
+  "f1_macro": 0.4047067650272909,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.3333333333333333,
+      "recall": 0.33962264150943394,
+      "f1": 0.3364485981308411,
+      "support": 53
+    },
+    "HOLD": {
+      "precision": 0.4819277108433735,
+      "recall": 0.37037037037037035,
+      "f1": 0.418848167539267,
+      "support": 108
+    },
+    "BUY": {
+      "precision": 0.4020618556701031,
+      "recall": 0.5342465753424658,
+      "f1": 0.4588235294117647,
+      "support": 73
+    }
+  },
+  "train_size": 934,
+  "test_size": 234,
+  "total_rows_after_features": 1168,
+  "label_distribution": {
+    "0": 297,
+    "1": 453,
+    "2": 418
+  },
+  "optuna": {
+    "best_value": 0.3949292424986639,
+    "best_params": {
+      "n_estimators": 557,
+      "max_depth": 4,
+      "learning_rate": 0.010564465921083163,
+      "subsample": 0.8570612237995492,
+      "colsample_bytree": 0.9374719072829155,
+      "min_child_weight": 2
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

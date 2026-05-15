@@ -1,0 +1,46 @@
+{
+  "ticker": "UPL.NS",
+  "f1_macro": 0.33182600654431643,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.2222222222222222,
+      "recall": 0.43137254901960786,
+      "f1": 0.29333333333333333,
+      "support": 51
+    },
+    "HOLD": {
+      "precision": 0.5362318840579711,
+      "recall": 0.34579439252336447,
+      "f1": 0.42045454545454547,
+      "support": 107
+    },
+    "BUY": {
+      "precision": 0.30303030303030304,
+      "recall": 0.2631578947368421,
+      "f1": 0.28169014084507044,
+      "support": 76
+    }
+  },
+  "train_size": 934,
+  "test_size": 234,
+  "total_rows_after_features": 1168,
+  "label_distribution": {
+    "0": 367,
+    "1": 419,
+    "2": 382
+  },
+  "optuna": {
+    "best_value": 0.4170477872324545,
+    "best_params": {
+      "n_estimators": 198,
+      "max_depth": 3,
+      "learning_rate": 0.2152276956423435,
+      "subsample": 0.8010873847185903,
+      "colsample_bytree": 0.692182150837552,
+      "min_child_weight": 6
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

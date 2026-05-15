@@ -1,0 +1,46 @@
+{
+  "ticker": "TRENT.NS",
+  "f1_macro": 0.26756671578606656,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.36619718309859156,
+      "recall": 0.2708333333333333,
+      "f1": 0.31137724550898205,
+      "support": 96
+    },
+    "HOLD": {
+      "precision": 0.40540540540540543,
+      "recall": 0.20270270270270271,
+      "f1": 0.2702702702702703,
+      "support": 74
+    },
+    "BUY": {
+      "precision": 0.16666666666666666,
+      "recall": 0.328125,
+      "f1": 0.22105263157894736,
+      "support": 64
+    }
+  },
+  "train_size": 934,
+  "test_size": 234,
+  "total_rows_after_features": 1168,
+  "label_distribution": {
+    "0": 282,
+    "1": 418,
+    "2": 468
+  },
+  "optuna": {
+    "best_value": 0.2574937326592891,
+    "best_params": {
+      "n_estimators": 634,
+      "max_depth": 8,
+      "learning_rate": 0.24444751035781145,
+      "subsample": 0.7147097260400445,
+      "colsample_bytree": 0.6848152511216491,
+      "min_child_weight": 8
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

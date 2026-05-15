@@ -1,0 +1,46 @@
+{
+  "ticker": "RELIANCE.NS",
+  "f1_macro": 0.3387169243428176,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.31932773109243695,
+      "recall": 0.6333333333333333,
+      "f1": 0.4245810055865922,
+      "support": 60
+    },
+    "HOLD": {
+      "precision": 0.4090909090909091,
+      "recall": 0.21176470588235294,
+      "f1": 0.27906976744186046,
+      "support": 85
+    },
+    "BUY": {
+      "precision": 0.352112676056338,
+      "recall": 0.2808988764044944,
+      "f1": 0.3125,
+      "support": 89
+    }
+  },
+  "train_size": 934,
+  "test_size": 234,
+  "total_rows_after_features": 1168,
+  "label_distribution": {
+    "0": 352,
+    "1": 376,
+    "2": 440
+  },
+  "optuna": {
+    "best_value": 0.3492189001008311,
+    "best_params": {
+      "n_estimators": 604,
+      "max_depth": 7,
+      "learning_rate": 0.04775378055023359,
+      "subsample": 0.6291990083417451,
+      "colsample_bytree": 0.8322973373452675,
+      "min_child_weight": 9
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "ticker": "SBIN.NS",
+  "f1_macro": 0.3445851833788261,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.2037037037037037,
+      "recall": 0.2037037037037037,
+      "f1": 0.2037037037037037,
+      "support": 54
+    },
+    "HOLD": {
+      "precision": 0.25,
+      "recall": 0.40350877192982454,
+      "f1": 0.3087248322147651,
+      "support": 57
+    },
+    "BUY": {
+      "precision": 0.625,
+      "recall": 0.44715447154471544,
+      "f1": 0.5213270142180095,
+      "support": 123
+    }
+  },
+  "train_size": 934,
+  "test_size": 234,
+  "total_rows_after_features": 1168,
+  "label_distribution": {
+    "0": 313,
+    "1": 374,
+    "2": 481
+  },
+  "optuna": {
+    "best_value": 0.3756679733359527,
+    "best_params": {
+      "n_estimators": 534,
+      "max_depth": 3,
+      "learning_rate": 0.07702976017619748,
+      "subsample": 0.9730186727060736,
+      "colsample_bytree": 0.6031757029325993,
+      "min_child_weight": 2
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}

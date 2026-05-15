@@ -1,0 +1,46 @@
+{
+  "ticker": "TATACONSUM.NS",
+  "f1_macro": 0.3011806943519135,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.16666666666666666,
+      "recall": 0.30952380952380953,
+      "f1": 0.21666666666666667,
+      "support": 42
+    },
+    "HOLD": {
+      "precision": 0.5714285714285714,
+      "recall": 0.3333333333333333,
+      "f1": 0.42105263157894735,
+      "support": 120
+    },
+    "BUY": {
+      "precision": 0.2441860465116279,
+      "recall": 0.2916666666666667,
+      "f1": 0.26582278481012656,
+      "support": 72
+    }
+  },
+  "train_size": 934,
+  "test_size": 234,
+  "total_rows_after_features": 1168,
+  "label_distribution": {
+    "0": 287,
+    "1": 498,
+    "2": 383
+  },
+  "optuna": {
+    "best_value": 0.2928578900541894,
+    "best_params": {
+      "n_estimators": 551,
+      "max_depth": 3,
+      "learning_rate": 0.02205087576206463,
+      "subsample": 0.8757180538820932,
+      "colsample_bytree": 0.8428691874859164,
+      "min_child_weight": 2
+    },
+    "n_trials": 50,
+    "cv_splits": 5,
+    "scoring": "f1_macro"
+  }
+}
