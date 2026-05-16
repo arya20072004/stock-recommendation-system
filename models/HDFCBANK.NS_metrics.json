@@ -1,43 +1,43 @@
 {
   "ticker": "HDFCBANK.NS",
-  "f1_macro": 0.26851851851851855,
+  "f1_macro": 0.3170671777482923,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2550335570469799,
-      "recall": 0.5671641791044776,
-      "f1": 0.35185185185185186,
+      "precision": 0.33663366336633666,
+      "recall": 0.5074626865671642,
+      "f1": 0.40476190476190477,
       "support": 67
     },
     "HOLD": {
-      "precision": 0.4090909090909091,
-      "recall": 0.18,
-      "f1": 0.25,
-      "support": 100
+      "precision": 0.44776119402985076,
+      "recall": 0.43478260869565216,
+      "f1": 0.4411764705882353,
+      "support": 69
     },
     "BUY": {
-      "precision": 0.2682926829268293,
-      "recall": 0.16417910447761194,
-      "f1": 0.2037037037037037,
-      "support": 67
+      "precision": 0.18181818181818182,
+      "recall": 0.07407407407407407,
+      "f1": 0.10526315789473684,
+      "support": 54
     }
   },
-  "train_size": 934,
-  "test_size": 234,
-  "total_rows_after_features": 1168,
+  "train_size": 758,
+  "test_size": 190,
+  "total_rows_after_features": 948,
   "label_distribution": {
-    "0": 336,
-    "1": 418,
-    "2": 414
+    "0": 258,
+    "1": 349,
+    "2": 341
   },
   "optuna": {
-    "best_value": 0.3669744073449356,
+    "best_value": 0.35404113069549864,
     "best_params": {
-      "n_estimators": 479,
-      "max_depth": 9,
-      "learning_rate": 0.017836568606575023,
-      "subsample": 0.6265870611697102,
-      "colsample_bytree": 0.8805557897118853,
-      "min_child_weight": 10
+      "n_estimators": 334,
+      "max_depth": 4,
+      "learning_rate": 0.07211165673445917,
+      "subsample": 0.8317593967472838,
+      "colsample_bytree": 0.7429401351837768,
+      "min_child_weight": 8
     },
     "n_trials": 50,
     "cv_splits": 5,

@@ -39,6 +39,72 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 
+# --- SECTOR MAPPING (Nifty 50) ---
+SECTOR_MAP = {
+    # IT
+    "INFY.NS":       "IT",
+    "TCS.NS":        "IT",
+    "HCLTECH.NS":    "IT",
+    "WIPRO.NS":      "IT",
+    "TECHM.NS":      "IT",
+    "LTIM.NS":       "IT",
+    # Banking
+    "HDFCBANK.NS":   "Banking",
+    "ICICIBANK.NS":  "Banking",
+    "KOTAKBANK.NS":  "Banking",
+    "AXISBANK.NS":   "Banking",
+    "SBIN.NS":       "Banking",
+    "INDUSINDBK.NS": "Banking",
+    # Financial Services
+    "BAJFINANCE.NS":  "FinancialServices",
+    "BAJAJFINSV.NS":  "FinancialServices",
+    "HDFCLIFE.NS":    "FinancialServices",
+    "SBILIFE.NS":     "FinancialServices",
+    # Pharma
+    "SUNPHARMA.NS":  "Pharma",
+    "DRREDDY.NS":    "Pharma",
+    "CIPLA.NS":      "Pharma",
+    "DIVISLAB.NS":   "Pharma",
+    "APOLLOHOSP.NS": "Pharma",
+    # Auto
+    "MARUTI.NS":     "Auto",
+    "BAJAJ-AUTO.NS": "Auto",
+    "HEROMOTOCO.NS": "Auto",
+    "EICHERMOT.NS":  "Auto",
+    "M&M.NS":        "Auto",
+    "TATAMOTORS.NS": "Auto",
+    # FMCG
+    "HINDUNILVR.NS": "FMCG",
+    "ITC.NS":        "FMCG",
+    "NESTLEIND.NS":  "FMCG",
+    "BRITANNIA.NS":  "FMCG",
+    "TATACONSUM.NS": "FMCG",
+    # Oil & Gas
+    "RELIANCE.NS":   "OilGas",
+    "ONGC.NS":       "OilGas",
+    "BPCL.NS":       "OilGas",
+    # Metals
+    "TATASTEEL.NS":  "Metals",
+    "JSWSTEEL.NS":   "Metals",
+    "HINDALCO.NS":   "Metals",
+    # Cement & Infra
+    "ULTRACEMCO.NS": "CementInfra",
+    "GRASIM.NS":     "CementInfra",
+    "LT.NS":         "CementInfra",
+    # Power & Utilities
+    "NTPC.NS":       "PowerUtilities",
+    "POWERGRID.NS":  "PowerUtilities",
+    "COALINDIA.NS":  "PowerUtilities",
+    # Telecom
+    "BHARTIARTL.NS": "Telecom",
+    # Conglomerate / Others
+    "ADANIENT.NS":   "Conglomerate",
+    "ADANIPORTS.NS": "Conglomerate",
+    "TITAN.NS":      "ConsumerDiscretionary",
+    "TRENT.NS":      "ConsumerDiscretionary",
+    "ASIANPAINT.NS": "ConsumerDiscretionary",
+    "UPL.NS":        "Agrochem",
+}
 
 def _prepare_nifty_data(start_date, end_date):
     nifty_df = yf.download(
@@ -86,6 +152,46 @@ def _prepare_sentiment_data(news_docs):
 
     return pd.DataFrame(columns=["sentiment"])
 
+def _prepare_sector_data(ticker, client):
+    """
+    Computes daily sector average return for the ticker's sector,
+    excluding the ticker itself to avoid self-contamination.
+    Returns a Series of sector_return indexed by date.
+    """
+    sector = SECTOR_MAP.get(ticker)
+    if sector is None:
+        return pd.Series(dtype=float, name="sector_return")
+
+    sector_peers = [t for t, s in SECTOR_MAP.items() if s == sector and t != ticker]
+    if not sector_peers:
+        return pd.Series(dtype=float, name="sector_return")
+
+    db = client["stock_market_db"]
+    cutoff_date = datetime.now(timezone.utc) - timedelta(days=365 * HISTORY_YEARS + 10)
+
+    peer_returns = []
+    for peer in sector_peers:
+        peer_df = pd.DataFrame(
+            list(db.historical_data.find(
+                {"ticker": peer, "date": {"$gte": cutoff_date}},
+                {"date": 1, "close": 1, "_id": 0}
+            ))
+        )
+        if peer_df.empty:
+            continue
+        peer_df["date"] = pd.to_datetime(peer_df["date"]).dt.tz_localize(None)
+        peer_df.set_index("date", inplace=True)
+        peer_df.sort_index(inplace=True)
+        peer_df["close"] = pd.to_numeric(peer_df["close"], errors="coerce")
+        peer_returns.append(peer_df["close"].pct_change().rename(peer))
+
+    if not peer_returns:
+        return pd.Series(dtype=float, name="sector_return")
+
+    sector_df = pd.concat(peer_returns, axis=1)
+    sector_return = sector_df.mean(axis=1)
+    sector_return.name = "sector_return"
+    return sector_return
 
 def create_dataset(ticker, client):
     """
@@ -137,8 +243,9 @@ def create_dataset(ticker, client):
     df.ta.macd(append=True)
     df.ta.bbands(append=True)
     df.ta.atr(length=14, append=True)
+    df.ta.adx(length=14, append=True)
 
-    ta_cols = [c for c in df.columns if any(x in c.upper() for x in ["RSI", "MACD", "BB", "ATR"])]
+    ta_cols = [c for c in df.columns if any(x in c.upper() for x in ["RSI", "MACD", "BB", "ATR", "ADX"])]
     logger.debug("%s: pandas_ta columns detected = %s", ticker, ta_cols)
 
     def _find_col(df_in, *tokens):
@@ -149,12 +256,13 @@ def create_dataset(ticker, client):
                 return col
         return None
 
-    rsi_col = _find_col(df, "RSI")
-    macdh_col = _find_col(df, "MACD", "H")   # histogram has 'H' suffix
-    bbl_col = _find_col(df, "BBL")
-    bbm_col = _find_col(df, "BBM")
-    bbu_col = _find_col(df, "BBU")
-    atr_col = _find_col(df, "ATR")
+    rsi_col   = _find_col(df, "RSI")
+    macdh_col = _find_col(df, "MACD", "H")
+    bbl_col   = _find_col(df, "BBL")
+    bbm_col   = _find_col(df, "BBM")
+    bbu_col   = _find_col(df, "BBU")
+    atr_col   = _find_col(df, "ATR")
+    adx_col   = _find_col(df, "ADX")
 
     missing = {
         "rsi": rsi_col,
@@ -174,33 +282,108 @@ def create_dataset(ticker, client):
         )
         return pd.DataFrame()
 
-    # Shift only the resolved indicator columns to avoid look-ahead bias
+    # Shift resolved indicator columns to avoid look-ahead bias
     resolved_indicator_cols = [
-        c for c in [rsi_col, macdh_col, bbl_col, bbm_col, bbu_col, atr_col] if c is not None
+        c for c in [rsi_col, macdh_col, bbl_col, bbm_col, bbu_col, atr_col, adx_col] if c is not None
     ]
     for col in resolved_indicator_cols:
         df[col] = df[col].shift(1)
 
-    df["rsi"] = df[rsi_col]
+    df["rsi"]       = df[rsi_col]
     df["macd_hist"] = df[macdh_col]
-    df["bb_width"] = (df[bbu_col] - df[bbl_col]) / df[bbm_col].replace(0, pd.NA)
-    df["atr"] = df[atr_col]
-    df["atr_pct"] = df["atr"] / df["close"].replace(0, pd.NA)
+    df["bb_width"]  = (df[bbu_col] - df[bbl_col]) / df[bbm_col].replace(0, pd.NA)
+    df["atr"]       = df[atr_col]
+    df["atr_pct"]   = df["atr"] / df["close"].replace(0, pd.NA)
 
-    df["sentiment_7d_avg"] = df["sentiment"].shift(1).rolling(window=7).mean()
+    # ADX — already shifted above via resolved_indicator_cols
+    if adx_col:
+        df["adx"] = df[adx_col]
+        df["adx_trending"] = (df["adx"] > 25).astype(int)
+    else:
+        logger.warning("%s: ADX column not found, using neutral fallback", ticker)
+        df["adx"] = 25.0
+        df["adx_trending"] = 0
+
+    df["sentiment_7d_avg"]  = df["sentiment"].shift(1).rolling(window=7).mean()
     df["sentiment_30d_avg"] = df["sentiment"].shift(1).rolling(window=30).mean()
-    df["price_change_1d"] = df["close"].shift(1).pct_change(1)
-    df["price_change_5d"] = df["close"].shift(1).pct_change(5)
+    df["price_change_1d"]   = df["close"].shift(1).pct_change(1)
+    df["price_change_5d"]   = df["close"].shift(1).pct_change(5)
     df["market_correlation"] = (
         df["return"].shift(1)
         .rolling(window=30)
         .corr(df["nifty_return"].shift(1))
     )
-    df["future_5d_return"] = df["close"].shift(-10) / df["close"] - 1
+
+    # --- OBV deviation ---
+    obv_raw = (np.sign(df["close"].diff()) * df["volume"]).fillna(0).cumsum()
+    obv_mean = obv_raw.rolling(window=20).mean()
+    df["obv_deviation"] = (
+        (obv_raw - obv_mean) / obv_mean.abs().replace(0, pd.NA)
+    ).shift(1)
+
+    # --- VWAP deviation ---
+    typical_price = (df["high"] + df["low"] + df["close"]) / 3
+    vwap_20 = (
+        (typical_price * df["volume"]).rolling(window=20).sum()
+        / df["volume"].rolling(window=20).sum()
+    )
+    df["vwap_deviation"] = (
+        (df["close"] - vwap_20) / vwap_20.replace(0, pd.NA)
+    ).shift(1)
+
+    # --- SECTOR MOMENTUM ---
+    sector_return = _prepare_sector_data(ticker, client)
+    if not sector_return.empty:
+        df = df.join(sector_return.to_frame(), how="left")
+        df["sector_return"] = df["sector_return"].fillna(0.0)
+        df["sector_momentum"] = df["return"].shift(1) - df["sector_return"].shift(1)
+        df["sector_momentum_5d"] = (
+            df["close"].shift(1).pct_change(5)
+            - df["sector_return"].shift(1).rolling(5).sum()
+        )
+    else:
+        df["sector_momentum"] = 0.0
+        df["sector_momentum_5d"] = 0.0
+
+    # --- 52-WEEK HIGH / LOW POSITION ---
+    rolling_high_52w = df["close"].shift(1).rolling(window=252).max()
+    rolling_low_52w  = df["close"].shift(1).rolling(window=252).min()
+    df["pct_from_52w_high"] = (
+        (df["close"].shift(1) - rolling_high_52w) / rolling_high_52w.replace(0, pd.NA)
+    )
+    df["pct_from_52w_low"] = (
+        (df["close"].shift(1) - rolling_low_52w) / rolling_low_52w.replace(0, pd.NA)
+    )
+    df["near_52w_high"] = (df["pct_from_52w_high"] >= -0.05).astype(int)
+    df["near_52w_low"]  = (df["pct_from_52w_low"]  <=  0.05).astype(int)
+
+    # --- EARNINGS PROXIMITY ---
+    EARNINGS_MONTHS = [1, 4, 7, 10]
+
+    def _days_to_next_earnings(date):
+        candidates = []
+        for m in EARNINGS_MONTHS:
+            candidate = pd.Timestamp(year=date.year, month=m, day=15)
+            if candidate >= date:
+                candidates.append(candidate)
+        if not candidates:
+            # all months passed this year — next Jan
+            candidates.append(pd.Timestamp(year=date.year + 1, month=1, day=15))
+        return (min(candidates) - date).days
+
+    df["days_to_earnings"] = df.index.map(_days_to_next_earnings)
+    df["earnings_proximity"] = pd.cut(
+        df["days_to_earnings"],
+        bins=[-1, 7, 21, 45, 9999],
+        labels=[3, 2, 1, 0]
+    ).astype(float)
+
+    # --- TARGET LABEL ---
+    df["future_10d_return"] = df["close"].shift(-10) / df["close"] - 1
     threshold = np.maximum(1.0 * df["atr_pct"], 0.01)
     df["target"] = 1
-    df.loc[df["future_5d_return"] > threshold, "target"] = 2
-    df.loc[df["future_5d_return"] < -threshold, "target"] = 0
+    df.loc[df["future_10d_return"] > threshold, "target"] = 2
+    df.loc[df["future_10d_return"] < -threshold, "target"] = 0
 
     required_columns = [
         "rsi",
@@ -214,6 +397,13 @@ def create_dataset(ticker, client):
         "market_correlation",
         "outperformance",
         "market_regime",
+        "obv_deviation",
+        "vwap_deviation",
+        "sector_momentum",
+        "pct_from_52w_high",
+        "pct_from_52w_low",
+        "adx",
+        "earnings_proximity",
         "target",
     ]
     df = df.replace([float("inf"), float("-inf")], pd.NA)
@@ -230,12 +420,24 @@ def _make_feature_list(df):
         "atr",
         "atr_pct",
         "sentiment_7d_avg",
-        "sentiment_30d_avg",   # ADD THIS
+        "sentiment_30d_avg",
         "price_change_1d",
         "price_change_5d",
         "market_correlation",
         "outperformance",
         "market_regime",
+        "obv_deviation",
+        "vwap_deviation",
+        # --- Tier 1 additions ---
+        "sector_momentum",
+        "sector_momentum_5d",
+        "pct_from_52w_high",
+        "pct_from_52w_low",
+        "near_52w_high",
+        "near_52w_low",
+        "adx",
+        "adx_trending",
+        "earnings_proximity",
     ]
     return [feature for feature in candidate_features if feature in df.columns]
 
@@ -243,11 +445,11 @@ def _make_feature_list(df):
 def _optuna_objective(trial, X_train, y_train):
     params = {
         "n_estimators": trial.suggest_int("n_estimators", 100, 700),
-        "max_depth": trial.suggest_int("max_depth", 2, 10),
+        "max_depth": trial.suggest_int("max_depth", 2, 6),
         "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.3, log=True),
         "subsample": trial.suggest_float("subsample", 0.6, 1.0),
         "colsample_bytree": trial.suggest_float("colsample_bytree", 0.6, 1.0),
-        "min_child_weight": trial.suggest_int("min_child_weight", 1, 10),
+        "min_child_weight": trial.suggest_int("min_child_weight", 3, 20),
     }
 
     cv = TimeSeriesSplit(n_splits=N_SPLITS)

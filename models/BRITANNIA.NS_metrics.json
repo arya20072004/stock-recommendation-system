@@ -1,43 +1,43 @@
 {
   "ticker": "BRITANNIA.NS",
-  "f1_macro": 0.3683547334710126,
+  "f1_macro": 0.38643245697207096,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2967032967032967,
-      "recall": 0.47368421052631576,
-      "f1": 0.36486486486486486,
-      "support": 57
+      "precision": 0.5192307692307693,
+      "recall": 0.4909090909090909,
+      "f1": 0.5046728971962616,
+      "support": 55
     },
     "HOLD": {
-      "precision": 0.5339805825242718,
-      "recall": 0.49107142857142855,
-      "f1": 0.5116279069767442,
-      "support": 112
+      "precision": 0.4224137931034483,
+      "recall": 0.5903614457831325,
+      "f1": 0.49246231155778897,
+      "support": 83
     },
     "BUY": {
-      "precision": 0.3,
-      "recall": 0.18461538461538463,
-      "f1": 0.22857142857142856,
-      "support": 65
+      "precision": 0.2727272727272727,
+      "recall": 0.11538461538461539,
+      "f1": 0.16216216216216217,
+      "support": 52
     }
   },
-  "train_size": 934,
-  "test_size": 234,
-  "total_rows_after_features": 1168,
+  "train_size": 758,
+  "test_size": 190,
+  "total_rows_after_features": 948,
   "label_distribution": {
-    "0": 294,
-    "1": 510,
-    "2": 364
+    "0": 212,
+    "1": 430,
+    "2": 306
   },
   "optuna": {
-    "best_value": 0.34993773921676696,
+    "best_value": 0.4101356604484672,
     "best_params": {
-      "n_estimators": 116,
-      "max_depth": 10,
-      "learning_rate": 0.2503368960670904,
-      "subsample": 0.6212392140228358,
-      "colsample_bytree": 0.8988932371968842,
-      "min_child_weight": 5
+      "n_estimators": 410,
+      "max_depth": 2,
+      "learning_rate": 0.11468004827034788,
+      "subsample": 0.8240273410913467,
+      "colsample_bytree": 0.6102687758917595,
+      "min_child_weight": 3
     },
     "n_trials": 50,
     "cv_splits": 5,

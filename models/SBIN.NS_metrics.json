@@ -1,43 +1,43 @@
 {
   "ticker": "SBIN.NS",
-  "f1_macro": 0.3445851833788261,
+  "f1_macro": 0.19098419950504475,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2037037037037037,
-      "recall": 0.2037037037037037,
-      "f1": 0.2037037037037037,
-      "support": 54
+      "precision": 0.16030534351145037,
+      "recall": 0.4772727272727273,
+      "f1": 0.24,
+      "support": 44
     },
     "HOLD": {
-      "precision": 0.25,
-      "recall": 0.40350877192982454,
-      "f1": 0.3087248322147651,
-      "support": 57
+      "precision": 0.2631578947368421,
+      "recall": 0.3333333333333333,
+      "f1": 0.29411764705882354,
+      "support": 45
     },
     "BUY": {
-      "precision": 0.625,
-      "recall": 0.44715447154471544,
-      "f1": 0.5213270142180095,
-      "support": 123
+      "precision": 1.0,
+      "recall": 0.019801980198019802,
+      "f1": 0.038834951456310676,
+      "support": 101
     }
   },
-  "train_size": 934,
-  "test_size": 234,
-  "total_rows_after_features": 1168,
+  "train_size": 758,
+  "test_size": 190,
+  "total_rows_after_features": 948,
   "label_distribution": {
-    "0": 313,
-    "1": 374,
-    "2": 481
+    "0": 241,
+    "1": 317,
+    "2": 390
   },
   "optuna": {
-    "best_value": 0.3756679733359527,
+    "best_value": 0.42438129768683064,
     "best_params": {
-      "n_estimators": 534,
-      "max_depth": 3,
-      "learning_rate": 0.07702976017619748,
-      "subsample": 0.9730186727060736,
-      "colsample_bytree": 0.6031757029325993,
-      "min_child_weight": 2
+      "n_estimators": 120,
+      "max_depth": 5,
+      "learning_rate": 0.024934655643741654,
+      "subsample": 0.6423870526086395,
+      "colsample_bytree": 0.7451223251772472,
+      "min_child_weight": 13
     },
     "n_trials": 50,
     "cv_splits": 5,

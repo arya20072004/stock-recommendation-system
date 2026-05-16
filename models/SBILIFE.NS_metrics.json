@@ -1,43 +1,43 @@
 {
   "ticker": "SBILIFE.NS",
-  "f1_macro": 0.26444136087984377,
+  "f1_macro": 0.3593471425329833,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2191780821917808,
-      "recall": 0.7619047619047619,
-      "f1": 0.3404255319148936,
-      "support": 42
+      "precision": 0.2602739726027397,
+      "recall": 0.475,
+      "f1": 0.336283185840708,
+      "support": 40
     },
     "HOLD": {
-      "precision": 0.5151515151515151,
-      "recall": 0.288135593220339,
-      "f1": 0.3695652173913043,
-      "support": 118
+      "precision": 0.5365853658536586,
+      "recall": 0.46808510638297873,
+      "f1": 0.5,
+      "support": 94
     },
     "BUY": {
-      "precision": 0.18181818181818182,
-      "recall": 0.05405405405405406,
-      "f1": 0.08333333333333333,
-      "support": 74
+      "precision": 0.3142857142857143,
+      "recall": 0.19642857142857142,
+      "f1": 0.24175824175824176,
+      "support": 56
     }
   },
-  "train_size": 934,
-  "test_size": 234,
-  "total_rows_after_features": 1168,
+  "train_size": 758,
+  "test_size": 190,
+  "total_rows_after_features": 948,
   "label_distribution": {
-    "0": 291,
-    "1": 487,
-    "2": 390
+    "0": 235,
+    "1": 393,
+    "2": 320
   },
   "optuna": {
-    "best_value": 0.3306902254695795,
+    "best_value": 0.347949385462154,
     "best_params": {
-      "n_estimators": 656,
-      "max_depth": 6,
-      "learning_rate": 0.0952453742560287,
-      "subsample": 0.6393466988278416,
-      "colsample_bytree": 0.8642724187277009,
-      "min_child_weight": 10
+      "n_estimators": 456,
+      "max_depth": 3,
+      "learning_rate": 0.029874747152908093,
+      "subsample": 0.9231313234699792,
+      "colsample_bytree": 0.7835008009872363,
+      "min_child_weight": 6
     },
     "n_trials": 50,
     "cv_splits": 5,

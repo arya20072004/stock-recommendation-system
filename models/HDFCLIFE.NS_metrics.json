@@ -1,43 +1,43 @@
 {
   "ticker": "HDFCLIFE.NS",
-  "f1_macro": 0.22705373518381647,
+  "f1_macro": 0.3372908555974918,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2108843537414966,
-      "recall": 0.4492753623188406,
-      "f1": 0.28703703703703703,
-      "support": 69
+      "precision": 0.3333333333333333,
+      "recall": 0.359375,
+      "f1": 0.3458646616541353,
+      "support": 64
     },
     "HOLD": {
-      "precision": 0.359375,
-      "recall": 0.23,
-      "f1": 0.2804878048780488,
-      "support": 100
+      "precision": 0.44680851063829785,
+      "recall": 0.24705882352941178,
+      "f1": 0.3181818181818182,
+      "support": 85
     },
     "BUY": {
-      "precision": 0.21739130434782608,
-      "recall": 0.07692307692307693,
-      "f1": 0.11363636363636363,
-      "support": 65
+      "precision": 0.2702702702702703,
+      "recall": 0.4878048780487805,
+      "f1": 0.34782608695652173,
+      "support": 41
     }
   },
-  "train_size": 934,
-  "test_size": 234,
-  "total_rows_after_features": 1168,
+  "train_size": 758,
+  "test_size": 190,
+  "total_rows_after_features": 948,
   "label_distribution": {
-    "0": 357,
-    "1": 455,
-    "2": 356
+    "0": 270,
+    "1": 373,
+    "2": 305
   },
   "optuna": {
-    "best_value": 0.3851805642939702,
+    "best_value": 0.32060818432052507,
     "best_params": {
-      "n_estimators": 291,
-      "max_depth": 2,
-      "learning_rate": 0.05520364391921585,
-      "subsample": 0.7028411585982328,
-      "colsample_bytree": 0.640071246055881,
-      "min_child_weight": 10
+      "n_estimators": 170,
+      "max_depth": 4,
+      "learning_rate": 0.010162228897845646,
+      "subsample": 0.9185898708706935,
+      "colsample_bytree": 0.7267734544181699,
+      "min_child_weight": 4
     },
     "n_trials": 50,
     "cv_splits": 5,

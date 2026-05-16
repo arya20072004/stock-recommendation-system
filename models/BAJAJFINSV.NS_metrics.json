@@ -1,43 +1,43 @@
 {
   "ticker": "BAJAJFINSV.NS",
-  "f1_macro": 0.36169544155324035,
+  "f1_macro": 0.3742606333205474,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.30128205128205127,
-      "recall": 0.6811594202898551,
-      "f1": 0.4177777777777778,
-      "support": 69
+      "precision": 0.43529411764705883,
+      "recall": 0.578125,
+      "f1": 0.4966442953020134,
+      "support": 64
     },
     "HOLD": {
-      "precision": 0.5813953488372093,
-      "recall": 0.21929824561403508,
-      "f1": 0.3184713375796178,
-      "support": 114
+      "precision": 0.55,
+      "recall": 0.5238095238095238,
+      "f1": 0.5365853658536586,
+      "support": 84
     },
     "BUY": {
-      "precision": 0.42857142857142855,
-      "recall": 0.29411764705882354,
-      "f1": 0.3488372093023256,
-      "support": 51
+      "precision": 0.12,
+      "recall": 0.07142857142857142,
+      "f1": 0.08955223880597014,
+      "support": 42
     }
   },
-  "train_size": 934,
-  "test_size": 234,
-  "total_rows_after_features": 1168,
+  "train_size": 758,
+  "test_size": 190,
+  "total_rows_after_features": 948,
   "label_distribution": {
-    "0": 348,
-    "1": 413,
-    "2": 407
+    "0": 277,
+    "1": 352,
+    "2": 319
   },
   "optuna": {
-    "best_value": 0.3156226669883493,
+    "best_value": 0.3208255468917872,
     "best_params": {
-      "n_estimators": 166,
-      "max_depth": 9,
-      "learning_rate": 0.014187709953498029,
-      "subsample": 0.9625444763885025,
-      "colsample_bytree": 0.9106286285977907,
-      "min_child_weight": 4
+      "n_estimators": 498,
+      "max_depth": 6,
+      "learning_rate": 0.010031786789487874,
+      "subsample": 0.9653068049994572,
+      "colsample_bytree": 0.9740541888085785,
+      "min_child_weight": 5
     },
     "n_trials": 50,
     "cv_splits": 5,
