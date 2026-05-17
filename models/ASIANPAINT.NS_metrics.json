@@ -1,46 +1,49 @@
 {
   "ticker": "ASIANPAINT.NS",
-  "f1_macro": 0.37865741910200074,
+  "f1_macro": 0.3234673477931596,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.3611111111111111,
-      "recall": 0.5098039215686274,
-      "f1": 0.42276422764227645,
-      "support": 51
+      "precision": 0.24444444444444444,
+      "recall": 0.15714285714285714,
+      "f1": 0.19130434782608696,
+      "support": 70
     },
     "HOLD": {
-      "precision": 0.3333333333333333,
-      "recall": 0.24561403508771928,
-      "f1": 0.2828282828282828,
-      "support": 57
+      "precision": 0.40963855421686746,
+      "recall": 0.4533333333333333,
+      "f1": 0.43037974683544306,
+      "support": 75
     },
     "BUY": {
-      "precision": 0.4473684210526316,
-      "recall": 0.4146341463414634,
-      "f1": 0.43037974683544306,
-      "support": 82
+      "precision": 0.32075471698113206,
+      "recall": 0.38202247191011235,
+      "f1": 0.3487179487179487,
+      "support": 89
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 295,
-    "1": 337,
-    "2": 316
+    "0": 354,
+    "1": 432,
+    "2": 380
   },
   "optuna": {
-    "best_value": 0.4065840353660636,
+    "best_value": 0.3054209372033853,
     "best_params": {
-      "n_estimators": 284,
-      "max_depth": 3,
-      "learning_rate": 0.012362047636962388,
-      "subsample": 0.6265168437411884,
-      "colsample_bytree": 0.8915576488126624,
-      "min_child_weight": 4
+      "n_estimators": 598,
+      "max_depth": 4,
+      "learning_rate": 0.018949971987113016,
+      "subsample": 0.7227379834726245,
+      "colsample_bytree": 0.7212852821236327,
+      "min_child_weight": 12,
+      "reg_lambda": 7.752845318309388,
+      "reg_alpha": 1.254933466131911,
+      "gamma": 1.346270423146846
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

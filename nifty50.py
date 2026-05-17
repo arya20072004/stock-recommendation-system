@@ -31,7 +31,7 @@ NIFTY50_TICKER_MAP = {
     'INFY.NS': 'Infosys Ltd.',
     'JSWSTEEL.NS': 'JSW Steel Ltd.',
     'KOTAKBANK.NS': 'Kotak Mahindra Bank Ltd.',
-    'LTIM.NS': 'LTIMindtree Ltd.',
+    'LTM.NS': 'LTIMindtree Ltd.',
     'LT.NS': 'Larsen & Toubro Ltd.',
     'M&M.NS': 'Mahindra & Mahindra Ltd.',
     'MARUTI.NS': 'Maruti Suzuki India Ltd.',

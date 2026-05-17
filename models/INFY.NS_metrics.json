@@ -1,46 +1,49 @@
 {
   "ticker": "INFY.NS",
-  "f1_macro": 0.3322677766593211,
+  "f1_macro": 0.30236580573108834,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.4090909090909091,
-      "recall": 0.14516129032258066,
-      "f1": 0.21428571428571427,
-      "support": 62
+      "precision": 0.23863636363636365,
+      "recall": 0.328125,
+      "f1": 0.27631578947368424,
+      "support": 64
     },
     "HOLD": {
-      "precision": 0.29310344827586204,
-      "recall": 0.2833333333333333,
-      "f1": 0.288135593220339,
-      "support": 60
+      "precision": 0.30985915492957744,
+      "recall": 0.29333333333333333,
+      "f1": 0.3013698630136986,
+      "support": 75
     },
     "BUY": {
-      "precision": 0.4,
-      "recall": 0.6470588235294118,
-      "f1": 0.4943820224719101,
-      "support": 68
+      "precision": 0.37333333333333335,
+      "recall": 0.29473684210526313,
+      "f1": 0.32941176470588235,
+      "support": 95
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 293,
-    "1": 283,
-    "2": 372
+    "0": 357,
+    "1": 359,
+    "2": 450
   },
   "optuna": {
-    "best_value": 0.3194598558072673,
+    "best_value": 0.3103583456133036,
     "best_params": {
-      "n_estimators": 221,
-      "max_depth": 5,
-      "learning_rate": 0.21673956492160149,
-      "subsample": 0.7046842580724875,
-      "colsample_bytree": 0.6111429187154426,
-      "min_child_weight": 4
+      "n_estimators": 698,
+      "max_depth": 3,
+      "learning_rate": 0.22528486576868478,
+      "subsample": 0.6134181053943465,
+      "colsample_bytree": 0.8391379578927555,
+      "min_child_weight": 5,
+      "reg_lambda": 14.523673698590493,
+      "reg_alpha": 1.9365715413212419,
+      "gamma": 0.5964583053172501
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

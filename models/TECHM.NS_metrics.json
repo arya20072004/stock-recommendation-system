@@ -1,46 +1,49 @@
 {
   "ticker": "TECHM.NS",
-  "f1_macro": 0.37329115137570695,
+  "f1_macro": 0.3647333389889221,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.30357142857142855,
-      "recall": 0.3695652173913043,
-      "f1": 0.3333333333333333,
-      "support": 46
+      "precision": 0.26666666666666666,
+      "recall": 0.6530612244897959,
+      "f1": 0.378698224852071,
+      "support": 49
     },
     "HOLD": {
-      "precision": 0.5185185185185185,
-      "recall": 0.20588235294117646,
-      "f1": 0.29473684210526313,
-      "support": 68
+      "precision": 0.45454545454545453,
+      "recall": 0.44871794871794873,
+      "f1": 0.45161290322580644,
+      "support": 78
     },
     "BUY": {
-      "precision": 0.4205607476635514,
-      "recall": 0.5921052631578947,
-      "f1": 0.4918032786885246,
-      "support": 76
+      "precision": 0.5135135135135135,
+      "recall": 0.17757009345794392,
+      "f1": 0.2638888888888889,
+      "support": 107
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 239,
-    "1": 350,
-    "2": 359
+    "0": 307,
+    "1": 418,
+    "2": 441
   },
   "optuna": {
-    "best_value": 0.3363241756431358,
+    "best_value": 0.30454688947303543,
     "best_params": {
-      "n_estimators": 544,
+      "n_estimators": 100,
       "max_depth": 4,
-      "learning_rate": 0.011997964528674781,
-      "subsample": 0.8703953522979543,
-      "colsample_bytree": 0.9779008675925903,
-      "min_child_weight": 5
+      "learning_rate": 0.045292722805422195,
+      "subsample": 0.9660233451781608,
+      "colsample_bytree": 0.9018265597660957,
+      "min_child_weight": 13,
+      "reg_lambda": 5.637605568276401,
+      "reg_alpha": 0.5658006588943311,
+      "gamma": 0.5260049031039438
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

@@ -1,46 +1,49 @@
 {
   "ticker": "TITAN.NS",
-  "f1_macro": 0.3372512582268679,
+  "f1_macro": 0.2759609491287978,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2857142857142857,
-      "recall": 0.37735849056603776,
-      "f1": 0.3252032520325203,
-      "support": 53
+      "precision": 0.20652173913043478,
+      "recall": 0.31666666666666665,
+      "f1": 0.25,
+      "support": 60
     },
     "HOLD": {
-      "precision": 0.2222222222222222,
-      "recall": 0.17391304347826086,
-      "f1": 0.1951219512195122,
-      "support": 46
+      "precision": 0.06666666666666667,
+      "recall": 0.015151515151515152,
+      "f1": 0.024691358024691357,
+      "support": 66
     },
     "BUY": {
-      "precision": 0.5119047619047619,
-      "recall": 0.4725274725274725,
-      "f1": 0.49142857142857144,
-      "support": 91
+      "precision": 0.5118110236220472,
+      "recall": 0.6018518518518519,
+      "f1": 0.5531914893617021,
+      "support": 108
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 272,
-    "1": 258,
-    "2": 418
+    "0": 324,
+    "1": 339,
+    "2": 503
   },
   "optuna": {
-    "best_value": 0.3489595011048571,
+    "best_value": 0.3453230406708409,
     "best_params": {
-      "n_estimators": 683,
-      "max_depth": 4,
-      "learning_rate": 0.18340379189024927,
-      "subsample": 0.79717241997626,
-      "colsample_bytree": 0.9868214010748771,
-      "min_child_weight": 20
+      "n_estimators": 628,
+      "max_depth": 3,
+      "learning_rate": 0.09398559058862602,
+      "subsample": 0.8169732611908073,
+      "colsample_bytree": 0.6751813720676207,
+      "min_child_weight": 6,
+      "reg_lambda": 7.716429312490445,
+      "reg_alpha": 0.7363612345667414,
+      "gamma": 2.926942005988052
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

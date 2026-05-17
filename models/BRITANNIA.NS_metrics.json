@@ -1,46 +1,49 @@
 {
   "ticker": "BRITANNIA.NS",
-  "f1_macro": 0.38643245697207096,
+  "f1_macro": 0.37713032297103094,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.5192307692307693,
-      "recall": 0.4909090909090909,
-      "f1": 0.5046728971962616,
-      "support": 55
+      "precision": 0.2857142857142857,
+      "recall": 0.2807017543859649,
+      "f1": 0.2831858407079646,
+      "support": 57
     },
     "HOLD": {
-      "precision": 0.4224137931034483,
-      "recall": 0.5903614457831325,
-      "f1": 0.49246231155778897,
-      "support": 83
+      "precision": 0.584070796460177,
+      "recall": 0.5892857142857143,
+      "f1": 0.5866666666666667,
+      "support": 112
     },
     "BUY": {
-      "precision": 0.2727272727272727,
-      "recall": 0.11538461538461539,
-      "f1": 0.16216216216216217,
-      "support": 52
+      "precision": 0.26153846153846155,
+      "recall": 0.26153846153846155,
+      "f1": 0.26153846153846155,
+      "support": 65
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 212,
-    "1": 430,
-    "2": 306
+    "0": 292,
+    "1": 510,
+    "2": 364
   },
   "optuna": {
-    "best_value": 0.4101356604484672,
+    "best_value": 0.3792260980557247,
     "best_params": {
-      "n_estimators": 410,
-      "max_depth": 2,
-      "learning_rate": 0.11468004827034788,
-      "subsample": 0.8240273410913467,
-      "colsample_bytree": 0.6102687758917595,
-      "min_child_weight": 3
+      "n_estimators": 480,
+      "max_depth": 4,
+      "learning_rate": 0.06275578102703053,
+      "subsample": 0.6087380887656995,
+      "colsample_bytree": 0.7650977681786824,
+      "min_child_weight": 22,
+      "reg_lambda": 9.280300284321301,
+      "reg_alpha": 0.974775468721693,
+      "gamma": 0.7766078118189311
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

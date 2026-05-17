@@ -1,46 +1,49 @@
 {
   "ticker": "RELIANCE.NS",
-  "f1_macro": 0.31905156428768694,
+  "f1_macro": 0.3402225729945824,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2976190476190476,
-      "recall": 0.43103448275862066,
-      "f1": 0.352112676056338,
-      "support": 58
+      "precision": 0.35051546391752575,
+      "recall": 0.5666666666666667,
+      "f1": 0.43312101910828027,
+      "support": 60
     },
     "HOLD": {
-      "precision": 0.36363636363636365,
-      "recall": 0.3125,
-      "f1": 0.33613445378151263,
-      "support": 64
+      "precision": 0.3114754098360656,
+      "recall": 0.2235294117647059,
+      "f1": 0.2602739726027397,
+      "support": 85
     },
     "BUY": {
-      "precision": 0.3137254901960784,
-      "recall": 0.23529411764705882,
-      "f1": 0.2689075630252101,
-      "support": 68
+      "precision": 0.35526315789473684,
+      "recall": 0.30337078651685395,
+      "f1": 0.32727272727272727,
+      "support": 89
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 296,
-    "1": 302,
-    "2": 350
+    "0": 351,
+    "1": 375,
+    "2": 440
   },
   "optuna": {
-    "best_value": 0.3379112590512263,
+    "best_value": 0.3525235194233207,
     "best_params": {
-      "n_estimators": 228,
-      "max_depth": 2,
-      "learning_rate": 0.10562150085365234,
-      "subsample": 0.9088451341611515,
-      "colsample_bytree": 0.8673681791842494,
-      "min_child_weight": 7
+      "n_estimators": 265,
+      "max_depth": 6,
+      "learning_rate": 0.024041691390085038,
+      "subsample": 0.9780897461819406,
+      "colsample_bytree": 0.9184755962616943,
+      "min_child_weight": 10,
+      "reg_lambda": 4.432186729831394,
+      "reg_alpha": 2.3418891430718984,
+      "gamma": 1.845332410275036
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

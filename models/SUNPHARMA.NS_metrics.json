@@ -1,46 +1,49 @@
 {
   "ticker": "SUNPHARMA.NS",
-  "f1_macro": 0.22315731573157316,
+  "f1_macro": 0.2747957747957748,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
-      "support": 55
+      "precision": 0.10526315789473684,
+      "recall": 0.028985507246376812,
+      "f1": 0.045454545454545456,
+      "support": 69
     },
     "HOLD": {
-      "precision": 0.4146341463414634,
-      "recall": 0.21518987341772153,
-      "f1": 0.2833333333333333,
-      "support": 79
+      "precision": 0.4235294117647059,
+      "recall": 0.36,
+      "f1": 0.3891891891891892,
+      "support": 100
     },
     "BUY": {
-      "precision": 0.2671232876712329,
-      "recall": 0.6964285714285714,
-      "f1": 0.38613861386138615,
-      "support": 56
+      "precision": 0.2923076923076923,
+      "recall": 0.5846153846153846,
+      "f1": 0.38974358974358975,
+      "support": 65
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 238,
-    "1": 340,
-    "2": 370
+    "0": 289,
+    "1": 430,
+    "2": 447
   },
   "optuna": {
-    "best_value": 0.3180635541415467,
+    "best_value": 0.31640705542258407,
     "best_params": {
-      "n_estimators": 135,
+      "n_estimators": 351,
       "max_depth": 4,
-      "learning_rate": 0.1303545909236537,
-      "subsample": 0.9315978706684567,
-      "colsample_bytree": 0.7235745006462659,
-      "min_child_weight": 4
+      "learning_rate": 0.1238683320501303,
+      "subsample": 0.8705681738955218,
+      "colsample_bytree": 0.7800344740474092,
+      "min_child_weight": 12,
+      "reg_lambda": 9.341675265349142,
+      "reg_alpha": 3.2593879346082697,
+      "gamma": 2.0471599928201476
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

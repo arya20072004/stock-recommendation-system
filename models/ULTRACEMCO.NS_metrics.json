@@ -1,46 +1,49 @@
 {
   "ticker": "ULTRACEMCO.NS",
-  "f1_macro": 0.31602012831272625,
+  "f1_macro": 0.3322732350074349,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.14705882352941177,
-      "recall": 0.1282051282051282,
-      "f1": 0.136986301369863,
-      "support": 39
+      "precision": 0.29545454545454547,
+      "recall": 0.24528301886792453,
+      "f1": 0.26804123711340205,
+      "support": 53
     },
     "HOLD": {
-      "precision": 0.4155844155844156,
-      "recall": 0.3595505617977528,
-      "f1": 0.3855421686746988,
-      "support": 89
+      "precision": 0.39215686274509803,
+      "recall": 0.37037037037037035,
+      "f1": 0.38095238095238093,
+      "support": 108
     },
     "BUY": {
-      "precision": 0.379746835443038,
-      "recall": 0.4838709677419355,
-      "f1": 0.425531914893617,
-      "support": 62
+      "precision": 0.3181818181818182,
+      "recall": 0.3835616438356164,
+      "f1": 0.34782608695652173,
+      "support": 73
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 211,
-    "1": 388,
-    "2": 349
+    "0": 297,
+    "1": 451,
+    "2": 418
   },
   "optuna": {
-    "best_value": 0.33747685815972556,
+    "best_value": 0.4018648717921869,
     "best_params": {
-      "n_estimators": 579,
-      "max_depth": 4,
-      "learning_rate": 0.2788094538293177,
-      "subsample": 0.6937908533737779,
-      "colsample_bytree": 0.633704128054237,
-      "min_child_weight": 19
+      "n_estimators": 275,
+      "max_depth": 7,
+      "learning_rate": 0.15436444311108546,
+      "subsample": 0.782194773179097,
+      "colsample_bytree": 0.873303019524443,
+      "min_child_weight": 6,
+      "reg_lambda": 13.831993983698627,
+      "reg_alpha": 2.3477987153434947,
+      "gamma": 1.0974617603734598
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

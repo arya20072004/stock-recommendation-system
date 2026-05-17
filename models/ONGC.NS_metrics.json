@@ -1,46 +1,49 @@
 {
   "ticker": "ONGC.NS",
-  "f1_macro": 0.2872963916467025,
+  "f1_macro": 0.28329218106995885,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.34782608695652173,
-      "recall": 0.18181818181818182,
-      "f1": 0.23880597014925373,
-      "support": 44
+      "precision": 0.10714285714285714,
+      "recall": 0.05660377358490566,
+      "f1": 0.07407407407407407,
+      "support": 53
     },
     "HOLD": {
-      "precision": 0.5789473684210527,
-      "recall": 0.125,
-      "f1": 0.205607476635514,
-      "support": 88
+      "precision": 0.5087719298245614,
+      "recall": 0.2761904761904762,
+      "f1": 0.35802469135802467,
+      "support": 105
     },
     "BUY": {
-      "precision": 0.2905405405405405,
-      "recall": 0.7413793103448276,
-      "f1": 0.4174757281553398,
-      "support": 58
+      "precision": 0.31543624161073824,
+      "recall": 0.618421052631579,
+      "f1": 0.4177777777777778,
+      "support": 76
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 214,
-    "1": 371,
-    "2": 363
+    "0": 270,
+    "1": 461,
+    "2": 435
   },
   "optuna": {
-    "best_value": 0.3247310644355984,
+    "best_value": 0.3232512296538902,
     "best_params": {
-      "n_estimators": 357,
+      "n_estimators": 687,
       "max_depth": 3,
-      "learning_rate": 0.017916184361394593,
-      "subsample": 0.8047303792319513,
-      "colsample_bytree": 0.9593589279844419,
-      "min_child_weight": 8
+      "learning_rate": 0.013805916114039824,
+      "subsample": 0.9482922537247611,
+      "colsample_bytree": 0.9660655907460483,
+      "min_child_weight": 11,
+      "reg_lambda": 2.9861328023848275,
+      "reg_alpha": 3.82938947979207,
+      "gamma": 0.8721631203393808
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

@@ -1,46 +1,49 @@
 {
   "ticker": "NESTLEIND.NS",
-  "f1_macro": 0.277031823677526,
+  "f1_macro": 0.21792925557726686,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2222222222222222,
-      "recall": 0.5777777777777777,
-      "f1": 0.32098765432098764,
-      "support": 45
+      "precision": 0.17142857142857143,
+      "recall": 0.22641509433962265,
+      "f1": 0.1951219512195122,
+      "support": 53
     },
     "HOLD": {
-      "precision": 0.22727272727272727,
-      "recall": 0.16129032258064516,
-      "f1": 0.18867924528301888,
-      "support": 62
+      "precision": 0.2987012987012987,
+      "recall": 0.5287356321839081,
+      "f1": 0.3817427385892116,
+      "support": 87
     },
     "BUY": {
-      "precision": 0.6206896551724138,
-      "recall": 0.21686746987951808,
-      "f1": 0.32142857142857145,
-      "support": 83
+      "precision": 0.4,
+      "recall": 0.0425531914893617,
+      "f1": 0.07692307692307693,
+      "support": 94
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 221,
-    "1": 401,
-    "2": 326
+    "0": 280,
+    "1": 503,
+    "2": 383
   },
   "optuna": {
-    "best_value": 0.421947872644593,
+    "best_value": 0.3577590617234948,
     "best_params": {
-      "n_estimators": 692,
+      "n_estimators": 441,
       "max_depth": 6,
-      "learning_rate": 0.09190851162364679,
-      "subsample": 0.6825158281105502,
-      "colsample_bytree": 0.8494083205863245,
-      "min_child_weight": 20
+      "learning_rate": 0.20359157724561874,
+      "subsample": 0.6375961903554194,
+      "colsample_bytree": 0.7483062196306363,
+      "min_child_weight": 17,
+      "reg_lambda": 4.323732630141192,
+      "reg_alpha": 1.1879802434821445,
+      "gamma": 1.391029885823756
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

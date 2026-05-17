@@ -1,46 +1,49 @@
 {
   "ticker": "ADANIENT.NS",
-  "f1_macro": 0.37369410135628006,
+  "f1_macro": 0.3168200217872806,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.6,
-      "recall": 0.2608695652173913,
-      "f1": 0.36363636363636365,
-      "support": 69
+      "precision": 0.4375,
+      "recall": 0.2692307692307692,
+      "f1": 0.3333333333333333,
+      "support": 78
     },
     "HOLD": {
-      "precision": 0.3125,
-      "recall": 0.3076923076923077,
-      "f1": 0.31007751937984496,
-      "support": 65
+      "precision": 0.2222222222222222,
+      "recall": 0.11627906976744186,
+      "f1": 0.15267175572519084,
+      "support": 86
     },
     "BUY": {
-      "precision": 0.3541666666666667,
-      "recall": 0.6071428571428571,
-      "f1": 0.4473684210526316,
-      "support": 56
+      "precision": 0.3475177304964539,
+      "recall": 0.7,
+      "f1": 0.46445497630331756,
+      "support": 70
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 264,
-    "1": 383,
-    "2": 301
+    "0": 310,
+    "1": 470,
+    "2": 386
   },
   "optuna": {
-    "best_value": 0.383760413260109,
+    "best_value": 0.33916952163816594,
     "best_params": {
-      "n_estimators": 306,
-      "max_depth": 2,
-      "learning_rate": 0.15556169206636772,
-      "subsample": 0.9837088768203452,
-      "colsample_bytree": 0.9428040029614491,
-      "min_child_weight": 10
+      "n_estimators": 358,
+      "max_depth": 7,
+      "learning_rate": 0.295477793421966,
+      "subsample": 0.6692822061185555,
+      "colsample_bytree": 0.8568922602469926,
+      "min_child_weight": 18,
+      "reg_lambda": 14.881215301408217,
+      "reg_alpha": 0.831928937071174,
+      "gamma": 2.208843543982979
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

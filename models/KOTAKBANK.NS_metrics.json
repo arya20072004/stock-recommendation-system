@@ -1,46 +1,49 @@
 {
   "ticker": "KOTAKBANK.NS",
-  "f1_macro": 0.3913337456194599,
+  "f1_macro": 0.3887373604918845,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.32608695652173914,
-      "recall": 0.28846153846153844,
-      "f1": 0.30612244897959184,
-      "support": 52
+      "precision": 0.2717391304347826,
+      "recall": 0.3968253968253968,
+      "f1": 0.3225806451612903,
+      "support": 63
     },
     "HOLD": {
-      "precision": 0.6122448979591837,
-      "recall": 0.3614457831325301,
-      "f1": 0.45454545454545453,
-      "support": 83
+      "precision": 0.5420560747663551,
+      "recall": 0.5918367346938775,
+      "f1": 0.5658536585365853,
+      "support": 98
     },
     "BUY": {
-      "precision": 0.3263157894736842,
-      "recall": 0.5636363636363636,
-      "f1": 0.41333333333333333,
-      "support": 55
+      "precision": 0.42857142857142855,
+      "recall": 0.2054794520547945,
+      "f1": 0.2777777777777778,
+      "support": 73
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 254,
-    "1": 387,
-    "2": 307
+    "0": 326,
+    "1": 462,
+    "2": 378
   },
   "optuna": {
-    "best_value": 0.3136315537348072,
+    "best_value": 0.3370112222125526,
     "best_params": {
-      "n_estimators": 192,
-      "max_depth": 4,
-      "learning_rate": 0.08109794741326062,
-      "subsample": 0.672164366130467,
-      "colsample_bytree": 0.6917016443805558,
-      "min_child_weight": 3
+      "n_estimators": 496,
+      "max_depth": 7,
+      "learning_rate": 0.21121142277050495,
+      "subsample": 0.6382844393700106,
+      "colsample_bytree": 0.9529106839729948,
+      "min_child_weight": 7,
+      "reg_lambda": 12.099064420135457,
+      "reg_alpha": 0.8460781116994806,
+      "gamma": 0.8366779467001384
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

@@ -1,46 +1,49 @@
 {
   "ticker": "HEROMOTOCO.NS",
-  "f1_macro": 0.36213158987131594,
+  "f1_macro": 0.40742590742590745,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.16129032258064516,
-      "recall": 0.10204081632653061,
-      "f1": 0.125,
-      "support": 49
+      "precision": 0.25925925925925924,
+      "recall": 0.4117647058823529,
+      "f1": 0.3181818181818182,
+      "support": 51
     },
     "HOLD": {
-      "precision": 0.47435897435897434,
-      "recall": 0.5441176470588235,
-      "f1": 0.5068493150684932,
-      "support": 68
+      "precision": 0.5161290322580645,
+      "recall": 0.5393258426966292,
+      "f1": 0.5274725274725275,
+      "support": 89
     },
     "BUY": {
-      "precision": 0.43209876543209874,
-      "recall": 0.4794520547945205,
-      "f1": 0.45454545454545453,
-      "support": 73
+      "precision": 0.48333333333333334,
+      "recall": 0.30851063829787234,
+      "f1": 0.37662337662337664,
+      "support": 94
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 266,
-    "1": 329,
-    "2": 353
+    "0": 332,
+    "1": 419,
+    "2": 415
   },
   "optuna": {
-    "best_value": 0.343638419141013,
+    "best_value": 0.31154994186198887,
     "best_params": {
-      "n_estimators": 427,
-      "max_depth": 3,
-      "learning_rate": 0.020110682395528854,
-      "subsample": 0.998185523097493,
-      "colsample_bytree": 0.9797309516714597,
-      "min_child_weight": 8
+      "n_estimators": 203,
+      "max_depth": 4,
+      "learning_rate": 0.16037729010698448,
+      "subsample": 0.9746528521178104,
+      "colsample_bytree": 0.9665359899508973,
+      "min_child_weight": 7,
+      "reg_lambda": 4.710455680368705,
+      "reg_alpha": 0.7907534259965779,
+      "gamma": 2.883178281352846
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

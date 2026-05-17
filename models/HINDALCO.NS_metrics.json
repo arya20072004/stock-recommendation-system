@@ -1,46 +1,49 @@
 {
   "ticker": "HINDALCO.NS",
-  "f1_macro": 0.26478525308934664,
+  "f1_macro": 0.32425036525126966,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.07272727272727272,
-      "recall": 0.15384615384615385,
-      "f1": 0.09876543209876543,
-      "support": 26
+      "precision": 0.15053763440860216,
+      "recall": 0.45161290322580644,
+      "f1": 0.22580645161290322,
+      "support": 31
     },
     "HOLD": {
-      "precision": 0.26785714285714285,
-      "recall": 0.25862068965517243,
-      "f1": 0.2631578947368421,
-      "support": 58
+      "precision": 0.4,
+      "recall": 0.25,
+      "f1": 0.3076923076923077,
+      "support": 80
     },
     "BUY": {
-      "precision": 0.5063291139240507,
-      "recall": 0.37735849056603776,
-      "f1": 0.43243243243243246,
-      "support": 106
+      "precision": 0.5164835164835165,
+      "recall": 0.3821138211382114,
+      "f1": 0.4392523364485981,
+      "support": 123
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 223,
-    "1": 323,
-    "2": 402
+    "0": 287,
+    "1": 391,
+    "2": 488
   },
   "optuna": {
-    "best_value": 0.3268676334258086,
+    "best_value": 0.3545386594378942,
     "best_params": {
-      "n_estimators": 363,
+      "n_estimators": 492,
       "max_depth": 4,
-      "learning_rate": 0.2986352334888463,
-      "subsample": 0.7290277808687248,
-      "colsample_bytree": 0.9825631837452433,
-      "min_child_weight": 14
+      "learning_rate": 0.2503190612868347,
+      "subsample": 0.7338485877515202,
+      "colsample_bytree": 0.7356066720364524,
+      "min_child_weight": 11,
+      "reg_lambda": 12.161603845439565,
+      "reg_alpha": 3.2610565716160678,
+      "gamma": 2.8392585606132217
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

@@ -152,18 +152,25 @@ def _prepare_sentiment_data(news_docs):
 
     return pd.DataFrame(columns=["sentiment"])
 
+SECTOR_MIN_PEERS = 4  # if fewer valid peers, disable sector momentum
+
 def _prepare_sector_data(ticker, client):
     """
     Computes daily sector average return for the ticker's sector,
     excluding the ticker itself to avoid self-contamination.
-    Returns a Series of sector_return indexed by date.
+    Returns empty Series if fewer than SECTOR_MIN_PEERS peers have data.
     """
     sector = SECTOR_MAP.get(ticker)
     if sector is None:
         return pd.Series(dtype=float, name="sector_return")
 
     sector_peers = [t for t, s in SECTOR_MAP.items() if s == sector and t != ticker]
-    if not sector_peers:
+    if len(sector_peers) < SECTOR_MIN_PEERS:
+        logger.info(
+            "%s: sector '%s' has only %d peers after self-exclusion "
+            "(min=%d) — sector momentum disabled",
+            ticker, sector, len(sector_peers), SECTOR_MIN_PEERS,
+        )
         return pd.Series(dtype=float, name="sector_return")
 
     db = client["stock_market_db"]
@@ -185,7 +192,12 @@ def _prepare_sector_data(ticker, client):
         peer_df["close"] = pd.to_numeric(peer_df["close"], errors="coerce")
         peer_returns.append(peer_df["close"].pct_change().rename(peer))
 
-    if not peer_returns:
+    # Check again after actually fetching — some peers may have returned empty
+    if len(peer_returns) < SECTOR_MIN_PEERS:
+        logger.info(
+            "%s: only %d peers had data in MongoDB (min=%d) — sector momentum disabled",
+            ticker, len(peer_returns), SECTOR_MIN_PEERS,
+        )
         return pd.Series(dtype=float, name="sector_return")
 
     sector_df = pd.concat(peer_returns, axis=1)
@@ -345,39 +357,6 @@ def create_dataset(ticker, client):
         df["sector_momentum"] = 0.0
         df["sector_momentum_5d"] = 0.0
 
-    # --- 52-WEEK HIGH / LOW POSITION ---
-    rolling_high_52w = df["close"].shift(1).rolling(window=252).max()
-    rolling_low_52w  = df["close"].shift(1).rolling(window=252).min()
-    df["pct_from_52w_high"] = (
-        (df["close"].shift(1) - rolling_high_52w) / rolling_high_52w.replace(0, pd.NA)
-    )
-    df["pct_from_52w_low"] = (
-        (df["close"].shift(1) - rolling_low_52w) / rolling_low_52w.replace(0, pd.NA)
-    )
-    df["near_52w_high"] = (df["pct_from_52w_high"] >= -0.05).astype(int)
-    df["near_52w_low"]  = (df["pct_from_52w_low"]  <=  0.05).astype(int)
-
-    # --- EARNINGS PROXIMITY ---
-    EARNINGS_MONTHS = [1, 4, 7, 10]
-
-    def _days_to_next_earnings(date):
-        candidates = []
-        for m in EARNINGS_MONTHS:
-            candidate = pd.Timestamp(year=date.year, month=m, day=15)
-            if candidate >= date:
-                candidates.append(candidate)
-        if not candidates:
-            # all months passed this year — next Jan
-            candidates.append(pd.Timestamp(year=date.year + 1, month=1, day=15))
-        return (min(candidates) - date).days
-
-    df["days_to_earnings"] = df.index.map(_days_to_next_earnings)
-    df["earnings_proximity"] = pd.cut(
-        df["days_to_earnings"],
-        bins=[-1, 7, 21, 45, 9999],
-        labels=[3, 2, 1, 0]
-    ).astype(float)
-
     # --- TARGET LABEL ---
     df["future_10d_return"] = df["close"].shift(-10) / df["close"] - 1
     threshold = np.maximum(1.0 * df["atr_pct"], 0.01)
@@ -400,10 +379,7 @@ def create_dataset(ticker, client):
         "obv_deviation",
         "vwap_deviation",
         "sector_momentum",
-        "pct_from_52w_high",
-        "pct_from_52w_low",
         "adx",
-        "earnings_proximity",
         "target",
     ]
     df = df.replace([float("inf"), float("-inf")], pd.NA)
@@ -428,32 +404,36 @@ def _make_feature_list(df):
         "market_regime",
         "obv_deviation",
         "vwap_deviation",
-        # --- Tier 1 additions ---
         "sector_momentum",
         "sector_momentum_5d",
-        "pct_from_52w_high",
-        "pct_from_52w_low",
-        "near_52w_high",
-        "near_52w_low",
         "adx",
         "adx_trending",
-        "earnings_proximity",
     ]
     return [feature for feature in candidate_features if feature in df.columns]
 
 
+# Exponential fold weights: later folds penalize overfitting to early regimes
+FOLD_WEIGHTS = {1: 1.0, 2: 1.2, 3: 1.5, 4: 2.0, 5: 2.5}
+
 def _optuna_objective(trial, X_train, y_train):
     params = {
-        "n_estimators": trial.suggest_int("n_estimators", 100, 700),
-        "max_depth": trial.suggest_int("max_depth", 2, 6),
-        "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.3, log=True),
-        "subsample": trial.suggest_float("subsample", 0.6, 1.0),
-        "colsample_bytree": trial.suggest_float("colsample_bytree", 0.6, 1.0),
-        "min_child_weight": trial.suggest_int("min_child_weight", 3, 20),
+        "n_estimators":      trial.suggest_int("n_estimators", 100, 700),
+        "max_depth":         trial.suggest_int("max_depth", 3, 7),
+        "learning_rate":     trial.suggest_float("learning_rate", 0.01, 0.3, log=True),
+        "subsample":         trial.suggest_float("subsample", 0.6, 1.0),
+        "colsample_bytree":  trial.suggest_float("colsample_bytree", 0.6, 1.0),
+        "min_child_weight":  trial.suggest_int("min_child_weight", 5, 25),
+        "reg_lambda":        trial.suggest_float("reg_lambda", 2.0, 15.0),
+        "reg_alpha":         trial.suggest_float("reg_alpha", 0.5, 5.0),
+        "gamma":             trial.suggest_float("gamma", 0.5, 5.0),
     }
 
+    # Optuna-tunable SMOTE ratios — prevent BUY/SELL inflation per trial
+    smote_minority_ratio = trial.suggest_float("smote_minority_ratio", 0.20, 0.40)
+
     cv = TimeSeriesSplit(n_splits=N_SPLITS)
-    fold_scores = []
+    weighted_score = 0.0
+    total_weight   = 0.0
 
     for fold_idx, (train_idx, valid_idx) in enumerate(cv.split(X_train), start=1):
         X_fold_train = X_train.iloc[train_idx]
@@ -462,12 +442,30 @@ def _optuna_objective(trial, X_train, y_train):
         y_fold_valid = y_train.iloc[valid_idx]
 
         if y_fold_train.nunique() < 2:
-            logger.debug("Skipping fold %s due to single class in training subset", fold_idx)
+            logger.debug("Skipping fold %s — single class in training subset", fold_idx)
+            continue
+
+        # Build controlled SMOTE strategy for this fold
+        label_counts  = y_fold_train.value_counts()
+        majority_count = label_counts.max()
+        sampling_target = {
+            label: min(majority_count, max(count, int(majority_count * smote_minority_ratio)))
+            for label, count in label_counts.items()
+        }
+
+        try:
+            fold_smote = SMOTE(
+                random_state=RANDOM_STATE,
+                sampling_strategy=sampling_target,
+                k_neighbors=min(5, label_counts.min() - 1),
+            )
+        except ValueError:
+            # k_neighbors too large for this fold — skip
             continue
 
         model = Pipeline(
             steps=[
-                ("smote", SMOTE(random_state=RANDOM_STATE)),
+                ("smote", fold_smote),
                 (
                     "xgb",
                     XGBClassifier(
@@ -482,18 +480,21 @@ def _optuna_objective(trial, X_train, y_train):
             ]
         )
 
+        fold_weight = FOLD_WEIGHTS.get(fold_idx, 1.0)
         try:
             model.fit(X_fold_train, y_fold_train)
-            preds = model.predict(X_fold_valid)
-            fold_scores.append(f1_score(y_fold_valid, preds, average="macro", zero_division=0))
+            preds        = model.predict(X_fold_valid)
+            fold_f1      = f1_score(y_fold_valid, preds, average="macro", zero_division=0)
+            weighted_score += fold_weight * fold_f1
+            total_weight   += fold_weight
         except ValueError as ex:
-            logger.debug("Fold failed for trial %s due to %s", trial.number, ex)
+            logger.debug("Fold %s failed for trial %s: %s", fold_idx, trial.number, ex)
             continue
 
-    if not fold_scores:
+    if total_weight == 0.0:
         return 0.0
 
-    return float(sum(fold_scores) / len(fold_scores))
+    return float(weighted_score / total_weight)
 
 
 def train_model(df, ticker):
@@ -548,15 +549,31 @@ def train_model(df, ticker):
         logger.warning("%s: no successful Optuna trials, skipping", ticker)
         return
 
-    best_params = study.best_params
+    # Extract best params — exclude SMOTE ratio (not an XGB param)
+    best_params = {
+        k: v for k, v in study.best_params.items()
+        if k != "smote_minority_ratio"
+    }
     logger.info("%s: best CV f1_macro = %.4f", ticker, study.best_value)
 
-    smote = SMOTE(random_state=RANDOM_STATE)
+    # --- Controlled SMOTE — cap minority oversampling to prevent BUY/SELL inflation ---
+    # Fixes: ITC BUY recall 0.74/precision 0.24, NTPC BUY recall 0.82, SBIN collapse
+    label_counts   = y_train.value_counts()
+    majority_count = label_counts.max()
+    sampling_target = {
+        label: min(majority_count, max(count, int(majority_count * 0.30)))
+        for label, count in label_counts.items()
+    }
+    smote = SMOTE(
+        random_state=RANDOM_STATE,
+        sampling_strategy=sampling_target,
+        k_neighbors=min(5, int(label_counts.min()) - 1),
+    )
     try:
         X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
     except ValueError as ex:
-        logger.warning("%s: SMOTE failed on final train split (%s), skipping", ticker, ex)
-        return
+        logger.warning("%s: SMOTE failed (%s) — using original training data", ticker, ex)
+        X_train_resampled, y_train_resampled = X_train, y_train
 
     best_model = XGBClassifier(
         objective="multi:softprob",
@@ -595,9 +612,9 @@ def train_model(df, ticker):
     )
     logger.info("\n%s", classification_report(y_test, y_pred, target_names=["SELL", "HOLD", "BUY"], zero_division=0))
 
-    model_filename = os.path.join(MODELS_DIR, f"model_{ticker}.joblib")
+    model_filename    = os.path.join(MODELS_DIR, f"model_{ticker}.joblib")
     features_filename = os.path.join(FEATURES_DIR, f"features_{ticker}.json")
-    metrics_filename = os.path.join(MODELS_DIR, f"{ticker}_metrics.json")
+    metrics_filename  = os.path.join(MODELS_DIR, f"{ticker}_metrics.json")
 
     joblib.dump(best_model, model_filename)
     with open(features_filename, "w", encoding="utf-8") as feat_file:
@@ -616,7 +633,7 @@ def train_model(df, ticker):
             "best_params": best_params,
             "n_trials": N_OPTUNA_TRIALS,
             "cv_splits": N_SPLITS,
-            "scoring": "f1_macro",
+            "scoring": "f1_macro (recency-weighted)",
         },
     }
     with open(metrics_filename, "w", encoding="utf-8") as metrics_file:

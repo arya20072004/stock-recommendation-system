@@ -1,46 +1,49 @@
 {
   "ticker": "SBILIFE.NS",
-  "f1_macro": 0.3593471425329833,
+  "f1_macro": 0.3472480210111395,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2602739726027397,
-      "recall": 0.475,
-      "f1": 0.336283185840708,
-      "support": 40
+      "precision": 0.23300970873786409,
+      "recall": 0.5714285714285714,
+      "f1": 0.3310344827586207,
+      "support": 42
     },
     "HOLD": {
-      "precision": 0.5365853658536586,
-      "recall": 0.46808510638297873,
-      "f1": 0.5,
-      "support": 94
+      "precision": 0.5486725663716814,
+      "recall": 0.5254237288135594,
+      "f1": 0.5367965367965368,
+      "support": 118
     },
     "BUY": {
-      "precision": 0.3142857142857143,
-      "recall": 0.19642857142857142,
-      "f1": 0.24175824175824176,
-      "support": 56
+      "precision": 0.4444444444444444,
+      "recall": 0.10810810810810811,
+      "f1": 0.17391304347826086,
+      "support": 74
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 235,
-    "1": 393,
-    "2": 320
+    "0": 291,
+    "1": 485,
+    "2": 390
   },
   "optuna": {
-    "best_value": 0.347949385462154,
+    "best_value": 0.2948027646668086,
     "best_params": {
-      "n_estimators": 456,
-      "max_depth": 3,
-      "learning_rate": 0.029874747152908093,
-      "subsample": 0.9231313234699792,
-      "colsample_bytree": 0.7835008009872363,
-      "min_child_weight": 6
+      "n_estimators": 255,
+      "max_depth": 4,
+      "learning_rate": 0.19583909263945354,
+      "subsample": 0.7137288663831638,
+      "colsample_bytree": 0.9661786996504692,
+      "min_child_weight": 23,
+      "reg_lambda": 12.936906803039802,
+      "reg_alpha": 2.9029299119818965,
+      "gamma": 0.8397362389382137
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

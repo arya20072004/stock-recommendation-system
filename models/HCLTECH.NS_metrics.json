@@ -1,46 +1,49 @@
 {
   "ticker": "HCLTECH.NS",
-  "f1_macro": 0.303637472446555,
+  "f1_macro": 0.285750007074881,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.21739130434782608,
-      "recall": 0.0847457627118644,
-      "f1": 0.12195121951219512,
+      "precision": 0.14285714285714285,
+      "recall": 0.06779661016949153,
+      "f1": 0.09195402298850575,
       "support": 59
     },
     "HOLD": {
-      "precision": 0.3695652173913043,
-      "recall": 0.2786885245901639,
-      "f1": 0.3177570093457944,
-      "support": 61
+      "precision": 0.35344827586206895,
+      "recall": 0.5324675324675324,
+      "f1": 0.42487046632124353,
+      "support": 77
     },
     "BUY": {
-      "precision": 0.371900826446281,
-      "recall": 0.6428571428571429,
-      "f1": 0.4712041884816754,
-      "support": 70
+      "precision": 0.35555555555555557,
+      "recall": 0.32653061224489793,
+      "f1": 0.3404255319148936,
+      "support": 98
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 240,
-    "1": 326,
-    "2": 382
+    "0": 300,
+    "1": 403,
+    "2": 463
   },
   "optuna": {
-    "best_value": 0.316677810054074,
+    "best_value": 0.31818793722342503,
     "best_params": {
-      "n_estimators": 163,
-      "max_depth": 3,
-      "learning_rate": 0.10830071467635304,
-      "subsample": 0.9980782563984228,
-      "colsample_bytree": 0.9200335162892241,
-      "min_child_weight": 13
+      "n_estimators": 361,
+      "max_depth": 7,
+      "learning_rate": 0.06554231069719997,
+      "subsample": 0.6723770745150514,
+      "colsample_bytree": 0.6747658466784784,
+      "min_child_weight": 10,
+      "reg_lambda": 11.434779790748175,
+      "reg_alpha": 3.855588524148317,
+      "gamma": 1.268981000393272
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

@@ -1,46 +1,49 @@
 {
   "ticker": "JSWSTEEL.NS",
-  "f1_macro": 0.338202037938649,
+  "f1_macro": 0.3113799825233582,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.18691588785046728,
-      "recall": 0.6896551724137931,
-      "f1": 0.29411764705882354,
-      "support": 29
+      "precision": 0.1553398058252427,
+      "recall": 0.38095238095238093,
+      "f1": 0.2206896551724138,
+      "support": 42
     },
     "HOLD": {
-      "precision": 0.6,
-      "recall": 0.35714285714285715,
-      "f1": 0.44776119402985076,
-      "support": 84
+      "precision": 0.4897959183673469,
+      "recall": 0.23300970873786409,
+      "f1": 0.3157894736842105,
+      "support": 103
     },
     "BUY": {
-      "precision": 0.45454545454545453,
-      "recall": 0.19480519480519481,
-      "f1": 0.2727272727272727,
-      "support": 77
+      "precision": 0.4146341463414634,
+      "recall": 0.38202247191011235,
+      "f1": 0.39766081871345027,
+      "support": 89
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 201,
-    "1": 397,
-    "2": 350
+    "0": 267,
+    "1": 492,
+    "2": 407
   },
   "optuna": {
-    "best_value": 0.3610792204924079,
+    "best_value": 0.370966213692011,
     "best_params": {
-      "n_estimators": 655,
-      "max_depth": 4,
-      "learning_rate": 0.19688070572591676,
-      "subsample": 0.7716323170379852,
-      "colsample_bytree": 0.7461982664256444,
-      "min_child_weight": 10
+      "n_estimators": 583,
+      "max_depth": 7,
+      "learning_rate": 0.19718253813683018,
+      "subsample": 0.9488740700007888,
+      "colsample_bytree": 0.8543792599580274,
+      "min_child_weight": 20,
+      "reg_lambda": 13.436201295544242,
+      "reg_alpha": 1.514663908755916,
+      "gamma": 0.5254484043448583
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

@@ -1,46 +1,49 @@
 {
   "ticker": "AXISBANK.NS",
-  "f1_macro": 0.2491555438086428,
+  "f1_macro": 0.35859166710230544,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.13793103448275862,
-      "recall": 0.06153846153846154,
-      "f1": 0.0851063829787234,
-      "support": 65
+      "precision": 0.3116883116883117,
+      "recall": 0.3380281690140845,
+      "f1": 0.32432432432432434,
+      "support": 71
     },
     "HOLD": {
-      "precision": 0.3238095238095238,
-      "recall": 0.6071428571428571,
-      "f1": 0.422360248447205,
-      "support": 56
+      "precision": 0.40540540540540543,
+      "recall": 0.5844155844155844,
+      "f1": 0.4787234042553192,
+      "support": 77
     },
     "BUY": {
-      "precision": 0.26785714285714285,
-      "recall": 0.21739130434782608,
-      "f1": 0.24,
-      "support": 69
+      "precision": 0.391304347826087,
+      "recall": 0.20930232558139536,
+      "f1": 0.2727272727272727,
+      "support": 86
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 246,
-    "1": 352,
-    "2": 350
+    "0": 321,
+    "1": 419,
+    "2": 426
   },
   "optuna": {
-    "best_value": 0.38620491387605005,
+    "best_value": 0.33569429108079074,
     "best_params": {
-      "n_estimators": 139,
+      "n_estimators": 608,
       "max_depth": 4,
-      "learning_rate": 0.030424855168335173,
-      "subsample": 0.852641503674421,
-      "colsample_bytree": 0.9061180146180275,
-      "min_child_weight": 7
+      "learning_rate": 0.2882847669196009,
+      "subsample": 0.6925850910157251,
+      "colsample_bytree": 0.8447260836992239,
+      "min_child_weight": 14,
+      "reg_lambda": 14.997927782866853,
+      "reg_alpha": 3.443304525846034,
+      "gamma": 1.050751525939367
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }

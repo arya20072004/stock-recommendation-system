@@ -1,46 +1,49 @@
 {
   "ticker": "BHARTIARTL.NS",
-  "f1_macro": 0.36672386672386675,
+  "f1_macro": 0.42776079033035197,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2857142857142857,
-      "recall": 0.06666666666666667,
-      "f1": 0.10810810810810811,
-      "support": 60
+      "precision": 0.8571428571428571,
+      "recall": 0.09375,
+      "f1": 0.16901408450704225,
+      "support": 64
     },
     "HOLD": {
-      "precision": 0.5740740740740741,
-      "recall": 0.4305555555555556,
-      "f1": 0.49206349206349204,
-      "support": 72
+      "precision": 0.5943396226415094,
+      "recall": 0.63,
+      "f1": 0.6116504854368932,
+      "support": 100
     },
     "BUY": {
-      "precision": 0.36885245901639346,
-      "recall": 0.7758620689655172,
-      "f1": 0.5,
-      "support": 58
+      "precision": 0.39669421487603307,
+      "recall": 0.6857142857142857,
+      "f1": 0.5026178010471204,
+      "support": 70
     }
   },
-  "train_size": 758,
-  "test_size": 190,
-  "total_rows_after_features": 948,
+  "train_size": 932,
+  "test_size": 234,
+  "total_rows_after_features": 1166,
   "label_distribution": {
-    "0": 178,
-    "1": 407,
-    "2": 363
+    "0": 233,
+    "1": 487,
+    "2": 446
   },
   "optuna": {
-    "best_value": 0.29680278808412386,
+    "best_value": 0.3139744512087318,
     "best_params": {
-      "n_estimators": 391,
-      "max_depth": 3,
-      "learning_rate": 0.03872125513120833,
-      "subsample": 0.7708197244044337,
-      "colsample_bytree": 0.9317320722996433,
-      "min_child_weight": 9
+      "n_estimators": 420,
+      "max_depth": 6,
+      "learning_rate": 0.09149299029549031,
+      "subsample": 0.9704675098060993,
+      "colsample_bytree": 0.8195487914157494,
+      "min_child_weight": 8,
+      "reg_lambda": 8.321067946617603,
+      "reg_alpha": 2.96949888081227,
+      "gamma": 1.2737496981348224
     },
     "n_trials": 50,
     "cv_splits": 5,
-    "scoring": "f1_macro"
+    "scoring": "f1_macro (recency-weighted)"
   }
 }
