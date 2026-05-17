@@ -1,0 +1,49 @@
+{
+  "ticker": "SHRIRAMFIN.NS",
+  "f1_macro": 0.25556897777380083,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.16666666666666666,
+      "recall": 0.06666666666666667,
+      "f1": 0.09523809523809523,
+      "support": 60
+    },
+    "HOLD": {
+      "precision": 0.25806451612903225,
+      "recall": 0.1111111111111111,
+      "f1": 0.1553398058252427,
+      "support": 72
+    },
+    "BUY": {
+      "precision": 0.4044943820224719,
+      "recall": 0.7128712871287128,
+      "f1": 0.5161290322580645,
+      "support": 101
+    }
+  },
+  "train_size": 929,
+  "test_size": 233,
+  "total_rows_after_features": 1162,
+  "label_distribution": {
+    "0": 279,
+    "1": 450,
+    "2": 433
+  },
+  "optuna": {
+    "best_value": 0.34587478144343586,
+    "best_params": {
+      "n_estimators": 495,
+      "max_depth": 6,
+      "learning_rate": 0.1627755788620605,
+      "subsample": 0.7488660240739309,
+      "colsample_bytree": 0.8610696947148857,
+      "min_child_weight": 19,
+      "reg_lambda": 11.466242726951583,
+      "reg_alpha": 2.0719301588013836,
+      "gamma": 2.385826698101503
+    },
+    "n_trials": 75,
+    "cv_splits": 5,
+    "scoring": "f1_macro (recency-weighted)"
+  }
+}

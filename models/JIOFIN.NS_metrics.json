@@ -1,0 +1,49 @@
+{
+  "ticker": "JIOFIN.NS",
+  "f1_macro": 0.24462477458732143,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 57
+    },
+    "HOLD": {
+      "precision": 0.31666666666666665,
+      "recall": 0.3958333333333333,
+      "f1": 0.35185185185185186,
+      "support": 48
+    },
+    "BUY": {
+      "precision": 0.2537313432835821,
+      "recall": 0.7727272727272727,
+      "f1": 0.38202247191011235,
+      "support": 22
+    }
+  },
+  "train_size": 508,
+  "test_size": 127,
+  "total_rows_after_features": 635,
+  "label_distribution": {
+    "0": 192,
+    "1": 240,
+    "2": 203
+  },
+  "optuna": {
+    "best_value": 0.23272158326451395,
+    "best_params": {
+      "n_estimators": 330,
+      "max_depth": 3,
+      "learning_rate": 0.2984840206184381,
+      "subsample": 0.6606991698406236,
+      "colsample_bytree": 0.8955806101116827,
+      "min_child_weight": 17,
+      "reg_lambda": 2.0257036496631073,
+      "reg_alpha": 3.2600036051818866,
+      "gamma": 1.3546986038452935
+    },
+    "n_trials": 75,
+    "cv_splits": 5,
+    "scoring": "f1_macro (recency-weighted)"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "ticker": "MAXHEALTH.NS",
+  "f1_macro": 0.28062233953250154,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.3,
+      "recall": 0.07692307692307693,
+      "f1": 0.12244897959183673,
+      "support": 78
+    },
+    "HOLD": {
+      "precision": 0.43386243386243384,
+      "recall": 0.803921568627451,
+      "f1": 0.563573883161512,
+      "support": 102
+    },
+    "BUY": {
+      "precision": 0.25,
+      "recall": 0.11320754716981132,
+      "f1": 0.15584415584415584,
+      "support": 53
+    }
+  },
+  "train_size": 929,
+  "test_size": 233,
+  "total_rows_after_features": 1162,
+  "label_distribution": {
+    "0": 272,
+    "1": 516,
+    "2": 374
+  },
+  "optuna": {
+    "best_value": 0.3553594751306277,
+    "best_params": {
+      "n_estimators": 647,
+      "max_depth": 3,
+      "learning_rate": 0.052009483865135174,
+      "subsample": 0.6729318022829517,
+      "colsample_bytree": 0.98350512500056,
+      "min_child_weight": 23,
+      "reg_lambda": 13.972643334387103,
+      "reg_alpha": 2.2938863690851883,
+      "gamma": 2.8605864358059847
+    },
+    "n_trials": 75,
+    "cv_splits": 5,
+    "scoring": "f1_macro (recency-weighted)"
+  }
+}

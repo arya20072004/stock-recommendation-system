@@ -47,63 +47,77 @@ SECTOR_MAP = {
     "HCLTECH.NS":    "IT",
     "WIPRO.NS":      "IT",
     "TECHM.NS":      "IT",
-    "LTIM.NS":       "IT",
+    
     # Banking
     "HDFCBANK.NS":   "Banking",
     "ICICIBANK.NS":  "Banking",
     "KOTAKBANK.NS":  "Banking",
     "AXISBANK.NS":   "Banking",
     "SBIN.NS":       "Banking",
-    "INDUSINDBK.NS": "Banking",
+    
     # Financial Services
     "BAJFINANCE.NS":  "FinancialServices",
     "BAJAJFINSV.NS":  "FinancialServices",
     "HDFCLIFE.NS":    "FinancialServices",
     "SBILIFE.NS":     "FinancialServices",
-    # Pharma
+    "SHRIRAMFIN.NS":  "FinancialServices",
+    "JIOFIN.NS":      "FinancialServices",
+    
+    # Pharma & Healthcare
     "SUNPHARMA.NS":  "Pharma",
     "DRREDDY.NS":    "Pharma",
     "CIPLA.NS":      "Pharma",
-    "DIVISLAB.NS":   "Pharma",
     "APOLLOHOSP.NS": "Pharma",
+    "MAXHEALTH.NS":  "Pharma",
+    
     # Auto
     "MARUTI.NS":     "Auto",
     "BAJAJ-AUTO.NS": "Auto",
     "HEROMOTOCO.NS": "Auto",
     "EICHERMOT.NS":  "Auto",
     "M&M.NS":        "Auto",
-    "TATAMOTORS.NS": "Auto",
+    "TMPV.NS": "Auto",
+    
     # FMCG
     "HINDUNILVR.NS": "FMCG",
     "ITC.NS":        "FMCG",
     "NESTLEIND.NS":  "FMCG",
     "BRITANNIA.NS":  "FMCG",
     "TATACONSUM.NS": "FMCG",
-    # Oil & Gas
+    
+    # Oil, Gas & Energy
     "RELIANCE.NS":   "OilGas",
     "ONGC.NS":       "OilGas",
-    "BPCL.NS":       "OilGas",
-    # Metals
+    
+    # Metals & Mining
     "TATASTEEL.NS":  "Metals",
     "JSWSTEEL.NS":   "Metals",
     "HINDALCO.NS":   "Metals",
+    
     # Cement & Infra
     "ULTRACEMCO.NS": "CementInfra",
     "GRASIM.NS":     "CementInfra",
     "LT.NS":         "CementInfra",
+    
     # Power & Utilities
     "NTPC.NS":       "PowerUtilities",
     "POWERGRID.NS":  "PowerUtilities",
     "COALINDIA.NS":  "PowerUtilities",
+    "BEL.NS":        "PowerUtilities",  # Often grouped under Capital Goods / Defence, mapped here to match core clusters
+    
     # Telecom
     "BHARTIARTL.NS": "Telecom",
-    # Conglomerate / Others
+    
+    # Conglomerate
     "ADANIENT.NS":   "Conglomerate",
     "ADANIPORTS.NS": "Conglomerate",
+    
+    # Consumer Discretionary, Retail & Services
     "TITAN.NS":      "ConsumerDiscretionary",
     "TRENT.NS":      "ConsumerDiscretionary",
     "ASIANPAINT.NS": "ConsumerDiscretionary",
-    "UPL.NS":        "Agrochem",
+    "INDIGO.NS":     "ConsumerDiscretionary",
+    "ETERNAL.NS":    "ConsumerDiscretionary"
 }
 
 def _prepare_nifty_data(start_date, end_date):
@@ -440,7 +454,7 @@ def _optuna_objective(trial, X_train, y_train):
     }
 
     # Optuna-tunable SMOTE ratios — prevent BUY/SELL inflation per trial
-    smote_minority_ratio = trial.suggest_float("smote_minority_ratio", 0.20, 0.40)
+    smote_minority_ratio = trial.suggest_float("smote_minority_ratio", 0.40, 0.70)
 
     cv = TimeSeriesSplit(n_splits=N_SPLITS)
     weighted_score = 0.0
@@ -571,14 +585,17 @@ def train_model(df, ticker):
     # Fixes: ITC BUY recall 0.74/precision 0.24, NTPC BUY recall 0.82, SBIN collapse
     label_counts   = y_train.value_counts()
     majority_count = label_counts.max()
-    sampling_target = {
-        label: min(majority_count, max(count, int(majority_count * 0.30)))
-        for label, count in label_counts.items()
-    }
+    minority_count  = label_counts.min()
+    sampling_target = {}
+    for label, count in label_counts.items():
+        target = max(count, int(majority_count * 0.50))
+        target = min(target, majority_count)        # never exceed majority
+        sampling_target[label] = target
+
     smote = SMOTE(
         random_state=RANDOM_STATE,
         sampling_strategy=sampling_target,
-        k_neighbors=min(5, int(label_counts.min()) - 1),
+        k_neighbors=min(5, int(minority_count) - 1),
     )
     try:
         X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)

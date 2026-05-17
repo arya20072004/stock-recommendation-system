@@ -1,0 +1,49 @@
+{
+  "ticker": "BEL.NS",
+  "f1_macro": 0.35223770160649676,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.36496350364963503,
+      "recall": 0.8064516129032258,
+      "f1": 0.5025125628140703,
+      "support": 62
+    },
+    "HOLD": {
+      "precision": 0.3617021276595745,
+      "recall": 0.2236842105263158,
+      "f1": 0.2764227642276423,
+      "support": 76
+    },
+    "BUY": {
+      "precision": 0.40816326530612246,
+      "recall": 0.21052631578947367,
+      "f1": 0.2777777777777778,
+      "support": 95
+    }
+  },
+  "train_size": 929,
+  "test_size": 233,
+  "total_rows_after_features": 1162,
+  "label_distribution": {
+    "0": 260,
+    "1": 453,
+    "2": 449
+  },
+  "optuna": {
+    "best_value": 0.3020462216119209,
+    "best_params": {
+      "n_estimators": 662,
+      "max_depth": 3,
+      "learning_rate": 0.26399843282150826,
+      "subsample": 0.6051460423895472,
+      "colsample_bytree": 0.8057603613888223,
+      "min_child_weight": 24,
+      "reg_lambda": 12.308378639234546,
+      "reg_alpha": 0.6840242058985921,
+      "gamma": 0.5032496359304884
+    },
+    "n_trials": 75,
+    "cv_splits": 5,
+    "scoring": "f1_macro (recency-weighted)"
+  }
+}

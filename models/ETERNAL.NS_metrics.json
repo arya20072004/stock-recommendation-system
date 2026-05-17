@@ -1,0 +1,49 @@
+{
+  "ticker": "ETERNAL.NS",
+  "f1_macro": 0.2052139037433155,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.05714285714285714,
+      "recall": 0.03278688524590164,
+      "f1": 0.041666666666666664,
+      "support": 61
+    },
+    "HOLD": {
+      "precision": 0.2692307692307692,
+      "recall": 0.13725490196078433,
+      "f1": 0.18181818181818182,
+      "support": 102
+    },
+    "BUY": {
+      "precision": 0.2857142857142857,
+      "recall": 0.625,
+      "f1": 0.39215686274509803,
+      "support": 64
+    }
+  },
+  "train_size": 906,
+  "test_size": 227,
+  "total_rows_after_features": 1133,
+  "label_distribution": {
+    "0": 281,
+    "1": 459,
+    "2": 393
+  },
+  "optuna": {
+    "best_value": 0.3543012188764667,
+    "best_params": {
+      "n_estimators": 216,
+      "max_depth": 7,
+      "learning_rate": 0.03301911714210998,
+      "subsample": 0.6346927211665727,
+      "colsample_bytree": 0.6500145849567381,
+      "min_child_weight": 24,
+      "reg_lambda": 11.453905383790165,
+      "reg_alpha": 1.8693567090572776,
+      "gamma": 1.2319986989603433
+    },
+    "n_trials": 75,
+    "cv_splits": 5,
+    "scoring": "f1_macro (recency-weighted)"
+  }
+}
