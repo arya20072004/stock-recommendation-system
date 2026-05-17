@@ -1,23 +1,23 @@
 {
   "ticker": "ADANIPORTS.NS",
-  "f1_macro": 0.24954183182031284,
+  "f1_macro": 0.33169627687976316,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.24324324324324326,
-      "recall": 0.3103448275862069,
-      "f1": 0.2727272727272727,
+      "precision": 0.2727272727272727,
+      "recall": 0.3620689655172414,
+      "f1": 0.3111111111111111,
       "support": 58
     },
     "HOLD": {
-      "precision": 0.34177215189873417,
+      "precision": 0.3724137931034483,
       "recall": 0.6835443037974683,
-      "f1": 0.45569620253164556,
+      "f1": 0.48214285714285715,
       "support": 79
     },
     "BUY": {
-      "precision": 0.5,
-      "recall": 0.010309278350515464,
-      "f1": 0.020202020202020204,
+      "precision": 0.9166666666666666,
+      "recall": 0.1134020618556701,
+      "f1": 0.2018348623853211,
       "support": 97
     }
   },
@@ -30,19 +30,19 @@
     "2": 404
   },
   "optuna": {
-    "best_value": 0.37345087366727275,
+    "best_value": 0.3658762124151831,
     "best_params": {
-      "n_estimators": 364,
-      "max_depth": 5,
-      "learning_rate": 0.06591119682942763,
-      "subsample": 0.6992439577345614,
-      "colsample_bytree": 0.9575957207487901,
-      "min_child_weight": 7,
-      "reg_lambda": 5.593788194060946,
-      "reg_alpha": 1.1446454210378887,
-      "gamma": 0.6373488013326682
+      "n_estimators": 362,
+      "max_depth": 3,
+      "learning_rate": 0.10094502685244805,
+      "subsample": 0.7080626293205708,
+      "colsample_bytree": 0.862821209324612,
+      "min_child_weight": 8,
+      "reg_lambda": 13.82695850155674,
+      "reg_alpha": 0.5108001282045791,
+      "gamma": 0.7190201763866039
     },
-    "n_trials": 50,
+    "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
   }

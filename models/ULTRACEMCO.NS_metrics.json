@@ -1,23 +1,23 @@
 {
   "ticker": "ULTRACEMCO.NS",
-  "f1_macro": 0.3322732350074349,
+  "f1_macro": 0.32741999602464716,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.29545454545454547,
-      "recall": 0.24528301886792453,
-      "f1": 0.26804123711340205,
+      "precision": 0.29411764705882354,
+      "recall": 0.2830188679245283,
+      "f1": 0.28846153846153844,
       "support": 53
     },
     "HOLD": {
-      "precision": 0.39215686274509803,
-      "recall": 0.37037037037037035,
-      "f1": 0.38095238095238093,
+      "precision": 0.38095238095238093,
+      "recall": 0.2962962962962963,
+      "f1": 0.3333333333333333,
       "support": 108
     },
     "BUY": {
-      "precision": 0.3181818181818182,
-      "recall": 0.3835616438356164,
-      "f1": 0.34782608695652173,
+      "precision": 0.31313131313131315,
+      "recall": 0.4246575342465753,
+      "f1": 0.36046511627906974,
       "support": 73
     }
   },
@@ -30,19 +30,19 @@
     "2": 418
   },
   "optuna": {
-    "best_value": 0.4018648717921869,
+    "best_value": 0.4092353404615874,
     "best_params": {
-      "n_estimators": 275,
-      "max_depth": 7,
-      "learning_rate": 0.15436444311108546,
-      "subsample": 0.782194773179097,
-      "colsample_bytree": 0.873303019524443,
-      "min_child_weight": 6,
-      "reg_lambda": 13.831993983698627,
-      "reg_alpha": 2.3477987153434947,
-      "gamma": 1.0974617603734598
+      "n_estimators": 411,
+      "max_depth": 6,
+      "learning_rate": 0.12925950452312146,
+      "subsample": 0.8119014979808474,
+      "colsample_bytree": 0.9057968383547537,
+      "min_child_weight": 9,
+      "reg_lambda": 7.715164645595088,
+      "reg_alpha": 1.5737093535318811,
+      "gamma": 1.8414322237928278
     },
-    "n_trials": 50,
+    "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
   }

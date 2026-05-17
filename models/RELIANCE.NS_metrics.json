@@ -1,23 +1,23 @@
 {
   "ticker": "RELIANCE.NS",
-  "f1_macro": 0.3402225729945824,
+  "f1_macro": 0.33137872602315094,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.35051546391752575,
-      "recall": 0.5666666666666667,
-      "f1": 0.43312101910828027,
+      "precision": 0.3120567375886525,
+      "recall": 0.7333333333333333,
+      "f1": 0.43781094527363185,
       "support": 60
     },
     "HOLD": {
-      "precision": 0.3114754098360656,
-      "recall": 0.2235294117647059,
-      "f1": 0.2602739726027397,
+      "precision": 0.38235294117647056,
+      "recall": 0.15294117647058825,
+      "f1": 0.2184873949579832,
       "support": 85
     },
     "BUY": {
-      "precision": 0.35526315789473684,
-      "recall": 0.30337078651685395,
-      "f1": 0.32727272727272727,
+      "precision": 0.423728813559322,
+      "recall": 0.2808988764044944,
+      "f1": 0.33783783783783783,
       "support": 89
     }
   },
@@ -30,19 +30,19 @@
     "2": 440
   },
   "optuna": {
-    "best_value": 0.3525235194233207,
+    "best_value": 0.3590255006346021,
     "best_params": {
-      "n_estimators": 265,
-      "max_depth": 6,
-      "learning_rate": 0.024041691390085038,
-      "subsample": 0.9780897461819406,
-      "colsample_bytree": 0.9184755962616943,
-      "min_child_weight": 10,
-      "reg_lambda": 4.432186729831394,
-      "reg_alpha": 2.3418891430718984,
-      "gamma": 1.845332410275036
+      "n_estimators": 202,
+      "max_depth": 4,
+      "learning_rate": 0.017841796718784098,
+      "subsample": 0.9862035174670519,
+      "colsample_bytree": 0.8112690294416649,
+      "min_child_weight": 5,
+      "reg_lambda": 9.55808942639728,
+      "reg_alpha": 3.5924153354120163,
+      "gamma": 1.4863543540726347
     },
-    "n_trials": 50,
+    "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
   }

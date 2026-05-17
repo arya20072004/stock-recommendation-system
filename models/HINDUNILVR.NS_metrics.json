@@ -1,23 +1,23 @@
 {
   "ticker": "HINDUNILVR.NS",
-  "f1_macro": 0.3517367444795924,
+  "f1_macro": 0.40378510378510385,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.375,
-      "recall": 0.15,
-      "f1": 0.21428571428571427,
+      "precision": 0.3870967741935484,
+      "recall": 0.2,
+      "f1": 0.26373626373626374,
       "support": 60
     },
     "HOLD": {
-      "precision": 0.4251497005988024,
-      "recall": 0.696078431372549,
-      "f1": 0.5278810408921933,
+      "precision": 0.46,
+      "recall": 0.6764705882352942,
+      "f1": 0.5476190476190477,
       "support": 102
     },
     "BUY": {
-      "precision": 0.4186046511627907,
-      "recall": 0.25,
-      "f1": 0.3130434782608696,
+      "precision": 0.4716981132075472,
+      "recall": 0.3472222222222222,
+      "f1": 0.4,
       "support": 72
     }
   },
@@ -30,19 +30,19 @@
     "2": 340
   },
   "optuna": {
-    "best_value": 0.27772106905481436,
+    "best_value": 0.281090336770925,
     "best_params": {
-      "n_estimators": 368,
+      "n_estimators": 454,
       "max_depth": 5,
-      "learning_rate": 0.1585908547219082,
-      "subsample": 0.7723019114297206,
-      "colsample_bytree": 0.777376743328352,
+      "learning_rate": 0.2397281317851477,
+      "subsample": 0.793506724847702,
+      "colsample_bytree": 0.7764673533662779,
       "min_child_weight": 6,
-      "reg_lambda": 6.302587796790411,
-      "reg_alpha": 1.6985401772396858,
-      "gamma": 4.951392184078229
+      "reg_lambda": 5.144878495124403,
+      "reg_alpha": 3.505502577123547,
+      "gamma": 4.408886219866749
     },
-    "n_trials": 50,
+    "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
   }

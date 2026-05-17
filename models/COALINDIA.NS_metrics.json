@@ -1,23 +1,23 @@
 {
   "ticker": "COALINDIA.NS",
-  "f1_macro": 0.3317925331538491,
+  "f1_macro": 0.31388122784956357,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2903225806451613,
+      "precision": 0.24324324324324326,
       "recall": 0.16363636363636364,
-      "f1": 0.20930232558139536,
+      "f1": 0.1956521739130435,
       "support": 55
     },
     "HOLD": {
-      "precision": 0.6071428571428571,
-      "recall": 0.17894736842105263,
-      "f1": 0.2764227642276423,
+      "precision": 0.4523809523809524,
+      "recall": 0.2,
+      "f1": 0.2773722627737226,
       "support": 95
     },
     "BUY": {
-      "precision": 0.37714285714285717,
-      "recall": 0.7857142857142857,
-      "f1": 0.5096525096525096,
+      "precision": 0.36129032258064514,
+      "recall": 0.6666666666666666,
+      "f1": 0.4686192468619247,
       "support": 84
     }
   },
@@ -30,19 +30,19 @@
     "2": 459
   },
   "optuna": {
-    "best_value": 0.22916793741632432,
+    "best_value": 0.2538007589542864,
     "best_params": {
-      "n_estimators": 607,
-      "max_depth": 6,
-      "learning_rate": 0.1965493920866405,
-      "subsample": 0.6765873346937203,
-      "colsample_bytree": 0.7380982460415894,
+      "n_estimators": 684,
+      "max_depth": 4,
+      "learning_rate": 0.21188940227882153,
+      "subsample": 0.9729710023480564,
+      "colsample_bytree": 0.9576657428744346,
       "min_child_weight": 6,
-      "reg_lambda": 4.711560159178429,
-      "reg_alpha": 1.7576979588073345,
-      "gamma": 3.553722727655949
+      "reg_lambda": 13.683578909167595,
+      "reg_alpha": 0.8644722132438182,
+      "gamma": 2.1981755879927354
     },
-    "n_trials": 50,
+    "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
   }

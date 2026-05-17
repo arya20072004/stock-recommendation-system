@@ -1,23 +1,23 @@
 {
   "ticker": "INDUSINDBK.NS",
-  "f1_macro": 0.23056691992986558,
+  "f1_macro": 0.23100764315717584,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
+      "precision": 0.14285714285714285,
+      "recall": 0.05660377358490566,
+      "f1": 0.08108108108108109,
       "support": 53
     },
     "HOLD": {
-      "precision": 0.36486486486486486,
-      "recall": 0.27,
-      "f1": 0.3103448275862069,
+      "precision": 0.3625,
+      "recall": 0.29,
+      "f1": 0.32222222222222224,
       "support": 100
     },
     "BUY": {
-      "precision": 0.2903225806451613,
-      "recall": 0.5555555555555556,
-      "f1": 0.3813559322033898,
+      "precision": 0.23308270676691728,
+      "recall": 0.38271604938271603,
+      "f1": 0.2897196261682243,
       "support": 81
     }
   },
@@ -30,19 +30,19 @@
     "2": 393
   },
   "optuna": {
-    "best_value": 0.33132243964334623,
+    "best_value": 0.351356933877657,
     "best_params": {
-      "n_estimators": 691,
-      "max_depth": 4,
-      "learning_rate": 0.010231505422773858,
-      "subsample": 0.7620865647987605,
-      "colsample_bytree": 0.7338935989629468,
+      "n_estimators": 310,
+      "max_depth": 5,
+      "learning_rate": 0.25911187422182763,
+      "subsample": 0.8296628634238653,
+      "colsample_bytree": 0.8643029497159527,
       "min_child_weight": 5,
-      "reg_lambda": 2.000522014234993,
-      "reg_alpha": 2.5265810693723894,
-      "gamma": 1.3965968881903998
+      "reg_lambda": 3.831386688716244,
+      "reg_alpha": 2.630446076727584,
+      "gamma": 1.4025645895785668
     },
-    "n_trials": 50,
+    "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
   }

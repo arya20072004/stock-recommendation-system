@@ -1,23 +1,23 @@
 {
   "ticker": "CIPLA.NS",
-  "f1_macro": 0.42412698412698413,
+  "f1_macro": 0.3438105393320849,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.5333333333333333,
-      "recall": 0.22857142857142856,
-      "f1": 0.32,
+      "precision": 0.34285714285714286,
+      "recall": 0.17142857142857143,
+      "f1": 0.22857142857142856,
       "support": 70
     },
     "HOLD": {
-      "precision": 0.5,
-      "recall": 0.5769230769230769,
-      "f1": 0.5357142857142857,
+      "precision": 0.45454545454545453,
+      "recall": 0.4807692307692308,
+      "f1": 0.4672897196261682,
       "support": 104
     },
     "BUY": {
-      "precision": 0.35714285714285715,
-      "recall": 0.5,
-      "f1": 0.4166666666666667,
+      "precision": 0.2808988764044944,
+      "recall": 0.4166666666666667,
+      "f1": 0.33557046979865773,
       "support": 60
     }
   },
@@ -30,19 +30,19 @@
     "2": 371
   },
   "optuna": {
-    "best_value": 0.3393930288483857,
+    "best_value": 0.33967414677686764,
     "best_params": {
-      "n_estimators": 566,
-      "max_depth": 7,
-      "learning_rate": 0.22708998617483298,
-      "subsample": 0.8902446641850823,
-      "colsample_bytree": 0.616434682788931,
-      "min_child_weight": 5,
-      "reg_lambda": 8.459972519805667,
-      "reg_alpha": 1.7556513744595752,
-      "gamma": 0.7252301541773458
+      "n_estimators": 692,
+      "max_depth": 3,
+      "learning_rate": 0.19430954384815577,
+      "subsample": 0.7644939892182654,
+      "colsample_bytree": 0.7763580618227754,
+      "min_child_weight": 21,
+      "reg_lambda": 8.087380595982472,
+      "reg_alpha": 2.106845701560882,
+      "gamma": 0.800606985800251
     },
-    "n_trials": 50,
+    "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
   }

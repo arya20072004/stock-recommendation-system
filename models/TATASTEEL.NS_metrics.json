@@ -1,23 +1,23 @@
 {
   "ticker": "TATASTEEL.NS",
-  "f1_macro": 0.3087459965508746,
+  "f1_macro": 0.3230273147997144,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.23622047244094488,
+      "precision": 0.2564102564102564,
       "recall": 0.7894736842105263,
-      "f1": 0.36363636363636365,
+      "f1": 0.3870967741935484,
       "support": 38
     },
     "HOLD": {
-      "precision": 0.41379310344827586,
-      "recall": 0.3870967741935484,
-      "f1": 0.4,
+      "precision": 0.38461538461538464,
+      "recall": 0.3763440860215054,
+      "f1": 0.3804347826086957,
       "support": 93
     },
     "BUY": {
       "precision": 0.5,
-      "recall": 0.0970873786407767,
-      "f1": 0.16260162601626016,
+      "recall": 0.1262135922330097,
+      "f1": 0.20155038759689922,
       "support": 103
     }
   },
@@ -30,19 +30,19 @@
     "2": 437
   },
   "optuna": {
-    "best_value": 0.36175250644508966,
+    "best_value": 0.37247637355171004,
     "best_params": {
-      "n_estimators": 584,
+      "n_estimators": 517,
       "max_depth": 3,
-      "learning_rate": 0.23790540836558807,
-      "subsample": 0.7598650191080408,
-      "colsample_bytree": 0.7832555443345992,
-      "min_child_weight": 18,
-      "reg_lambda": 7.638000482866428,
-      "reg_alpha": 4.001211058300172,
-      "gamma": 1.1204880152142138
+      "learning_rate": 0.13369029549392547,
+      "subsample": 0.9981249736645935,
+      "colsample_bytree": 0.6550696528113628,
+      "min_child_weight": 21,
+      "reg_lambda": 3.8695551895784672,
+      "reg_alpha": 3.1980352679967234,
+      "gamma": 1.2647121751811234
     },
-    "n_trials": 50,
+    "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
   }

@@ -1,23 +1,23 @@
 {
   "ticker": "AXISBANK.NS",
-  "f1_macro": 0.35859166710230544,
+  "f1_macro": 0.4174081846430731,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.3116883116883117,
-      "recall": 0.3380281690140845,
-      "f1": 0.32432432432432434,
+      "precision": 0.3125,
+      "recall": 0.352112676056338,
+      "f1": 0.33112582781456956,
       "support": 71
     },
     "HOLD": {
-      "precision": 0.40540540540540543,
-      "recall": 0.5844155844155844,
-      "f1": 0.4787234042553192,
+      "precision": 0.4457831325301205,
+      "recall": 0.4805194805194805,
+      "f1": 0.4625,
       "support": 77
     },
     "BUY": {
-      "precision": 0.391304347826087,
-      "recall": 0.20930232558139536,
-      "f1": 0.2727272727272727,
+      "precision": 0.5070422535211268,
+      "recall": 0.4186046511627907,
+      "f1": 0.4585987261146497,
       "support": 86
     }
   },
@@ -30,19 +30,19 @@
     "2": 426
   },
   "optuna": {
-    "best_value": 0.33569429108079074,
+    "best_value": 0.3359097572873684,
     "best_params": {
-      "n_estimators": 608,
-      "max_depth": 4,
-      "learning_rate": 0.2882847669196009,
-      "subsample": 0.6925850910157251,
-      "colsample_bytree": 0.8447260836992239,
-      "min_child_weight": 14,
-      "reg_lambda": 14.997927782866853,
-      "reg_alpha": 3.443304525846034,
-      "gamma": 1.050751525939367
+      "n_estimators": 442,
+      "max_depth": 6,
+      "learning_rate": 0.1970175163066447,
+      "subsample": 0.7084188538776115,
+      "colsample_bytree": 0.6034801005010642,
+      "min_child_weight": 15,
+      "reg_lambda": 6.569241788961001,
+      "reg_alpha": 1.7803875688847297,
+      "gamma": 2.134039877186993
     },
-    "n_trials": 50,
+    "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
   }

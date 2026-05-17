@@ -1,23 +1,23 @@
 {
   "ticker": "DRREDDY.NS",
-  "f1_macro": 0.44781448295461984,
+  "f1_macro": 0.46554995355077544,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.44594594594594594,
-      "recall": 0.44,
-      "f1": 0.4429530201342282,
+      "precision": 0.47560975609756095,
+      "recall": 0.52,
+      "f1": 0.4968152866242038,
       "support": 75
     },
     "HOLD": {
-      "precision": 0.43956043956043955,
-      "recall": 0.49382716049382713,
-      "f1": 0.46511627906976744,
+      "precision": 0.3918918918918919,
+      "recall": 0.35802469135802467,
+      "f1": 0.3741935483870968,
       "support": 81
     },
     "BUY": {
-      "precision": 0.463768115942029,
-      "recall": 0.41025641025641024,
-      "f1": 0.43537414965986393,
+      "precision": 0.5256410256410257,
+      "recall": 0.5256410256410257,
+      "f1": 0.5256410256410257,
       "support": 78
     }
   },
@@ -30,19 +30,19 @@
     "2": 389
   },
   "optuna": {
-    "best_value": 0.257298922324892,
+    "best_value": 0.29846010976828324,
     "best_params": {
-      "n_estimators": 602,
-      "max_depth": 4,
-      "learning_rate": 0.08308793775061538,
-      "subsample": 0.793166852582324,
-      "colsample_bytree": 0.8691450033538184,
-      "min_child_weight": 5,
-      "reg_lambda": 14.64427399097519,
-      "reg_alpha": 3.8409058718225193,
-      "gamma": 2.0540998305192004
+      "n_estimators": 545,
+      "max_depth": 7,
+      "learning_rate": 0.28939750875288417,
+      "subsample": 0.600351418183667,
+      "colsample_bytree": 0.6349020709141048,
+      "min_child_weight": 13,
+      "reg_lambda": 3.2036798586630946,
+      "reg_alpha": 1.2856055475048676,
+      "gamma": 0.9444612386970004
     },
-    "n_trials": 50,
+    "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
   }

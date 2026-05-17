@@ -1,23 +1,23 @@
 {
   "ticker": "ASIANPAINT.NS",
-  "f1_macro": 0.3234673477931596,
+  "f1_macro": 0.2787183600092984,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.24444444444444444,
-      "recall": 0.15714285714285714,
-      "f1": 0.19130434782608696,
+      "precision": 0.23076923076923078,
+      "recall": 0.12857142857142856,
+      "f1": 0.1651376146788991,
       "support": 70
     },
     "HOLD": {
-      "precision": 0.40963855421686746,
-      "recall": 0.4533333333333333,
-      "f1": 0.43037974683544306,
+      "precision": 0.32653061224489793,
+      "recall": 0.4266666666666667,
+      "f1": 0.3699421965317919,
       "support": 75
     },
     "BUY": {
-      "precision": 0.32075471698113206,
-      "recall": 0.38202247191011235,
-      "f1": 0.3487179487179487,
+      "precision": 0.28865979381443296,
+      "recall": 0.3146067415730337,
+      "f1": 0.3010752688172043,
       "support": 89
     }
   },
@@ -30,19 +30,19 @@
     "2": 380
   },
   "optuna": {
-    "best_value": 0.3054209372033853,
+    "best_value": 0.3200901894462176,
     "best_params": {
-      "n_estimators": 598,
-      "max_depth": 4,
-      "learning_rate": 0.018949971987113016,
-      "subsample": 0.7227379834726245,
-      "colsample_bytree": 0.7212852821236327,
-      "min_child_weight": 12,
-      "reg_lambda": 7.752845318309388,
-      "reg_alpha": 1.254933466131911,
-      "gamma": 1.346270423146846
+      "n_estimators": 572,
+      "max_depth": 6,
+      "learning_rate": 0.045007091295493816,
+      "subsample": 0.9533921019949267,
+      "colsample_bytree": 0.9442905103118732,
+      "min_child_weight": 10,
+      "reg_lambda": 2.8320716579684846,
+      "reg_alpha": 3.430731241912395,
+      "gamma": 2.1820888636245446
     },
-    "n_trials": 50,
+    "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
   }

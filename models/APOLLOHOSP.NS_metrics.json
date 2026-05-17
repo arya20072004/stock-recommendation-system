@@ -1,23 +1,23 @@
 {
   "ticker": "APOLLOHOSP.NS",
-  "f1_macro": 0.2928497714875424,
+  "f1_macro": 0.3016261664972743,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
+      "precision": 0.125,
+      "recall": 0.014084507042253521,
+      "f1": 0.02531645569620253,
       "support": 71
     },
     "HOLD": {
-      "precision": 0.39520958083832336,
-      "recall": 0.75,
-      "f1": 0.5176470588235295,
+      "precision": 0.38414634146341464,
+      "recall": 0.7159090909090909,
+      "f1": 0.5,
       "support": 88
     },
     "BUY": {
-      "precision": 0.41379310344827586,
-      "recall": 0.32,
-      "f1": 0.3609022556390977,
+      "precision": 0.41935483870967744,
+      "recall": 0.3466666666666667,
+      "f1": 0.3795620437956204,
       "support": 75
     }
   },
@@ -30,19 +30,19 @@
     "2": 408
   },
   "optuna": {
-    "best_value": 0.3429015110967402,
+    "best_value": 0.3424290982299183,
     "best_params": {
-      "n_estimators": 409,
-      "max_depth": 6,
-      "learning_rate": 0.15254144083160467,
-      "subsample": 0.8285076157101232,
-      "colsample_bytree": 0.9281262873917093,
-      "min_child_weight": 7,
-      "reg_lambda": 5.2468276197156225,
-      "reg_alpha": 0.5534513794731009,
-      "gamma": 1.9505714935416225
+      "n_estimators": 246,
+      "max_depth": 4,
+      "learning_rate": 0.10731596529332461,
+      "subsample": 0.9002617176156431,
+      "colsample_bytree": 0.8884128821391251,
+      "min_child_weight": 9,
+      "reg_lambda": 12.520069682350334,
+      "reg_alpha": 1.2501086086815028,
+      "gamma": 1.4004307588651528
     },
-    "n_trials": 50,
+    "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
   }

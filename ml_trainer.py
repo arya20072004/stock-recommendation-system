@@ -30,7 +30,7 @@ RANDOM_STATE = 42
 HISTORY_YEARS = 5
 MIN_ROWS_AFTER_FEATURES = 200
 N_SPLITS = 5
-N_OPTUNA_TRIALS = 50
+N_OPTUNA_TRIALS = 75
 
 logging.basicConfig(
     level=logging.INFO,
@@ -205,6 +205,8 @@ def _prepare_sector_data(ticker, client):
     sector_return.name = "sector_return"
     return sector_return
 
+TREND_FOLLOWING_SECTORS = {"Auto", "Metals", "FMCG", "Pharma", "CementInfra"}
+
 def create_dataset(ticker, client):
     """
     Pulls 5 years of data from MongoDB and engineers leakage-safe features.
@@ -308,13 +310,22 @@ def create_dataset(ticker, client):
     df["atr_pct"]   = df["atr"] / df["close"].replace(0, pd.NA)
 
     # ADX — already shifted above via resolved_indicator_cols
-    if adx_col:
-        df["adx"] = df[adx_col]
-        df["adx_trending"] = (df["adx"] > 25).astype(int)
+    ticker_sector = SECTOR_MAP.get(ticker, "")
+    if ticker_sector in TREND_FOLLOWING_SECTORS:
+        if adx_col:
+            df["adx"] = df[adx_col]
+            df["adx_trending"] = (df["adx"] > 25).astype(int)
+        else:
+            df["adx"] = 25.0
+            df["adx_trending"] = 0
     else:
-        logger.warning("%s: ADX column not found, using neutral fallback", ticker)
-        df["adx"] = 25.0
+        # Banking, IT, FinancialServices, Telecom, OilGas — ADX adds noise
+        df["adx"] = 25.0          # neutral, won't influence model
         df["adx_trending"] = 0
+        logger.info(
+            "%s: ADX disabled for sector '%s' — event-driven stock",
+            ticker, ticker_sector
+        )
 
     df["sentiment_7d_avg"]  = df["sentiment"].shift(1).rolling(window=7).mean()
     df["sentiment_30d_avg"] = df["sentiment"].shift(1).rolling(window=30).mean()

@@ -1,23 +1,23 @@
 {
   "ticker": "DIVISLAB.NS",
-  "f1_macro": 0.32997651514107,
+  "f1_macro": 0.3175466580638994,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.14516129032258066,
-      "recall": 0.15,
-      "f1": 0.14754098360655737,
+      "precision": 0.14285714285714285,
+      "recall": 0.13333333333333333,
+      "f1": 0.13793103448275862,
       "support": 60
     },
     "HOLD": {
-      "precision": 0.5257731958762887,
+      "precision": 0.51,
       "recall": 0.4722222222222222,
-      "f1": 0.4975609756097561,
+      "f1": 0.49038461538461536,
       "support": 108
     },
     "BUY": {
-      "precision": 0.3246753246753247,
-      "recall": 0.36764705882352944,
-      "f1": 0.3448275862068966,
+      "precision": 0.3,
+      "recall": 0.35294117647058826,
+      "f1": 0.32432432432432434,
       "support": 68
     }
   },
@@ -30,19 +30,19 @@
     "2": 376
   },
   "optuna": {
-    "best_value": 0.39550514155972744,
+    "best_value": 0.39984321143467566,
     "best_params": {
-      "n_estimators": 577,
-      "max_depth": 4,
-      "learning_rate": 0.1288429874000819,
-      "subsample": 0.7767519156352247,
-      "colsample_bytree": 0.6225097511644466,
-      "min_child_weight": 20,
-      "reg_lambda": 2.638477810202716,
-      "reg_alpha": 1.2273845325373722,
-      "gamma": 1.1275067723318
+      "n_estimators": 516,
+      "max_depth": 7,
+      "learning_rate": 0.24044156473465367,
+      "subsample": 0.77234005480844,
+      "colsample_bytree": 0.8546178827218496,
+      "min_child_weight": 17,
+      "reg_lambda": 13.669926548280824,
+      "reg_alpha": 1.2443501419840826,
+      "gamma": 0.9781791464495775
     },
-    "n_trials": 50,
+    "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
   }

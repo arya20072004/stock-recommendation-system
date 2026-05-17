@@ -1,23 +1,23 @@
 {
   "ticker": "BPCL.NS",
-  "f1_macro": 0.36522660418607183,
+  "f1_macro": 0.3552081066047547,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.3,
-      "recall": 0.10714285714285714,
-      "f1": 0.15789473684210525,
+      "precision": 0.23809523809523808,
+      "recall": 0.08928571428571429,
+      "f1": 0.12987012987012986,
       "support": 56
     },
     "HOLD": {
-      "precision": 0.44144144144144143,
-      "recall": 0.532608695652174,
-      "f1": 0.4827586206896552,
+      "precision": 0.44166666666666665,
+      "recall": 0.5760869565217391,
+      "f1": 0.5,
       "support": 92
     },
     "BUY": {
-      "precision": 0.4174757281553398,
-      "recall": 0.5,
-      "f1": 0.455026455026455,
+      "precision": 0.41935483870967744,
+      "recall": 0.45348837209302323,
+      "f1": 0.43575418994413406,
       "support": 86
     }
   },
@@ -30,19 +30,19 @@
     "2": 401
   },
   "optuna": {
-    "best_value": 0.3555600905104801,
+    "best_value": 0.32219970799818093,
     "best_params": {
-      "n_estimators": 291,
-      "max_depth": 3,
-      "learning_rate": 0.21454368660823606,
-      "subsample": 0.8371343963814987,
-      "colsample_bytree": 0.666688646836422,
+      "n_estimators": 401,
+      "max_depth": 7,
+      "learning_rate": 0.21145975084756374,
+      "subsample": 0.7872569536990526,
+      "colsample_bytree": 0.6532255812059586,
       "min_child_weight": 12,
-      "reg_lambda": 7.725015366929132,
-      "reg_alpha": 0.857744252004658,
-      "gamma": 3.4282696538591475
+      "reg_lambda": 2.596073375904492,
+      "reg_alpha": 1.0677547442002584,
+      "gamma": 3.5104983685581033
     },
-    "n_trials": 50,
+    "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
   }

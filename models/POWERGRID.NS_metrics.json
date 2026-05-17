@@ -1,23 +1,23 @@
 {
   "ticker": "POWERGRID.NS",
-  "f1_macro": 0.25555555555555554,
+  "f1_macro": 0.25805192178334724,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.15789473684210525,
-      "recall": 0.04225352112676056,
-      "f1": 0.06666666666666667,
+      "precision": 0.25,
+      "recall": 0.028169014084507043,
+      "f1": 0.05063291139240506,
       "support": 71
     },
     "HOLD": {
-      "precision": 0.5977011494252874,
-      "recall": 0.4297520661157025,
-      "f1": 0.5,
+      "precision": 0.5930232558139535,
+      "recall": 0.4214876033057851,
+      "f1": 0.4927536231884058,
       "support": 121
     },
     "BUY": {
-      "precision": 0.1328125,
-      "recall": 0.40476190476190477,
-      "f1": 0.2,
+      "precision": 0.15,
+      "recall": 0.5,
+      "f1": 0.23076923076923078,
       "support": 42
     }
   },
@@ -30,19 +30,19 @@
     "2": 411
   },
   "optuna": {
-    "best_value": 0.33911076460302186,
+    "best_value": 0.30348689766053966,
     "best_params": {
-      "n_estimators": 245,
-      "max_depth": 6,
-      "learning_rate": 0.1440219496601218,
-      "subsample": 0.6847356338126778,
-      "colsample_bytree": 0.7677144933622831,
-      "min_child_weight": 7,
-      "reg_lambda": 3.833833797932207,
-      "reg_alpha": 0.9552344483856827,
-      "gamma": 0.8127110614763305
+      "n_estimators": 562,
+      "max_depth": 4,
+      "learning_rate": 0.026599341673682313,
+      "subsample": 0.7066677824111209,
+      "colsample_bytree": 0.997288301012001,
+      "min_child_weight": 22,
+      "reg_lambda": 7.893134131541894,
+      "reg_alpha": 1.9165511959349368,
+      "gamma": 1.0437836524678357
     },
-    "n_trials": 50,
+    "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
   }
