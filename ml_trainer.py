@@ -219,7 +219,7 @@ def _prepare_sector_data(ticker, client):
     sector_return.name = "sector_return"
     return sector_return
 
-TREND_FOLLOWING_SECTORS = {"Auto", "Metals", "FMCG", "Pharma", "CementInfra"}
+TREND_FOLLOWING_SECTORS = {"Auto", "Metals", "FMCG", "CementInfra"}
 
 def create_dataset(ticker, client):
     """
@@ -473,10 +473,14 @@ def _optuna_objective(trial, X_train, y_train):
         # Build controlled SMOTE strategy for this fold
         label_counts  = y_fold_train.value_counts()
         majority_count = label_counts.max()
-        sampling_target = {
-            label: min(majority_count, max(count, int(majority_count * smote_minority_ratio)))
-            for label, count in label_counts.items()
-        }
+        sampling_target = {}
+        for label, count in label_counts.items():
+            if int(label) == 2:  # BUY — hard cap regardless of Optuna trial
+                floor = 0.35
+            else:                # SELL and HOLD — Optuna tunes this
+                floor = smote_minority_ratio
+            target = min(majority_count, max(count, int(majority_count * floor)))
+            sampling_target[label] = target
 
         try:
             fold_smote = SMOTE(
@@ -558,6 +562,14 @@ def train_model(df, ticker):
     if y_train.nunique() < 2:
         logger.warning("%s: training split has single class, skipping", ticker)
         return
+    
+    MIN_TRAIN_ROWS_FOR_CV = N_SPLITS * 30
+    if len(X_train) < MIN_TRAIN_ROWS_FOR_CV:
+        logger.warning(
+            "%s: training set too small for %d-fold CV (%d rows < %d required) — skipping",
+            ticker, N_SPLITS, len(X_train), MIN_TRAIN_ROWS_FOR_CV,
+        )
+        return
 
     try:
         study = optuna.create_study(direction="maximize")
@@ -586,10 +598,13 @@ def train_model(df, ticker):
     label_counts   = y_train.value_counts()
     majority_count = label_counts.max()
     minority_count  = label_counts.min()
+    SMOTE_FLOORS = {0: 0.50, 1: 0.50, 2: 0.35}
+
     sampling_target = {}
     for label, count in label_counts.items():
-        target = max(count, int(majority_count * 0.50))
-        target = min(target, majority_count)        # never exceed majority
+        floor = SMOTE_FLOORS.get(int(label), 0.50)
+        target = max(count, int(majority_count * floor))
+        target = min(target, majority_count)
         sampling_target[label] = target
 
     smote = SMOTE(
@@ -611,7 +626,19 @@ def train_model(df, ticker):
         n_jobs=-1,
         **best_params,
     )
-    best_model.fit(X_train_resampled, y_train_resampled)
+    resampled_counts = pd.Series(y_train_resampled).value_counts()
+    sell_count = resampled_counts.get(0, 1)
+    hold_count = resampled_counts.get(1, 1)
+    buy_count  = resampled_counts.get(2, 1)
+    sell_boost = min((hold_count + buy_count) / max(sell_count, 1), 3.0)
+
+    sample_weights = np.where(y_train_resampled == 0, sell_boost, 1.0)
+    logger.info(
+        "%s: SELL sample_weight boost = %.2f (sell=%d, hold=%d, buy=%d after SMOTE)",
+        ticker, sell_boost, sell_count, hold_count, buy_count,
+    )
+
+    best_model.fit(X_train_resampled, y_train_resampled, sample_weight=sample_weights)
 
     y_pred = best_model.predict(X_test)
     f1_macro = f1_score(y_test, y_pred, average="macro", zero_division=0)
