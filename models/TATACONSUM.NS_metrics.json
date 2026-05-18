@@ -1,23 +1,23 @@
 {
   "ticker": "TATACONSUM.NS",
-  "f1_macro": 0.30609671790343546,
+  "f1_macro": 0.33443994601889343,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.16666666666666666,
-      "recall": 0.35714285714285715,
-      "f1": 0.22727272727272727,
+      "precision": 0.2,
+      "recall": 0.5238095238095238,
+      "f1": 0.2894736842105263,
       "support": 42
     },
     "HOLD": {
-      "precision": 0.5688073394495413,
-      "recall": 0.5166666666666667,
-      "f1": 0.5414847161572053,
+      "precision": 0.6,
+      "recall": 0.525,
+      "f1": 0.56,
       "support": 120
     },
     "BUY": {
-      "precision": 0.22857142857142856,
-      "recall": 0.1111111111111111,
-      "f1": 0.14953271028037382,
+      "precision": 0.3684210526315789,
+      "recall": 0.09722222222222222,
+      "f1": 0.15384615384615385,
       "support": 72
     }
   },
@@ -29,18 +29,23 @@
     "1": 496,
     "2": 383
   },
+  "confidence_stats": {
+    "mean_max_proba": 0.46647804975509644,
+    "mean_top2_margin": 0.14057506620883942,
+    "f1_macro": 0.33443994601889343
+  },
   "optuna": {
-    "best_value": 0.3181997217836538,
+    "best_value": 0.3283646796032635,
     "best_params": {
-      "n_estimators": 364,
-      "max_depth": 7,
-      "learning_rate": 0.03642871520628174,
-      "subsample": 0.6545257777880629,
-      "colsample_bytree": 0.7545837269219806,
-      "min_child_weight": 10,
-      "reg_lambda": 6.74160284578821,
-      "reg_alpha": 2.0668565310467026,
-      "gamma": 2.2268119134134077
+      "n_estimators": 594,
+      "max_depth": 6,
+      "learning_rate": 0.2985138285948311,
+      "subsample": 0.9916135987272408,
+      "colsample_bytree": 0.630475613204085,
+      "min_child_weight": 19,
+      "reg_lambda": 6.736084813479199,
+      "reg_alpha": 1.5586177189228618,
+      "gamma": 2.3468656561513255
     },
     "n_trials": 75,
     "cv_splits": 5,

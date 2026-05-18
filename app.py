@@ -13,6 +13,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from xgboost import XGBClassifier
 from nifty50 import TICKERS
+from confidence import compute_confidence_tier, get_display_signal
 
 # --- SETUP ---
 load_dotenv()
@@ -128,21 +129,31 @@ def get_latest_prediction(ticker):
     
     # Use predict_proba for confidence score
     proba = model.predict_proba(latest_features)[0]
-    confidence = float(max(proba))
-    predicted_class_idx = proba.argmax()
-    
-    # Map prediction to class name
-    recommendation_map = {0: 'SELL', 1: 'HOLD', 2: 'BUY'}
-    recommendation = recommendation_map.get(predicted_class_idx, 'HOLD')
-    
-    # If confidence is low, mark as UNCERTAIN
-    if confidence < 0.60:
-        recommendation = 'UNCERTAIN'
-    
+    predicted_class = ["SELL", "HOLD", "BUY"][int(proba.argmax())]
+
+    max_proba   = float(proba.max())
+    sorted_p    = sorted(proba, reverse=True)
+    top2_margin = float(sorted_p[0] - sorted_p[1])
+
+    confidence = compute_confidence_tier(
+        ticker=ticker,
+        max_proba=max_proba,
+        top2_margin=top2_margin,
+    )
+    display_signal = get_display_signal(predicted_class, confidence)
+
     return {
-        'recommendation': recommendation,
-        'confidence': round(confidence * 100, 1),
-        'predicted_at': datetime.now().strftime('%d %b %Y, %I:%M %p')
+        "recommendation":  display_signal,
+        "raw_prediction":  predicted_class,
+        "confidence_tier": confidence["tier"],
+        "confidence":      round(max_proba * 100, 1),
+        "probabilities": {
+            "SELL": round(float(proba[0]), 4),
+            "HOLD": round(float(proba[1]), 4),
+            "BUY":  round(float(proba[2]), 4),
+        },
+        "confidence_detail": confidence,
+        "predicted_at": datetime.now().strftime("%d %b %Y, %I:%M %p"),
     }
 
 # --- API Endpoints ---

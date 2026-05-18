@@ -1,23 +1,23 @@
 {
   "ticker": "TCS.NS",
-  "f1_macro": 0.37284454024986674,
+  "f1_macro": 0.29710670255708743,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.32075471698113206,
-      "recall": 0.2361111111111111,
-      "f1": 0.272,
+      "precision": 0.2653061224489796,
+      "recall": 0.18055555555555555,
+      "f1": 0.21487603305785125,
       "support": 72
     },
     "HOLD": {
-      "precision": 0.4067796610169492,
-      "recall": 0.27586206896551724,
-      "f1": 0.3287671232876712,
+      "precision": 0.2549019607843137,
+      "recall": 0.14942528735632185,
+      "f1": 0.18840579710144928,
       "support": 87
     },
     "BUY": {
-      "precision": 0.4180327868852459,
+      "precision": 0.3805970149253731,
       "recall": 0.68,
-      "f1": 0.5177664974619289,
+      "f1": 0.4880382775119617,
       "support": 75
     }
   },
@@ -29,18 +29,23 @@
     "1": 368,
     "2": 427
   },
+  "confidence_stats": {
+    "mean_max_proba": 0.6034818291664124,
+    "mean_top2_margin": 0.3300960958003998,
+    "f1_macro": 0.29710670255708743
+  },
   "optuna": {
-    "best_value": 0.3562438820707802,
+    "best_value": 0.36560703207278694,
     "best_params": {
-      "n_estimators": 165,
-      "max_depth": 4,
-      "learning_rate": 0.11883331249026334,
-      "subsample": 0.6408729171732341,
-      "colsample_bytree": 0.8576684313966834,
-      "min_child_weight": 11,
-      "reg_lambda": 11.345195252544265,
-      "reg_alpha": 0.9314152458997693,
-      "gamma": 0.64162980584814
+      "n_estimators": 628,
+      "max_depth": 7,
+      "learning_rate": 0.0584742697519774,
+      "subsample": 0.8770268405275717,
+      "colsample_bytree": 0.9927783910348559,
+      "min_child_weight": 21,
+      "reg_lambda": 7.599194716350836,
+      "reg_alpha": 0.7097790445782044,
+      "gamma": 0.7550266273555715
     },
     "n_trials": 75,
     "cv_splits": 5,

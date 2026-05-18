@@ -1,46 +1,51 @@
 {
   "ticker": "JIOFIN.NS",
-  "f1_macro": 0.259409200968523,
+  "f1_macro": 0.2280370369145167,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.15384615384615385,
-      "recall": 0.03508771929824561,
-      "f1": 0.05714285714285714,
-      "support": 57
+      "precision": 0.13333333333333333,
+      "recall": 0.034482758620689655,
+      "f1": 0.0547945205479452,
+      "support": 58
     },
     "HOLD": {
-      "precision": 0.33766233766233766,
-      "recall": 0.5416666666666666,
-      "f1": 0.416,
+      "precision": 0.32075471698113206,
+      "recall": 0.3541666666666667,
+      "f1": 0.33663366336633666,
       "support": 48
     },
     "BUY": {
-      "precision": 0.24324324324324326,
-      "recall": 0.4090909090909091,
-      "f1": 0.3050847457627119,
+      "precision": 0.2,
+      "recall": 0.5454545454545454,
+      "f1": 0.2926829268292683,
       "support": 22
     }
   },
   "train_size": 508,
-  "test_size": 127,
-  "total_rows_after_features": 635,
+  "test_size": 128,
+  "total_rows_after_features": 636,
   "label_distribution": {
-    "0": 192,
+    "0": 193,
     "1": 240,
     "2": 203
   },
+  "confidence_stats": {
+    "mean_max_proba": 0.5787407755851746,
+    "mean_top2_margin": 0.28416210412979126,
+    "f1_macro": 0.2280370369145167
+  },
   "optuna": {
-    "best_value": 0.23201782795327516,
+    "best_value": 0.23987248338346834,
     "best_params": {
-      "n_estimators": 305,
-      "max_depth": 6,
-      "learning_rate": 0.16452365879573239,
-      "subsample": 0.9472181531859826,
-      "colsample_bytree": 0.8136511916587328,
-      "min_child_weight": 20,
-      "reg_lambda": 13.170912376290927,
-      "reg_alpha": 1.2531190915874406,
-      "gamma": 0.8447050100438168
+      "n_estimators": 692,
+      "max_depth": 3,
+      "learning_rate": 0.19795783061806754,
+      "subsample": 0.8974921173134408,
+      "colsample_bytree": 0.9729949213602855,
+      "min_child_weight": 17,
+      "reg_lambda": 6.5671667327532735,
+      "reg_alpha": 0.9136402438926374,
+      "gamma": 0.5131739738366681
     },
     "n_trials": 75,
     "cv_splits": 5,

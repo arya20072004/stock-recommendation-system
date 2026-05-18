@@ -1,23 +1,23 @@
 {
   "ticker": "TECHM.NS",
-  "f1_macro": 0.2249259617768551,
+  "f1_macro": 0.2676662541874352,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.24539877300613497,
+      "precision": 0.2564102564102564,
       "recall": 0.8163265306122449,
-      "f1": 0.37735849056603776,
+      "f1": 0.3902439024390244,
       "support": 49
     },
     "HOLD": {
-      "precision": 0.3076923076923077,
-      "recall": 0.2564102564102564,
-      "f1": 0.27972027972027974,
+      "precision": 0.40540540540540543,
+      "recall": 0.38461538461538464,
+      "f1": 0.39473684210526316,
       "support": 78
     },
     "BUY": {
-      "precision": 0.16666666666666666,
+      "precision": 0.25,
       "recall": 0.009345794392523364,
-      "f1": 0.017699115044247787,
+      "f1": 0.018018018018018018,
       "support": 107
     }
   },
@@ -29,18 +29,23 @@
     "1": 418,
     "2": 441
   },
+  "confidence_stats": {
+    "mean_max_proba": 0.484937459230423,
+    "mean_top2_margin": 0.1841815859079361,
+    "f1_macro": 0.2676662541874352
+  },
   "optuna": {
-    "best_value": 0.3062748449034838,
+    "best_value": 0.32226209009943946,
     "best_params": {
-      "n_estimators": 538,
-      "max_depth": 6,
-      "learning_rate": 0.07988030691294101,
-      "subsample": 0.9629476567132852,
-      "colsample_bytree": 0.8467928490134137,
-      "min_child_weight": 5,
-      "reg_lambda": 6.810048999131567,
-      "reg_alpha": 1.0881880620623983,
-      "gamma": 4.774090569225117
+      "n_estimators": 692,
+      "max_depth": 7,
+      "learning_rate": 0.25295816327381726,
+      "subsample": 0.7543710295474377,
+      "colsample_bytree": 0.8975951831665379,
+      "min_child_weight": 6,
+      "reg_lambda": 4.178833041801565,
+      "reg_alpha": 1.006341788572682,
+      "gamma": 4.812392128968348
     },
     "n_trials": 75,
     "cv_splits": 5,

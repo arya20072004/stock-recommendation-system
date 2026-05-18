@@ -1,23 +1,23 @@
 {
   "ticker": "MARUTI.NS",
-  "f1_macro": 0.24522927295332475,
+  "f1_macro": 0.26864657624603205,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.125,
-      "recall": 0.20930232558139536,
-      "f1": 0.1565217391304348,
+      "precision": 0.16822429906542055,
+      "recall": 0.4186046511627907,
+      "f1": 0.24,
       "support": 43
     },
     "HOLD": {
-      "precision": 0.3262411347517731,
-      "recall": 0.5227272727272727,
-      "f1": 0.4017467248908297,
+      "precision": 0.34951456310679613,
+      "recall": 0.4090909090909091,
+      "f1": 0.3769633507853403,
       "support": 88
     },
     "BUY": {
-      "precision": 0.5238095238095238,
-      "recall": 0.10679611650485436,
-      "f1": 0.1774193548387097,
+      "precision": 0.5,
+      "recall": 0.11650485436893204,
+      "f1": 0.1889763779527559,
       "support": 103
     }
   },
@@ -29,18 +29,23 @@
     "1": 487,
     "2": 406
   },
+  "confidence_stats": {
+    "mean_max_proba": 0.6064841747283936,
+    "mean_top2_margin": 0.3268643319606781,
+    "f1_macro": 0.26864657624603205
+  },
   "optuna": {
-    "best_value": 0.3944754224228145,
+    "best_value": 0.40162036567130616,
     "best_params": {
-      "n_estimators": 192,
-      "max_depth": 6,
-      "learning_rate": 0.20831953210495524,
-      "subsample": 0.9392231994807487,
-      "colsample_bytree": 0.8603583672450479,
-      "min_child_weight": 20,
-      "reg_lambda": 12.51534078573545,
-      "reg_alpha": 2.0689455087726376,
-      "gamma": 1.3198210127278602
+      "n_estimators": 366,
+      "max_depth": 3,
+      "learning_rate": 0.1762450462283917,
+      "subsample": 0.8669907437801739,
+      "colsample_bytree": 0.7413844568689751,
+      "min_child_weight": 24,
+      "reg_lambda": 2.8268779659008305,
+      "reg_alpha": 1.1952374683332,
+      "gamma": 1.1245294830070678
     },
     "n_trials": 75,
     "cv_splits": 5,

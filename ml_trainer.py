@@ -76,7 +76,7 @@ SECTOR_MAP = {
     "HEROMOTOCO.NS": "Auto",
     "EICHERMOT.NS":  "Auto",
     "M&M.NS":        "Auto",
-    "TMPV.NS": "Auto",
+    "TMPV.NS":       "Auto",
     
     # FMCG
     "HINDUNILVR.NS": "FMCG",
@@ -118,6 +118,24 @@ SECTOR_MAP = {
     "ASIANPAINT.NS": "ConsumerDiscretionary",
     "INDIGO.NS":     "ConsumerDiscretionary",
     "ETERNAL.NS":    "ConsumerDiscretionary"
+}
+
+# Add near the top of ml_trainer.py, after SECTOR_MAP definition
+SECTOR_INDEX_NAME_MAP = {
+    "IT":                    "InformationTechnology",
+    "Banking":               "FinancialServices",
+    "FinancialServices":     "FinancialServices",
+    "Pharma":                "Healthcare",
+    "Auto":                  "AutomobileAndAutoComponents",
+    "FMCG":                  "FastMovingConsumerGoods",
+    "OilGas":                "OilGasAndConsumableFuels",
+    "Metals":                "MetalsAndMining",
+    "CementInfra":           "ConstructionMaterials",
+    "PowerUtilities":        "Power",
+    "Telecom":               "Telecommunication",
+    "Conglomerate":          "Diversified",
+    "ConsumerDiscretionary": "ConsumerServices",
+    "Agrochem":              "Chemicals",
 }
 
 def _prepare_nifty_data(start_date, end_date):
@@ -170,34 +188,83 @@ SECTOR_MIN_PEERS = 4  # if fewer valid peers, disable sector momentum
 
 def _prepare_sector_data(ticker, client):
     """
-    Computes daily sector average return for the ticker's sector,
-    excluding the ticker itself to avoid self-contamination.
-    Returns empty Series if fewer than SECTOR_MIN_PEERS peers have data.
+    Fetches pre-built sector index from sector_indices collection,
+    then subtracts this ticker's own contribution for self-exclusion.
+    Falls back to Nifty 50 peer loop if sector_indices is unavailable.
     """
     sector = SECTOR_MAP.get(ticker)
     if sector is None:
         return pd.Series(dtype=float, name="sector_return")
 
+    db = client["stock_market_db"]
+    cutoff_date = datetime.now(timezone.utc) - timedelta(days=365 * HISTORY_YEARS + 10)
+
+    index_sector_name = SECTOR_INDEX_NAME_MAP.get(sector, sector)
+
+    # Then use index_sector_name in the find() query:
+    index_docs = list(db.sector_indices.find(
+        {"sector": index_sector_name, "date": {"$gte": cutoff_date}},
+        {"date": 1, "return": 1, "peer_count": 1, "_id": 0}
+    ))
+
+    if len(index_docs) >= 50:
+        index_df = pd.DataFrame(index_docs)
+        index_df["date"] = pd.to_datetime(index_df["date"]).dt.tz_localize(None)
+        index_df.set_index("date", inplace=True)
+        index_df.sort_index(inplace=True)
+        sector_index = index_df["return"].rename("sector_return")
+        peer_count   = int(index_df["peer_count"].iloc[-1])
+
+        # Self-exclusion: subtract this ticker's weighted contribution
+        # sector_index = (N * sector_avg + ticker_return) / N
+        # => sector_excl = (N * sector_avg - ticker_return) / (N - 1)
+        ticker_docs = list(db.historical_data.find(
+            {"ticker": ticker, "date": {"$gte": cutoff_date}},
+            {"date": 1, "close": 1, "_id": 0}
+        ))
+        if ticker_docs and peer_count > 1:
+            t_df = pd.DataFrame(ticker_docs)
+            t_df["date"] = pd.to_datetime(t_df["date"]).dt.tz_localize(None)
+            t_df.set_index("date", inplace=True)
+            t_df.sort_index(inplace=True)
+            t_df["close"] = pd.to_numeric(t_df["close"], errors="coerce")
+            ticker_return = t_df["close"].pct_change().rename("ticker_return")
+
+            aligned = sector_index.to_frame().join(ticker_return, how="left")
+            aligned["ticker_return"] = aligned["ticker_return"].fillna(0.0)
+            sector_excl = (
+                (peer_count * aligned["sector_return"] - aligned["ticker_return"])
+                / (peer_count - 1)
+            )
+            sector_excl.name = "sector_return"
+            logger.debug(
+                "%s: sector '%s' index loaded (%d peers, self-excluded)",
+                ticker, sector, peer_count - 1,
+            )
+            return sector_excl
+
+        logger.debug("%s: sector '%s' index loaded (%d peers, no self-exclusion)", ticker, sector, peer_count)
+        return sector_index
+
+    # --- Fallback: original Nifty 50 peer loop ---
+    logger.info(
+        "%s: sector_indices unavailable for '%s' — falling back to Nifty 50 peer loop",
+        ticker, sector,
+    )
     sector_peers = [t for t, s in SECTOR_MAP.items() if s == sector and t != ticker]
     if len(sector_peers) < SECTOR_MIN_PEERS:
         logger.info(
-            "%s: sector '%s' has only %d peers after self-exclusion "
-            "(min=%d) — sector momentum disabled",
+            "%s: sector '%s' has only %d peers after self-exclusion (min=%d) — sector momentum disabled",
             ticker, sector, len(sector_peers), SECTOR_MIN_PEERS,
         )
         return pd.Series(dtype=float, name="sector_return")
 
-    db = client["stock_market_db"]
-    cutoff_date = datetime.now(timezone.utc) - timedelta(days=365 * HISTORY_YEARS + 10)
-
     peer_returns = []
     for peer in sector_peers:
-        peer_df = pd.DataFrame(
-            list(db.historical_data.find(
-                {"ticker": peer, "date": {"$gte": cutoff_date}},
-                {"date": 1, "close": 1, "_id": 0}
-            ))
-        )
+        peer_df = pd.DataFrame(list(db.historical_data.find(
+            {"ticker": peer, "date": {"$gte": cutoff_date}},
+            {"date": 1, "close": 1, "_id": 0}
+        )))
         if peer_df.empty:
             continue
         peer_df["date"] = pd.to_datetime(peer_df["date"]).dt.tz_localize(None)
@@ -206,7 +273,6 @@ def _prepare_sector_data(ticker, client):
         peer_df["close"] = pd.to_numeric(peer_df["close"], errors="coerce")
         peer_returns.append(peer_df["close"].pct_change().rename(peer))
 
-    # Check again after actually fetching — some peers may have returned empty
     if len(peer_returns) < SECTOR_MIN_PEERS:
         logger.info(
             "%s: only %d peers had data in MongoDB (min=%d) — sector momentum disabled",
@@ -475,11 +541,7 @@ def _optuna_objective(trial, X_train, y_train):
         majority_count = label_counts.max()
         sampling_target = {}
         for label, count in label_counts.items():
-            if int(label) == 2:  # BUY — hard cap regardless of Optuna trial
-                floor = 0.35
-            else:                # SELL and HOLD — Optuna tunes this
-                floor = smote_minority_ratio
-            target = min(majority_count, max(count, int(majority_count * floor)))
+            target = min(majority_count, max(count, int(majority_count * smote_minority_ratio)))
             sampling_target[label] = target
 
         try:
@@ -598,7 +660,7 @@ def train_model(df, ticker):
     label_counts   = y_train.value_counts()
     majority_count = label_counts.max()
     minority_count  = label_counts.min()
-    SMOTE_FLOORS = {0: 0.50, 1: 0.50, 2: 0.35}
+    SMOTE_FLOORS = {0: 0.50, 1: 0.50, 2: 0.50}
 
     sampling_target = {}
     for label, count in label_counts.items():
@@ -682,6 +744,11 @@ def train_model(df, ticker):
     with open(features_filename, "w", encoding="utf-8") as feat_file:
         json.dump(features, feat_file)
 
+    y_proba = best_model.predict_proba(X_test)
+    max_probas = y_proba.max(axis=1)
+    sorted_probas = np.sort(y_proba, axis=1)[:, ::-1]
+    top2_margins = sorted_probas[:, 0] - sorted_probas[:, 1]
+
     metrics_payload = {
         "ticker": ticker,
         "f1_macro": float(f1_macro),
@@ -690,6 +757,12 @@ def train_model(df, ticker):
         "test_size": int(len(X_test)),
         "total_rows_after_features": int(len(df)),
         "label_distribution": label_distribution,
+        "confidence_stats": {
+            # Used by app.py to compute per-stock tier thresholds
+            "mean_max_proba": float(np.mean(max_probas)),
+            "mean_top2_margin": float(np.mean(top2_margins)),
+            "f1_macro": float(f1_macro),       # redundant but explicit for tier lookup
+        },
         "optuna": {
             "best_value": float(study.best_value),
             "best_params": best_params,

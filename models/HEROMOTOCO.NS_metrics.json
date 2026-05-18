@@ -1,23 +1,23 @@
 {
   "ticker": "HEROMOTOCO.NS",
-  "f1_macro": 0.36427797531348194,
+  "f1_macro": 0.39107152674693496,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.23300970873786409,
-      "recall": 0.47058823529411764,
-      "f1": 0.3116883116883117,
+      "precision": 0.2777777777777778,
+      "recall": 0.49019607843137253,
+      "f1": 0.3546099290780142,
       "support": 51
     },
     "HOLD": {
-      "precision": 0.4772727272727273,
-      "recall": 0.47191011235955055,
-      "f1": 0.4745762711864407,
+      "precision": 0.4696969696969697,
+      "recall": 0.34831460674157305,
+      "f1": 0.4,
       "support": 89
     },
     "BUY": {
-      "precision": 0.4883720930232558,
-      "recall": 0.22340425531914893,
-      "f1": 0.30656934306569344,
+      "precision": 0.46153846153846156,
+      "recall": 0.3829787234042553,
+      "f1": 0.4186046511627907,
       "support": 94
     }
   },
@@ -29,18 +29,23 @@
     "1": 419,
     "2": 415
   },
+  "confidence_stats": {
+    "mean_max_proba": 0.5432863235473633,
+    "mean_top2_margin": 0.2615383565425873,
+    "f1_macro": 0.39107152674693496
+  },
   "optuna": {
-    "best_value": 0.2958487995696071,
+    "best_value": 0.3244459471664459,
     "best_params": {
-      "n_estimators": 552,
-      "max_depth": 3,
-      "learning_rate": 0.011315791138078396,
-      "subsample": 0.8681950286649561,
-      "colsample_bytree": 0.6672078717396096,
-      "min_child_weight": 7,
-      "reg_lambda": 2.1866243256045435,
-      "reg_alpha": 3.2012369251094768,
-      "gamma": 1.297096770615417
+      "n_estimators": 380,
+      "max_depth": 7,
+      "learning_rate": 0.19424434022574721,
+      "subsample": 0.9968298356639425,
+      "colsample_bytree": 0.676728457600239,
+      "min_child_weight": 9,
+      "reg_lambda": 9.422046732632865,
+      "reg_alpha": 1.7356682459290338,
+      "gamma": 0.6028985544246102
     },
     "n_trials": 75,
     "cv_splits": 5,

@@ -1,23 +1,23 @@
 {
   "ticker": "JSWSTEEL.NS",
-  "f1_macro": 0.2979425820507415,
+  "f1_macro": 0.29070010449320793,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.14414414414414414,
+      "precision": 0.16326530612244897,
       "recall": 0.38095238095238093,
-      "f1": 0.20915032679738563,
+      "f1": 0.22857142857142856,
       "support": 42
     },
     "HOLD": {
-      "precision": 0.46153846153846156,
-      "recall": 0.23300970873786409,
-      "f1": 0.3096774193548387,
+      "precision": 0.4225352112676056,
+      "recall": 0.2912621359223301,
+      "f1": 0.3448275862068966,
       "support": 103
     },
     "BUY": {
-      "precision": 0.4225352112676056,
-      "recall": 0.33707865168539325,
-      "f1": 0.375,
+      "precision": 0.35384615384615387,
+      "recall": 0.25842696629213485,
+      "f1": 0.2987012987012987,
       "support": 89
     }
   },
@@ -29,18 +29,23 @@
     "1": 492,
     "2": 407
   },
+  "confidence_stats": {
+    "mean_max_proba": 0.5475767254829407,
+    "mean_top2_margin": 0.2568272054195404,
+    "f1_macro": 0.29070010449320793
+  },
   "optuna": {
-    "best_value": 0.3865440574831414,
+    "best_value": 0.3722064559639086,
     "best_params": {
-      "n_estimators": 607,
-      "max_depth": 4,
-      "learning_rate": 0.14151353055345373,
-      "subsample": 0.7749009583430679,
-      "colsample_bytree": 0.7349320789109532,
-      "min_child_weight": 13,
-      "reg_lambda": 6.273228167532234,
-      "reg_alpha": 1.0875124529324651,
-      "gamma": 1.683233333163561
+      "n_estimators": 104,
+      "max_depth": 3,
+      "learning_rate": 0.24180315843313524,
+      "subsample": 0.8583501099387681,
+      "colsample_bytree": 0.7177126514458162,
+      "min_child_weight": 10,
+      "reg_lambda": 7.1405340056548585,
+      "reg_alpha": 0.6400193995604538,
+      "gamma": 2.174419105440281
     },
     "n_trials": 75,
     "cv_splits": 5,

@@ -1,23 +1,23 @@
 {
   "ticker": "BAJFINANCE.NS",
-  "f1_macro": 0.35124841722063943,
+  "f1_macro": 0.34329134592191674,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.34615384615384615,
-      "recall": 0.6923076923076923,
-      "f1": 0.46153846153846156,
+      "precision": 0.3412698412698413,
+      "recall": 0.6615384615384615,
+      "f1": 0.450261780104712,
       "support": 65
     },
     "HOLD": {
-      "precision": 0.4891304347826087,
-      "recall": 0.45,
-      "f1": 0.46875,
+      "precision": 0.49473684210526314,
+      "recall": 0.47,
+      "f1": 0.48205128205128206,
       "support": 100
     },
     "BUY": {
-      "precision": 0.4166666666666667,
-      "recall": 0.07246376811594203,
-      "f1": 0.12345679012345678,
+      "precision": 0.3076923076923077,
+      "recall": 0.057971014492753624,
+      "f1": 0.0975609756097561,
       "support": 69
     }
   },
@@ -29,18 +29,23 @@
     "1": 410,
     "2": 406
   },
+  "confidence_stats": {
+    "mean_max_proba": 0.5342144966125488,
+    "mean_top2_margin": 0.24544961750507355,
+    "f1_macro": 0.34329134592191674
+  },
   "optuna": {
-    "best_value": 0.4243980488101406,
+    "best_value": 0.41259146579477657,
     "best_params": {
-      "n_estimators": 593,
-      "max_depth": 7,
-      "learning_rate": 0.03881642423720552,
-      "subsample": 0.9095756696076095,
-      "colsample_bytree": 0.9451290893816559,
-      "min_child_weight": 6,
-      "reg_lambda": 13.893919258837656,
-      "reg_alpha": 4.004661267982732,
-      "gamma": 1.0439390142550957
+      "n_estimators": 237,
+      "max_depth": 5,
+      "learning_rate": 0.05692006002732439,
+      "subsample": 0.9986327277898013,
+      "colsample_bytree": 0.7894191344242915,
+      "min_child_weight": 9,
+      "reg_lambda": 2.797580357344852,
+      "reg_alpha": 1.6518978154151478,
+      "gamma": 1.7480879056768268
     },
     "n_trials": 75,
     "cv_splits": 5,

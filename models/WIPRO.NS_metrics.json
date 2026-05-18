@@ -1,23 +1,23 @@
 {
   "ticker": "WIPRO.NS",
-  "f1_macro": 0.3146975546975547,
+  "f1_macro": 0.3389780154486037,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2441860465116279,
-      "recall": 0.328125,
-      "f1": 0.28,
+      "precision": 0.29411764705882354,
+      "recall": 0.3125,
+      "f1": 0.30303030303030304,
       "support": 64
     },
     "HOLD": {
-      "precision": 0.475,
-      "recall": 0.20430107526881722,
-      "f1": 0.2857142857142857,
+      "precision": 0.46153846153846156,
+      "recall": 0.1935483870967742,
+      "f1": 0.2727272727272727,
       "support": 93
     },
     "BUY": {
-      "precision": 0.32407407407407407,
-      "recall": 0.45454545454545453,
-      "f1": 0.3783783783783784,
+      "precision": 0.3543307086614173,
+      "recall": 0.5844155844155844,
+      "f1": 0.4411764705882353,
       "support": 77
     }
   },
@@ -29,18 +29,23 @@
     "1": 381,
     "2": 418
   },
+  "confidence_stats": {
+    "mean_max_proba": 0.5546048283576965,
+    "mean_top2_margin": 0.28315502405166626,
+    "f1_macro": 0.3389780154486037
+  },
   "optuna": {
-    "best_value": 0.3441294080068589,
+    "best_value": 0.3367710797061031,
     "best_params": {
-      "n_estimators": 204,
-      "max_depth": 3,
-      "learning_rate": 0.21016616417937595,
-      "subsample": 0.8244035127659537,
-      "colsample_bytree": 0.8725207962517025,
-      "min_child_weight": 25,
-      "reg_lambda": 10.903415138294,
-      "reg_alpha": 3.983967790939232,
-      "gamma": 4.7994738795171665
+      "n_estimators": 618,
+      "max_depth": 7,
+      "learning_rate": 0.06798396248172102,
+      "subsample": 0.7963086477351903,
+      "colsample_bytree": 0.7861725231510001,
+      "min_child_weight": 7,
+      "reg_lambda": 8.240669897777932,
+      "reg_alpha": 2.6185905609601012,
+      "gamma": 1.0493602593225118
     },
     "n_trials": 75,
     "cv_splits": 5,
