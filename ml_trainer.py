@@ -630,15 +630,22 @@ def train_model(df, ticker):
     sell_count = resampled_counts.get(0, 1)
     hold_count = resampled_counts.get(1, 1)
     buy_count  = resampled_counts.get(2, 1)
-    sell_boost = min((hold_count + buy_count) / max(sell_count, 1), 3.0)
+    raw_boost = (hold_count + buy_count) / max(sell_count, 1)
+    sell_boost = min(raw_boost, 1.5)
+    hold_boost = 1.2 if sell_boost > 1.2 else 1.0
 
-    sample_weights = np.where(y_train_resampled == 0, sell_boost, 1.0)
-    logger.info(
-        "%s: SELL sample_weight boost = %.2f (sell=%d, hold=%d, buy=%d after SMOTE)",
-        ticker, sell_boost, sell_count, hold_count, buy_count,
+    sw = np.where(
+        y_train_resampled == 0, sell_boost,
+        np.where(y_train_resampled == 1, hold_boost, 1.0)
     )
 
-    best_model.fit(X_train_resampled, y_train_resampled, sample_weight=sample_weights)
+    logger.info(
+        "%s: SELL sample_weight boost = %.2f | HOLD boost = %.2f "
+        "(sell=%d, hold=%d, buy=%d after SMOTE)",
+        ticker, sell_boost, hold_boost, sell_count, hold_count, buy_count,
+    )
+
+    best_model.fit(X_train_resampled, y_train_resampled, sample_weight=sw)
 
     y_pred = best_model.predict(X_test)
     f1_macro = f1_score(y_test, y_pred, average="macro", zero_division=0)
