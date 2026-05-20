@@ -145,6 +145,10 @@ SECTOR_INDEX_NAME_MAP = {
     "ConsumerServices": "ConsumerServices",
 }
 
+TICKER_HISTORY_OVERRIDE = {
+    "MARUTI.NS": 3,  # confirmed concept drift across 15 runs
+}
+
 def _prepare_nifty_data(start_date, end_date):
     nifty_df = yf.download(
         "^NSEI",
@@ -202,9 +206,13 @@ def _prepare_sector_data(ticker, client):
     sector = SECTOR_MAP.get(ticker)
     if sector is None:
         return pd.Series(dtype=float, name="sector_return")
+    
+    EVENT_DRIVEN_SECTORS_NO_INDEX = {"Healthcare", "InformationTechnology"}
+    if sector in EVENT_DRIVEN_SECTORS_NO_INDEX:
+        return pd.Series(dtype=float, name="sector_return")
 
     db = client["stock_market_db"]
-    cutoff_date = datetime.utcnow() - timedelta(days=365 * HISTORY_YEARS + 10)
+    cutoff_date = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=365 * HISTORY_YEARS + 10)
 
     index_sector_name = SECTOR_INDEX_NAME_MAP.get(sector, sector)
 
@@ -305,7 +313,8 @@ def create_dataset(ticker, client):
     Pulls 5 years of data from MongoDB and engineers leakage-safe features.
     """
     db = client["stock_market_db"]
-    cutoff_date = datetime.utcnow() - timedelta(days=365 * HISTORY_YEARS + 10)
+    history_years = TICKER_HISTORY_OVERRIDE.get(ticker, HISTORY_YEARS)
+    cutoff_date = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=365 * history_years + 10)
 
     prices_df = pd.DataFrame(
         list(db.historical_data.find({"ticker": ticker, "date": {"$gte": cutoff_date}}))
