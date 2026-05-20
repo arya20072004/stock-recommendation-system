@@ -19,7 +19,8 @@ from dotenv import load_dotenv
 from pymongo import MongoClient, UpdateOne
 
 load_dotenv()
-MONGO_URI   = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+uri = os.getenv("MONGO_URI")
+MONGO_URI   = os.getenv("MONGO_URI", uri)
 HISTORY_YEARS = 5
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
@@ -120,7 +121,6 @@ NIFTY500_SECTOR_MAP: dict[str, list[str]] = {
         "SUPREMEIND.NS",
         "SUZLON.NS",
         "SYRMA.NS",
-        "TATAMOTORS.NS",
         "TEGA.NS",
         "THERMAX.NS",
         "TIMKEN.NS",
@@ -230,9 +230,6 @@ NIFTY500_SECTOR_MAP: dict[str, list[str]] = {
         "JUBLFOOD.NS",
         "THELEELA.NS",
         "LEMONTREE.NS",
-        "LENSKART.NS",
-        "MEESHO.NS",
-        "PHYSICSWALLAH.NS",
         "SAPPHIRE.NS",
         "SWIGGY.NS",
         "TBOTEK.NS",
@@ -289,7 +286,7 @@ NIFTY500_SECTOR_MAP: dict[str, list[str]] = {
         "ANGELONE.NS",
         "APTUS.NS",
         "AIIL.NS",
-        "AXISBANK.EQ",
+        "AXISBANK.NS",
         "BSE.NS",
         "BAJFINANCE.NS",
         "BAJAJFINSV.NS",
@@ -473,8 +470,6 @@ NIFTY500_SECTOR_MAP: dict[str, list[str]] = {
 
     "MetalsAndMining": [
         "ADANIENT.NS",
-        "DUMMYVEDL1.NS",
-        "DUMMYVEDL4.NS",
         "GRAVITA.NS",
         "GMDCLTD.NS",
         "HINDALCO.NS",
@@ -501,7 +496,6 @@ NIFTY500_SECTOR_MAP: dict[str, list[str]] = {
         "CASTROLIND.NS",
         "CHENNPETRO.NS",
         "COALINDIA.NS",
-        "DUMMYVEDL3.NS",
         "GAIL.NS",
         "HINDPETRO.NS",
         "IOC.NS",
@@ -514,13 +508,12 @@ NIFTY500_SECTOR_MAP: dict[str, list[str]] = {
         "RELIANCE.NS"
     ],
 
-    "Power": [
+    "PowerUtilities": [
         "ACMESOLAR.NS",
         "ADANIENSOL.NS",
         "ADANIGREEN.NS",
         "ADANIPOWER.NS",
         "CESC.NS",
-        "DUMMYVEDL2.NS",
         "JSWENERGY.NS",
         "JPPOWER.NS",
         "NHPC.NS",
@@ -589,8 +582,11 @@ NIFTY500_SECTOR_MAP: dict[str, list[str]] = {
 
 def build_sector_indices(client: MongoClient) -> None:
     db = client["stock_market_db"]
-    start_date = (datetime.now() - timedelta(days=365 * HISTORY_YEARS + 30)).strftime("%Y-%m-%d")
-    end_date   = datetime.now().strftime("%Y-%m-%d")
+    start_date = (
+        datetime.now(timezone.utc)
+        - timedelta(days=365 * HISTORY_YEARS + 30)
+    ).strftime("%Y-%m-%d")
+    end_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
     for sector, tickers in NIFTY500_SECTOR_MAP.items():
         logger.info("Building sector index for: %s (%d tickers)", sector, len(tickers))
@@ -617,8 +613,17 @@ def build_sector_indices(client: MongoClient) -> None:
             logger.warning("%s: insufficient peers (%d), skipping", sector, len(peer_returns))
             continue
 
+        valid_peer_count = len(peer_returns)
+
+        if valid_peer_count < 5:
+            logger.warning(
+                "%s: only %d valid peers after download filtering",
+                sector,
+                valid_peer_count,
+            )
+            continue
         # Equal-weighted sector return — self-exclusion handled at query time in ml_trainer
-        sector_df    = pd.concat(peer_returns.values(), axis=1)
+        sector_df    = pd.concat(peer_returns.values(), axis=1, sort=False)
         sector_index = sector_df.mean(axis=1).dropna()
         sector_index.index = pd.to_datetime(sector_index.index).tz_localize(None)
 

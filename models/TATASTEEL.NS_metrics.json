@@ -1,51 +1,51 @@
 {
   "ticker": "TATASTEEL.NS",
-  "f1_macro": 0.31911803827676327,
+  "f1_macro": 0.313599100354675,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.23484848484848486,
-      "recall": 0.8157894736842105,
-      "f1": 0.36470588235294116,
-      "support": 38
+      "precision": 0.23134328358208955,
+      "recall": 0.8378378378378378,
+      "f1": 0.36257309941520466,
+      "support": 37
     },
     "HOLD": {
-      "precision": 0.4418604651162791,
-      "recall": 0.40860215053763443,
-      "f1": 0.4245810055865922,
+      "precision": 0.4125,
+      "recall": 0.3548387096774194,
+      "f1": 0.3815028901734104,
       "support": 93
     },
     "BUY": {
-      "precision": 0.625,
-      "recall": 0.0970873786407767,
-      "f1": 0.16806722689075632,
+      "precision": 0.631578947368421,
+      "recall": 0.11650485436893204,
+      "f1": 0.19672131147540983,
       "support": 103
     }
   },
-  "train_size": 932,
-  "test_size": 234,
-  "total_rows_after_features": 1166,
+  "train_size": 931,
+  "test_size": 233,
+  "total_rows_after_features": 1164,
   "label_distribution": {
     "0": 300,
     "1": 429,
-    "2": 437
+    "2": 435
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6722585558891296,
-    "mean_top2_margin": 0.4484109580516815,
-    "f1_macro": 0.31911803827676327
+    "mean_max_proba": 0.5876179337501526,
+    "mean_top2_margin": 0.31820350885391235,
+    "f1_macro": 0.313599100354675
   },
   "optuna": {
-    "best_value": 0.35321038018843326,
+    "best_value": 0.3621482180559892,
     "best_params": {
-      "n_estimators": 346,
-      "max_depth": 3,
-      "learning_rate": 0.07239902955730376,
-      "subsample": 0.826462675462711,
-      "colsample_bytree": 0.9593550459200495,
-      "min_child_weight": 16,
-      "reg_lambda": 2.7989680214887533,
-      "reg_alpha": 3.3836680856353514,
-      "gamma": 0.6821209959715665
+      "n_estimators": 521,
+      "max_depth": 6,
+      "learning_rate": 0.011642300034640408,
+      "subsample": 0.7893296559387102,
+      "colsample_bytree": 0.7777162901942078,
+      "min_child_weight": 21,
+      "reg_lambda": 5.54942882981383,
+      "reg_alpha": 2.2676365734516546,
+      "gamma": 0.879058933404779
     },
     "n_trials": 75,
     "cv_splits": 5,

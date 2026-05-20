@@ -21,6 +21,7 @@ from sklearn.metrics import (
 from sklearn.model_selection import TimeSeriesSplit
 from xgboost import XGBClassifier
 
+
 # --- SETUP ---
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
@@ -41,101 +42,107 @@ optuna.logging.set_verbosity(optuna.logging.WARNING)
 
 # --- SECTOR MAPPING (Nifty 50) ---
 SECTOR_MAP = {
-    # IT
-    "INFY.NS":       "IT",
-    "TCS.NS":        "IT",
-    "HCLTECH.NS":    "IT",
-    "WIPRO.NS":      "IT",
-    "TECHM.NS":      "IT",
-    
-    # Banking
-    "HDFCBANK.NS":   "Banking",
-    "ICICIBANK.NS":  "Banking",
-    "KOTAKBANK.NS":  "Banking",
-    "AXISBANK.NS":   "Banking",
-    "SBIN.NS":       "Banking",
-    
-    # Financial Services
-    "BAJFINANCE.NS":  "FinancialServices",
-    "BAJAJFINSV.NS":  "FinancialServices",
-    "HDFCLIFE.NS":    "FinancialServices",
-    "SBILIFE.NS":     "FinancialServices",
-    "SHRIRAMFIN.NS":  "FinancialServices",
-    "JIOFIN.NS":      "FinancialServices",
-    
-    # Pharma & Healthcare
-    "SUNPHARMA.NS":  "Pharma",
-    "DRREDDY.NS":    "Pharma",
-    "CIPLA.NS":      "Pharma",
-    "APOLLOHOSP.NS": "Pharma",
-    "MAXHEALTH.NS":  "Pharma",
-    
-    # Auto
-    "MARUTI.NS":     "Auto",
-    "BAJAJ-AUTO.NS": "Auto",
-    "HEROMOTOCO.NS": "Auto",
-    "EICHERMOT.NS":  "Auto",
-    "M&M.NS":        "Auto",
-    "TMPV.NS":       "Auto",
-    
-    # FMCG
-    "HINDUNILVR.NS": "FMCG",
-    "ITC.NS":        "FMCG",
-    "NESTLEIND.NS":  "FMCG",
-    "BRITANNIA.NS":  "FMCG",
-    "TATACONSUM.NS": "FMCG",
-    
-    # Oil, Gas & Energy
-    "RELIANCE.NS":   "OilGas",
-    "ONGC.NS":       "OilGas",
-    
+
+    # Information Technology
+    "INFY.NS":       "InformationTechnology",
+    "TCS.NS":        "InformationTechnology",
+    "HCLTECH.NS":    "InformationTechnology",
+    "WIPRO.NS":      "InformationTechnology",
+    "TECHM.NS":      "InformationTechnology",
+
+    # Banking / Financial Services
+    "HDFCBANK.NS":   "FinancialServices",
+    "ICICIBANK.NS":  "FinancialServices",
+    "KOTAKBANK.NS":  "FinancialServices",
+    "AXISBANK.NS":   "FinancialServices",
+    "SBIN.NS":       "FinancialServices",
+
+    # NBFC / Insurance / Financials
+    "BAJFINANCE.NS": "FinancialServices",
+    "BAJAJFINSV.NS": "FinancialServices",
+    "HDFCLIFE.NS":   "FinancialServices",
+    "SBILIFE.NS":    "FinancialServices",
+    "SHRIRAMFIN.NS": "FinancialServices",
+    "JIOFIN.NS":     "FinancialServices",
+
+    # Healthcare
+    "SUNPHARMA.NS":  "Healthcare",
+    "DRREDDY.NS":    "Healthcare",
+    "CIPLA.NS":      "Healthcare",
+    "APOLLOHOSP.NS": "Healthcare",
+    "MAXHEALTH.NS":  "Healthcare",
+
+    # Automobile & Auto Components
+    "MARUTI.NS":     "AutomobileAndAutoComponents",
+    "BAJAJ-AUTO.NS": "AutomobileAndAutoComponents",
+    "HEROMOTOCO.NS": "AutomobileAndAutoComponents",
+    "EICHERMOT.NS":  "AutomobileAndAutoComponents",
+    "M&M.NS":        "AutomobileAndAutoComponents",
+    "TMPV.NS":       "AutomobileAndAutoComponents",
+
+    # Fast Moving Consumer Goods
+    "HINDUNILVR.NS": "FastMovingConsumerGoods",
+    "ITC.NS":        "FastMovingConsumerGoods",
+    "NESTLEIND.NS":  "FastMovingConsumerGoods",
+    "BRITANNIA.NS":  "FastMovingConsumerGoods",
+    "TATACONSUM.NS": "FastMovingConsumerGoods",
+
+    # Oil Gas & Consumable Fuels
+    "RELIANCE.NS":   "OilGasAndConsumableFuels",
+    "ONGC.NS":       "OilGasAndConsumableFuels",
+
     # Metals & Mining
-    "TATASTEEL.NS":  "Metals",
-    "JSWSTEEL.NS":   "Metals",
-    "HINDALCO.NS":   "Metals",
-    
-    # Cement & Infra
-    "ULTRACEMCO.NS": "CementInfra",
-    "GRASIM.NS":     "CementInfra",
-    "LT.NS":         "CementInfra",
-    
-    # Power & Utilities
+    "TATASTEEL.NS":  "MetalsAndMining",
+    "JSWSTEEL.NS":   "MetalsAndMining",
+    "HINDALCO.NS":   "MetalsAndMining",
+
+    # Construction Materials / Infra
+    "ULTRACEMCO.NS": "ConstructionMaterials",
+    "GRASIM.NS":     "ConstructionMaterials",
+    "LT.NS":         "Construction",
+
+    # Power Utilities
     "NTPC.NS":       "PowerUtilities",
     "POWERGRID.NS":  "PowerUtilities",
-    "COALINDIA.NS":  "PowerUtilities",
-    "BEL.NS":        "PowerUtilities",  # Often grouped under Capital Goods / Defence, mapped here to match core clusters
-    
+    "COALINDIA.NS":  "OilGasAndConsumableFuels",
+    "BEL.NS":        "CapitalGoods",
+
     # Telecom
-    "BHARTIARTL.NS": "Telecom",
-    
-    # Conglomerate
-    "ADANIENT.NS":   "Conglomerate",
-    "ADANIPORTS.NS": "Conglomerate",
-    
-    # Consumer Discretionary, Retail & Services
-    "TITAN.NS":      "ConsumerDiscretionary",
-    "TRENT.NS":      "ConsumerDiscretionary",
-    "ASIANPAINT.NS": "ConsumerDiscretionary",
-    "INDIGO.NS":     "ConsumerDiscretionary",
-    "ETERNAL.NS":    "ConsumerDiscretionary"
+    "BHARTIARTL.NS": "Telecommunication",
+
+    # Services / Logistics
+    "ADANIPORTS.NS": "Services",
+
+    # Metals / Resources Proxy
+    "ADANIENT.NS":   "MetalsAndMining",
+
+    # Consumer Durables / Retail / Services
+    "TITAN.NS":      "ConsumerDurables",
+    "TRENT.NS":      "ConsumerServices",
+    "ASIANPAINT.NS": "ConsumerDurables",
+    "INDIGO.NS":     "Services",
+    "ETERNAL.NS":    "ConsumerServices",
 }
 
 # Add near the top of ml_trainer.py, after SECTOR_MAP definition
 SECTOR_INDEX_NAME_MAP = {
-    "IT":                    "InformationTechnology",
-    "Banking":               "FinancialServices",
-    "FinancialServices":     "FinancialServices",
-    "Pharma":                "Healthcare",
-    "Auto":                  "AutomobileAndAutoComponents",
-    "FMCG":                  "FastMovingConsumerGoods",
-    "OilGas":                "OilGasAndConsumableFuels",
-    "Metals":                "MetalsAndMining",
-    "CementInfra":           "ConstructionMaterials",
-    "PowerUtilities":        "Power",
-    "Telecom":               "Telecommunication",
-    "Conglomerate":          "Diversified",
-    "ConsumerDiscretionary": "ConsumerServices",
-    "Agrochem":              "Chemicals",
+    "IT":           "InformationTechnology",
+    "OilGas":       "OilGasAndConsumableFuels",
+    "Auto":         "AutomobileAndAutoComponents",
+    "Metals":       "MetalsAndMining",
+    "Banking":      "FinancialServices",
+    "Pharma":       "Healthcare",
+    "PowerUtilities": "PowerUtilities",
+    "Telecom":      "Telecommunication",
+    "FMCG":         "FastMovingConsumerGoods",
+    "CementInfra":  "ConstructionMaterials",
+    "Realty":       "Realty",          # already long-form
+    "CapitalGoods": "CapitalGoods",    # already long-form
+    "MediaEnt":     "MediaEntertainmentAndPublication",
+    "Construction": "Construction",
+    "Services": "Services",
+    "Diversified": "Diversified",
+    "ConsumerServices": "ConsumerServices",
 }
 
 def _prepare_nifty_data(start_date, end_date):
@@ -197,9 +204,15 @@ def _prepare_sector_data(ticker, client):
         return pd.Series(dtype=float, name="sector_return")
 
     db = client["stock_market_db"]
-    cutoff_date = datetime.now(timezone.utc) - timedelta(days=365 * HISTORY_YEARS + 10)
+    cutoff_date = datetime.utcnow() - timedelta(days=365 * HISTORY_YEARS + 10)
 
     index_sector_name = SECTOR_INDEX_NAME_MAP.get(sector, sector)
+
+    index_docs = list(db.sector_indices.find(
+        {"sector": index_sector_name, "date": {"$gte": cutoff_date}},
+        {"date": 1, "return": 1, "peer_count": 1, "_id": 0}
+    ))
+    logger.info("%s: sector index query '%s' returned %d docs", ticker, index_sector_name, len(index_docs))
 
     # Then use index_sector_name in the find() query:
     index_docs = list(db.sector_indices.find(
@@ -237,13 +250,13 @@ def _prepare_sector_data(ticker, client):
                 / (peer_count - 1)
             )
             sector_excl.name = "sector_return"
-            logger.debug(
+            logger.info(
                 "%s: sector '%s' index loaded (%d peers, self-excluded)",
                 ticker, sector, peer_count - 1,
             )
             return sector_excl
 
-        logger.debug("%s: sector '%s' index loaded (%d peers, no self-exclusion)", ticker, sector, peer_count)
+        logger.info("%s: sector '%s' index loaded (%d peers, no self-exclusion)", ticker, sector, peer_count)
         return sector_index
 
     # --- Fallback: original Nifty 50 peer loop ---
@@ -292,7 +305,7 @@ def create_dataset(ticker, client):
     Pulls 5 years of data from MongoDB and engineers leakage-safe features.
     """
     db = client["stock_market_db"]
-    cutoff_date = datetime.now(timezone.utc) - timedelta(days=365 * HISTORY_YEARS + 10)
+    cutoff_date = datetime.utcnow() - timedelta(days=365 * HISTORY_YEARS + 10)
 
     prices_df = pd.DataFrame(
         list(db.historical_data.find({"ticker": ticker, "date": {"$gte": cutoff_date}}))
