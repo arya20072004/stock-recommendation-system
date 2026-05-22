@@ -1,54 +1,59 @@
 {
   "ticker": "HINDALCO.NS",
-  "f1_macro": 0.3003919035314384,
+  "f1_macro": 0.24971961171056192,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.15,
-      "recall": 0.6,
-      "f1": 0.24,
+      "precision": 0.041666666666666664,
+      "recall": 0.1,
+      "f1": 0.058823529411764705,
       "support": 30
     },
     "HOLD": {
-      "precision": 0.390625,
-      "recall": 0.3125,
-      "f1": 0.3472222222222222,
+      "precision": 0.3146067415730337,
+      "recall": 0.35,
+      "f1": 0.33136094674556216,
       "support": 80
     },
     "BUY": {
-      "precision": 0.5510204081632653,
-      "recall": 0.21951219512195122,
-      "f1": 0.313953488372093,
+      "precision": 0.4861111111111111,
+      "recall": 0.2845528455284553,
+      "f1": 0.358974358974359,
       "support": 123
     }
   },
-  "train_size": 931,
+  "train_size": 930,
   "test_size": 233,
-  "total_rows_after_features": 1164,
+  "total_rows_after_features": 1163,
   "label_distribution": {
     "0": 287,
     "1": 390,
-    "2": 487
+    "2": 486
   },
   "confidence_stats": {
-    "mean_max_proba": 0.4580359160900116,
-    "mean_top2_margin": 0.14804624021053314,
-    "f1_macro": 0.3003919035314384
+    "mean_max_proba": 0.5854589939117432,
+    "mean_top2_margin": 0.31787216663360596,
+    "f1_macro": 0.24971961171056192
   },
   "optuna": {
-    "best_value": 0.37906442890347636,
+    "best_value": 0.38370671674831075,
     "best_params": {
-      "n_estimators": 394,
-      "max_depth": 4,
-      "learning_rate": 0.021716773299884046,
-      "subsample": 0.6086404234422556,
-      "colsample_bytree": 0.6364376054039358,
-      "min_child_weight": 7,
-      "reg_lambda": 3.5946657380606526,
-      "reg_alpha": 3.147579780425735,
-      "gamma": 2.849063657365722
+      "n_estimators": 122,
+      "max_depth": 5,
+      "learning_rate": 0.234633665768842,
+      "subsample": 0.6005397214228464,
+      "colsample_bytree": 0.648395720739291,
+      "min_child_weight": 8,
+      "reg_lambda": 3.031417744331544,
+      "reg_alpha": 2.3603967312705976,
+      "gamma": 0.8389941526855849
     },
     "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
+  },
+  "smote_floors_used": {
+    "0": 0.5,
+    "1": 0.5,
+    "2": 0.5
   }
 }

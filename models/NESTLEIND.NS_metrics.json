@@ -1,54 +1,59 @@
 {
   "ticker": "NESTLEIND.NS",
-  "f1_macro": 0.25450754458161867,
+  "f1_macro": 0.24465094228677267,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.3055555555555556,
-      "recall": 0.41509433962264153,
-      "f1": 0.352,
-      "support": 53
+      "precision": 0.2795031055900621,
+      "recall": 0.7142857142857143,
+      "f1": 0.4017857142857143,
+      "support": 63
     },
     "HOLD": {
-      "precision": 0.32051282051282054,
-      "recall": 0.5747126436781609,
-      "f1": 0.411522633744856,
-      "support": 87
+      "precision": 0.2857142857142857,
+      "recall": 0.2727272727272727,
+      "f1": 0.27906976744186046,
+      "support": 66
     },
     "BUY": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
-      "support": 93
+      "precision": 0.3333333333333333,
+      "recall": 0.028846153846153848,
+      "f1": 0.05309734513274336,
+      "support": 104
     }
   },
-  "train_size": 931,
+  "train_size": 930,
   "test_size": 233,
-  "total_rows_after_features": 1164,
+  "total_rows_after_features": 1163,
   "label_distribution": {
-    "0": 280,
-    "1": 501,
-    "2": 383
+    "0": 324,
+    "1": 402,
+    "2": 437
   },
   "confidence_stats": {
-    "mean_max_proba": 0.49574288725852966,
-    "mean_top2_margin": 0.14472226798534393,
-    "f1_macro": 0.25450754458161867
+    "mean_max_proba": 0.4556516706943512,
+    "mean_top2_margin": 0.11878854036331177,
+    "f1_macro": 0.24465094228677267
   },
   "optuna": {
-    "best_value": 0.32413313753693107,
+    "best_value": 0.31505703878124397,
     "best_params": {
-      "n_estimators": 546,
+      "n_estimators": 467,
       "max_depth": 3,
-      "learning_rate": 0.028806820929502697,
-      "subsample": 0.9215886065800638,
-      "colsample_bytree": 0.8092059982583797,
-      "min_child_weight": 21,
-      "reg_lambda": 4.721086230956722,
-      "reg_alpha": 0.5399299431756281,
-      "gamma": 2.1809708103683008
+      "learning_rate": 0.026040250193372565,
+      "subsample": 0.7903706494529498,
+      "colsample_bytree": 0.8376031045138399,
+      "min_child_weight": 8,
+      "reg_lambda": 5.269988343286904,
+      "reg_alpha": 1.4133508312846763,
+      "gamma": 2.7184826612023985
     },
     "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
+  },
+  "smote_floors_used": {
+    "0": 0.5,
+    "1": 0.5,
+    "2": 0.65
   }
 }

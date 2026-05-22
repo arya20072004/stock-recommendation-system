@@ -1,54 +1,59 @@
 {
   "ticker": "MARUTI.NS",
-  "f1_macro": 0.27765431689276593,
+  "f1_macro": 0.2715060302016824,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.3,
-      "recall": 0.2727272727272727,
-      "f1": 0.2857142857142857,
+      "precision": 0.23636363636363636,
+      "recall": 0.3939393939393939,
+      "f1": 0.29545454545454547,
       "support": 33
     },
     "HOLD": {
-      "precision": 0.35,
-      "recall": 0.7608695652173914,
-      "f1": 0.4794520547945205,
+      "precision": 0.30434782608695654,
+      "recall": 0.45652173913043476,
+      "f1": 0.3652173913043478,
       "support": 46
     },
     "BUY": {
       "precision": 0.5,
-      "recall": 0.03636363636363636,
-      "f1": 0.06779661016949153,
+      "recall": 0.09090909090909091,
+      "f1": 0.15384615384615385,
       "support": 55
     }
   },
-  "train_size": 534,
+  "train_size": 533,
   "test_size": 134,
-  "total_rows_after_features": 668,
+  "total_rows_after_features": 667,
   "label_distribution": {
-    "0": 154,
+    "0": 153,
     "1": 284,
     "2": 230
   },
   "confidence_stats": {
-    "mean_max_proba": 0.4563072621822357,
-    "mean_top2_margin": 0.12239829450845718,
-    "f1_macro": 0.27765431689276593
+    "mean_max_proba": 0.5747140645980835,
+    "mean_top2_margin": 0.2660176753997803,
+    "f1_macro": 0.2715060302016824
   },
   "optuna": {
-    "best_value": 0.334318341947865,
+    "best_value": 0.32214246411958236,
     "best_params": {
-      "n_estimators": 128,
-      "max_depth": 3,
-      "learning_rate": 0.026602431275660338,
-      "subsample": 0.7425884099000029,
-      "colsample_bytree": 0.6321518691483758,
-      "min_child_weight": 21,
-      "reg_lambda": 13.438310013199711,
-      "reg_alpha": 2.1755238314760867,
-      "gamma": 0.5279422198286486
+      "n_estimators": 173,
+      "max_depth": 6,
+      "learning_rate": 0.29787632018509014,
+      "subsample": 0.8011708795729843,
+      "colsample_bytree": 0.8384109868500282,
+      "min_child_weight": 14,
+      "reg_lambda": 6.156980999108768,
+      "reg_alpha": 0.7788515008377669,
+      "gamma": 1.0970327503172654
     },
     "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
+  },
+  "smote_floors_used": {
+    "0": 0.5,
+    "1": 0.5,
+    "2": 0.5
   }
 }

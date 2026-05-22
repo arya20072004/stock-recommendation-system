@@ -1,54 +1,59 @@
 {
   "ticker": "COALINDIA.NS",
-  "f1_macro": 0.30965182658285567,
+  "f1_macro": 0.33943430952385034,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2345679012345679,
-      "recall": 0.34545454545454546,
-      "f1": 0.27941176470588236,
+      "precision": 0.25,
+      "recall": 0.2545454545454545,
+      "f1": 0.25225225225225223,
       "support": 55
     },
     "HOLD": {
-      "precision": 0.328125,
-      "recall": 0.22340425531914893,
-      "f1": 0.26582278481012656,
+      "precision": 0.4125,
+      "recall": 0.35106382978723405,
+      "f1": 0.3793103448275862,
       "support": 94
     },
     "BUY": {
-      "precision": 0.375,
-      "recall": 0.39285714285714285,
-      "f1": 0.38372093023255816,
+      "precision": 0.36082474226804123,
+      "recall": 0.4166666666666667,
+      "f1": 0.3867403314917127,
       "support": 84
     }
   },
-  "train_size": 931,
+  "train_size": 930,
   "test_size": 233,
-  "total_rows_after_features": 1164,
+  "total_rows_after_features": 1163,
   "label_distribution": {
     "0": 285,
-    "1": 420,
+    "1": 419,
     "2": 459
   },
   "confidence_stats": {
-    "mean_max_proba": 0.453532874584198,
-    "mean_top2_margin": 0.12830622494220734,
-    "f1_macro": 0.30965182658285567
+    "mean_max_proba": 0.4434067904949188,
+    "mean_top2_margin": 0.10582899302244186,
+    "f1_macro": 0.33943430952385034
   },
   "optuna": {
-    "best_value": 0.25132998950208574,
+    "best_value": 0.25690211191558643,
     "best_params": {
-      "n_estimators": 203,
-      "max_depth": 7,
-      "learning_rate": 0.03299445553248174,
-      "subsample": 0.9234389165405206,
-      "colsample_bytree": 0.9962372915533759,
-      "min_child_weight": 6,
-      "reg_lambda": 4.815770457099992,
-      "reg_alpha": 1.7913932116599143,
-      "gamma": 1.7604884380305768
+      "n_estimators": 214,
+      "max_depth": 5,
+      "learning_rate": 0.010102293833100413,
+      "subsample": 0.9978346886681804,
+      "colsample_bytree": 0.9845222326317827,
+      "min_child_weight": 4,
+      "reg_lambda": 6.59043182465834,
+      "reg_alpha": 2.217611090021932,
+      "gamma": 0.19405576443767103
     },
     "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
+  },
+  "smote_floors_used": {
+    "0": 0.5,
+    "1": 0.5,
+    "2": 0.5
   }
 }

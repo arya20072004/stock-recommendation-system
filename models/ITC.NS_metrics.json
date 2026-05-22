@@ -1,54 +1,59 @@
 {
   "ticker": "ITC.NS",
-  "f1_macro": 0.25383679729229464,
+  "f1_macro": 0.2552734926215589,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2903225806451613,
-      "recall": 0.11392405063291139,
-      "f1": 0.16363636363636364,
+      "precision": 0.22580645161290322,
+      "recall": 0.08860759493670886,
+      "f1": 0.12727272727272726,
       "support": 79
     },
     "HOLD": {
-      "precision": 0.45614035087719296,
-      "recall": 0.24074074074074073,
-      "f1": 0.3151515151515151,
+      "precision": 0.4657534246575342,
+      "recall": 0.3148148148148148,
+      "f1": 0.3756906077348066,
       "support": 108
     },
     "BUY": {
-      "precision": 0.18620689655172415,
-      "recall": 0.5869565217391305,
-      "f1": 0.28272251308900526,
+      "precision": 0.17829457364341086,
+      "recall": 0.5,
+      "f1": 0.26285714285714284,
       "support": 46
     }
   },
-  "train_size": 931,
+  "train_size": 930,
   "test_size": 233,
-  "total_rows_after_features": 1164,
+  "total_rows_after_features": 1163,
   "label_distribution": {
     "0": 265,
-    "1": 496,
+    "1": 495,
     "2": 403
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6577708721160889,
-    "mean_top2_margin": 0.4061981439590454,
-    "f1_macro": 0.25383679729229464
+    "mean_max_proba": 0.6305502653121948,
+    "mean_top2_margin": 0.3601461350917816,
+    "f1_macro": 0.2552734926215589
   },
   "optuna": {
-    "best_value": 0.36714236230768627,
+    "best_value": 0.36442980190816393,
     "best_params": {
-      "n_estimators": 169,
-      "max_depth": 5,
-      "learning_rate": 0.29924884589048584,
-      "subsample": 0.6878859560540909,
-      "colsample_bytree": 0.8390145721224517,
-      "min_child_weight": 7,
-      "reg_lambda": 2.6351718652271594,
-      "reg_alpha": 0.9726815426839768,
-      "gamma": 0.8349195000225047
+      "n_estimators": 345,
+      "max_depth": 7,
+      "learning_rate": 0.09838926905725637,
+      "subsample": 0.9600096453410603,
+      "colsample_bytree": 0.8769743363994045,
+      "min_child_weight": 5,
+      "reg_lambda": 4.0736469406743305,
+      "reg_alpha": 0.9727558077201908,
+      "gamma": 0.19207235565787747
     },
     "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
+  },
+  "smote_floors_used": {
+    "0": 0.5,
+    "1": 0.5,
+    "2": 0.5
   }
 }

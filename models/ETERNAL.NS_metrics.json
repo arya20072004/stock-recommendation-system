@@ -1,23 +1,23 @@
 {
   "ticker": "ETERNAL.NS",
-  "f1_macro": 0.28188775510204084,
+  "f1_macro": 0.2512438974934881,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.18823529411764706,
-      "recall": 0.25806451612903225,
-      "f1": 0.21768707482993196,
+      "precision": 0.15,
+      "recall": 0.1935483870967742,
+      "f1": 0.16901408450704225,
       "support": 62
     },
     "HOLD": {
-      "precision": 0.3111111111111111,
-      "recall": 0.13725490196078433,
-      "f1": 0.19047619047619047,
+      "precision": 0.2631578947368421,
+      "recall": 0.09803921568627451,
+      "f1": 0.14285714285714285,
       "support": 102
     },
     "BUY": {
-      "precision": 0.36082474226804123,
-      "recall": 0.5555555555555556,
-      "f1": 0.4375,
+      "precision": 0.3486238532110092,
+      "recall": 0.6031746031746031,
+      "f1": 0.4418604651162791,
       "support": 63
     }
   },
@@ -30,25 +30,30 @@
     "2": 393
   },
   "confidence_stats": {
-    "mean_max_proba": 0.48943233489990234,
-    "mean_top2_margin": 0.16460475325584412,
-    "f1_macro": 0.28188775510204084
+    "mean_max_proba": 0.4777349531650543,
+    "mean_top2_margin": 0.1565065085887909,
+    "f1_macro": 0.2512438974934881
   },
   "optuna": {
-    "best_value": 0.34549584061512123,
+    "best_value": 0.34704133418369576,
     "best_params": {
-      "n_estimators": 652,
+      "n_estimators": 610,
       "max_depth": 5,
-      "learning_rate": 0.011548621794088167,
-      "subsample": 0.6361394469013268,
-      "colsample_bytree": 0.8102821799553928,
-      "min_child_weight": 25,
-      "reg_lambda": 6.794918515387014,
-      "reg_alpha": 2.9125250155498463,
-      "gamma": 0.6458782061510637
+      "learning_rate": 0.025372019309471187,
+      "subsample": 0.6753413773040512,
+      "colsample_bytree": 0.6628536432341001,
+      "min_child_weight": 13,
+      "reg_lambda": 14.997780956692548,
+      "reg_alpha": 2.66850692666467,
+      "gamma": 2.130486802697804
     },
     "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
+  },
+  "smote_floors_used": {
+    "0": 0.5,
+    "1": 0.5,
+    "2": 0.5
   }
 }

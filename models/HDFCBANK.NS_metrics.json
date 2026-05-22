@@ -1,54 +1,59 @@
 {
   "ticker": "HDFCBANK.NS",
-  "f1_macro": 0.22983414509421307,
+  "f1_macro": 0.2657229974608824,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.23076923076923078,
-      "recall": 0.582089552238806,
-      "f1": 0.3305084745762712,
+      "precision": 0.26627218934911245,
+      "recall": 0.6716417910447762,
+      "f1": 0.3813559322033898,
       "support": 67
     },
     "HOLD": {
-      "precision": 0.2962962962962963,
-      "recall": 0.08,
-      "f1": 0.12598425196850394,
+      "precision": 0.35714285714285715,
+      "recall": 0.15,
+      "f1": 0.2112676056338028,
       "support": 100
     },
     "BUY": {
-      "precision": 0.32432432432432434,
-      "recall": 0.18181818181818182,
-      "f1": 0.23300970873786409,
+      "precision": 0.4090909090909091,
+      "recall": 0.13636363636363635,
+      "f1": 0.20454545454545456,
       "support": 66
     }
   },
-  "train_size": 931,
+  "train_size": 930,
   "test_size": 233,
-  "total_rows_after_features": 1164,
+  "total_rows_after_features": 1163,
   "label_distribution": {
     "0": 336,
-    "1": 414,
+    "1": 413,
     "2": 414
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5376449227333069,
-    "mean_top2_margin": 0.25063276290893555,
-    "f1_macro": 0.22983414509421307
+    "mean_max_proba": 0.6180683374404907,
+    "mean_top2_margin": 0.35699552297592163,
+    "f1_macro": 0.2657229974608824
   },
   "optuna": {
-    "best_value": 0.3559986216255342,
+    "best_value": 0.37800591293351327,
     "best_params": {
-      "n_estimators": 351,
+      "n_estimators": 455,
       "max_depth": 7,
-      "learning_rate": 0.2491444781487484,
-      "subsample": 0.6029627363262352,
-      "colsample_bytree": 0.7408506346816921,
-      "min_child_weight": 18,
-      "reg_lambda": 2.701220133156616,
-      "reg_alpha": 2.284053966390152,
-      "gamma": 2.6555339362552988
+      "learning_rate": 0.2999150274987611,
+      "subsample": 0.6936690328340473,
+      "colsample_bytree": 0.6476472131727211,
+      "min_child_weight": 12,
+      "reg_lambda": 6.787117324871282,
+      "reg_alpha": 1.025162882396545,
+      "gamma": 1.2430997954293597
     },
     "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
+  },
+  "smote_floors_used": {
+    "0": 0.5,
+    "1": 0.5,
+    "2": 0.5
   }
 }

@@ -1,23 +1,23 @@
 {
   "ticker": "MAXHEALTH.NS",
-  "f1_macro": 0.3715444014883789,
+  "f1_macro": 0.34881205440282925,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.4,
-      "recall": 0.28205128205128205,
-      "f1": 0.3308270676691729,
+      "precision": 0.3448275862068966,
+      "recall": 0.2564102564102564,
+      "f1": 0.29411764705882354,
       "support": 78
     },
     "HOLD": {
-      "precision": 0.47580645161290325,
-      "recall": 0.5784313725490197,
-      "f1": 0.5221238938053098,
+      "precision": 0.4636363636363636,
+      "recall": 0.5,
+      "f1": 0.4811320754716981,
       "support": 102
     },
     "BUY": {
-      "precision": 0.25925925925925924,
-      "recall": 0.2641509433962264,
-      "f1": 0.2616822429906542,
+      "precision": 0.24615384615384617,
+      "recall": 0.3018867924528302,
+      "f1": 0.2711864406779661,
       "support": 53
     }
   },
@@ -30,25 +30,30 @@
     "2": 374
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5003042221069336,
-    "mean_top2_margin": 0.16171318292617798,
-    "f1_macro": 0.3715444014883789
+    "mean_max_proba": 0.5332072973251343,
+    "mean_top2_margin": 0.2098170965909958,
+    "f1_macro": 0.34881205440282925
   },
   "optuna": {
-    "best_value": 0.3693465343765799,
+    "best_value": 0.3715064729393523,
     "best_params": {
-      "n_estimators": 647,
-      "max_depth": 5,
-      "learning_rate": 0.018881965833836015,
-      "subsample": 0.8829555918053329,
-      "colsample_bytree": 0.8967291135123957,
-      "min_child_weight": 25,
-      "reg_lambda": 4.7585721167531645,
-      "reg_alpha": 2.543217492814379,
-      "gamma": 1.3718822859551982
+      "n_estimators": 510,
+      "max_depth": 3,
+      "learning_rate": 0.2643436573137735,
+      "subsample": 0.6034859094657663,
+      "colsample_bytree": 0.9568482355485101,
+      "min_child_weight": 15,
+      "reg_lambda": 8.490360709806973,
+      "reg_alpha": 2.8117933008941374,
+      "gamma": 1.6044890933782887
     },
     "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
+  },
+  "smote_floors_used": {
+    "0": 0.5,
+    "1": 0.5,
+    "2": 0.5
   }
 }

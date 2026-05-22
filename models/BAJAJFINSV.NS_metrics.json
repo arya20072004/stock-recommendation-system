@@ -1,54 +1,59 @@
 {
   "ticker": "BAJAJFINSV.NS",
-  "f1_macro": 0.2592153914115695,
+  "f1_macro": 0.2828282828282829,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2937853107344633,
-      "recall": 0.7536231884057971,
-      "f1": 0.42276422764227645,
+      "precision": 0.2839506172839506,
+      "recall": 0.6666666666666666,
+      "f1": 0.39826839826839827,
       "support": 69
     },
     "HOLD": {
-      "precision": 0.5111111111111111,
+      "precision": 0.45098039215686275,
       "recall": 0.20175438596491227,
-      "f1": 0.2893081761006289,
+      "f1": 0.2787878787878788,
       "support": 114
     },
     "BUY": {
-      "precision": 0.18181818181818182,
-      "recall": 0.04,
-      "f1": 0.06557377049180328,
+      "precision": 0.3,
+      "recall": 0.12,
+      "f1": 0.17142857142857143,
       "support": 50
     }
   },
-  "train_size": 931,
+  "train_size": 930,
   "test_size": 233,
-  "total_rows_after_features": 1164,
+  "total_rows_after_features": 1163,
   "label_distribution": {
     "0": 348,
     "1": 412,
-    "2": 404
+    "2": 403
   },
   "confidence_stats": {
-    "mean_max_proba": 0.48581817746162415,
-    "mean_top2_margin": 0.18874818086624146,
-    "f1_macro": 0.2592153914115695
+    "mean_max_proba": 0.5173053741455078,
+    "mean_top2_margin": 0.22665303945541382,
+    "f1_macro": 0.2828282828282829
   },
   "optuna": {
-    "best_value": 0.33476236373787227,
+    "best_value": 0.3269137331650934,
     "best_params": {
-      "n_estimators": 521,
-      "max_depth": 3,
-      "learning_rate": 0.021112497984844335,
-      "subsample": 0.9720026630890793,
-      "colsample_bytree": 0.9288440125845906,
-      "min_child_weight": 16,
-      "reg_lambda": 5.580200450062538,
-      "reg_alpha": 1.8116512498942106,
-      "gamma": 1.5972044895281028
+      "n_estimators": 462,
+      "max_depth": 7,
+      "learning_rate": 0.21564376177931946,
+      "subsample": 0.9599560590773553,
+      "colsample_bytree": 0.8561084971470344,
+      "min_child_weight": 7,
+      "reg_lambda": 4.3193172168582326,
+      "reg_alpha": 2.0155674179759258,
+      "gamma": 1.3206303235452777
     },
     "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
+  },
+  "smote_floors_used": {
+    "0": 0.5,
+    "1": 0.5,
+    "2": 0.5
   }
 }

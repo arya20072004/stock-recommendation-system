@@ -1,54 +1,59 @@
 {
   "ticker": "HEROMOTOCO.NS",
-  "f1_macro": 0.3606748659728792,
+  "f1_macro": 0.3423881151107923,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.24193548387096775,
-      "recall": 0.5882352941176471,
-      "f1": 0.34285714285714286,
+      "precision": 0.25225225225225223,
+      "recall": 0.5490196078431373,
+      "f1": 0.345679012345679,
       "support": 51
     },
     "HOLD": {
-      "precision": 0.49206349206349204,
-      "recall": 0.3522727272727273,
-      "f1": 0.4105960264900662,
+      "precision": 0.43478260869565216,
+      "recall": 0.3409090909090909,
+      "f1": 0.3821656050955414,
       "support": 88
     },
     "BUY": {
-      "precision": 0.5,
-      "recall": 0.24468085106382978,
-      "f1": 0.32857142857142857,
+      "precision": 0.41509433962264153,
+      "recall": 0.23404255319148937,
+      "f1": 0.29931972789115646,
       "support": 94
     }
   },
-  "train_size": 931,
+  "train_size": 930,
   "test_size": 233,
-  "total_rows_after_features": 1164,
+  "total_rows_after_features": 1163,
   "label_distribution": {
     "0": 332,
-    "1": 417,
+    "1": 416,
     "2": 415
   },
   "confidence_stats": {
-    "mean_max_proba": 0.4724765419960022,
-    "mean_top2_margin": 0.15299877524375916,
-    "f1_macro": 0.3606748659728792
+    "mean_max_proba": 0.4655440151691437,
+    "mean_top2_margin": 0.1430683732032776,
+    "f1_macro": 0.3423881151107923
   },
   "optuna": {
-    "best_value": 0.3016760140238551,
+    "best_value": 0.3064424158578122,
     "best_params": {
-      "n_estimators": 216,
-      "max_depth": 7,
-      "learning_rate": 0.052002621907516346,
-      "subsample": 0.6125142390736987,
-      "colsample_bytree": 0.8609629676458587,
-      "min_child_weight": 9,
-      "reg_lambda": 4.053425516324069,
-      "reg_alpha": 2.712443745345573,
-      "gamma": 2.0169262905176026
+      "n_estimators": 200,
+      "max_depth": 3,
+      "learning_rate": 0.23749070636871222,
+      "subsample": 0.8593116532725386,
+      "colsample_bytree": 0.6392771168835161,
+      "min_child_weight": 14,
+      "reg_lambda": 7.870362788725397,
+      "reg_alpha": 3.2729729412089115,
+      "gamma": 2.0283885414985754
     },
     "n_trials": 75,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted)"
+  },
+  "smote_floors_used": {
+    "0": 0.5,
+    "1": 0.5,
+    "2": 0.5
   }
 }

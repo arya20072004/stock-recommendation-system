@@ -104,7 +104,7 @@ SECTOR_MAP = {
     # Power Utilities
     "NTPC.NS":       "PowerUtilities",
     "POWERGRID.NS":  "PowerUtilities",
-    "COALINDIA.NS":  "OilGasAndConsumableFuels",
+    "COALINDIA.NS":  "PowerUtilities",
     "BEL.NS":        "CapitalGoods",
 
     # Telecom
@@ -147,6 +147,11 @@ SECTOR_INDEX_NAME_MAP = {
 
 TICKER_HISTORY_OVERRIDE = {
     "MARUTI.NS": 3,  # confirmed concept drift across 15 runs
+}
+
+TICKER_ATR_THRESHOLD_SCALE: dict[str, float] = {
+    "NESTLEIND.NS": 0.75,  # Default 1.0× ATR produces too few BUY labels — low volatility stock
+    "TECHM.NS":     0.75,  # Same reason — BUY labels suppressed by high ATR threshold
 }
 
 def _prepare_nifty_data(start_date, end_date):
@@ -197,6 +202,12 @@ def _prepare_sentiment_data(news_docs):
 
 SECTOR_MIN_PEERS = 4  # if fewer valid peers, disable sector momentum
 
+EVENT_DRIVEN_SECTORS_NO_INDEX = {"Healthcare", "InformationTechnology"}
+SECTOR_INDEX_DISABLED_TICKERS = {
+    "TITAN.NS", 
+    "HDFCBANK.NS",
+}
+
 def _prepare_sector_data(ticker, client):
     """
     Fetches pre-built sector index from sector_indices collection,
@@ -206,8 +217,11 @@ def _prepare_sector_data(ticker, client):
     sector = SECTOR_MAP.get(ticker)
     if sector is None:
         return pd.Series(dtype=float, name="sector_return")
+
+    if ticker in SECTOR_INDEX_DISABLED_TICKERS:
+        logger.info("%s: sector index disabled at ticker level", ticker)
+        return pd.Series(dtype=float, name="sector_return")
     
-    EVENT_DRIVEN_SECTORS_NO_INDEX = {"Healthcare", "InformationTechnology"}
     if sector in EVENT_DRIVEN_SECTORS_NO_INDEX:
         return pd.Series(dtype=float, name="sector_return")
 
@@ -472,10 +486,32 @@ def create_dataset(ticker, client):
 
     # --- TARGET LABEL ---
     df["future_10d_return"] = df["close"].shift(-10) / df["close"] - 1
-    threshold = np.maximum(1.0 * df["atr_pct"], 0.01)
+    atr_scale = TICKER_ATR_THRESHOLD_SCALE.get(ticker, 1.0)
+    threshold = np.maximum(atr_scale * df["atr_pct"], 0.01)
     df["target"] = 1
     df.loc[df["future_10d_return"] > threshold, "target"] = 2
     df.loc[df["future_10d_return"] < -threshold, "target"] = 0
+    logger.info(
+        "%s: label threshold scale = %.2f× ATR (BUY=%d, HOLD=%d, SELL=%d)",
+        ticker,
+        atr_scale,
+        (df["target"] == 2).sum(),
+        (df["target"] == 1).sum(),
+        (df["target"] == 0).sum(),
+    )
+
+    buy_label_count  = (df["target"] == 2).sum()
+    sell_label_count = (df["target"] == 0).sum()
+    hold_label_count = (df["target"] == 1).sum()
+    total_labels     = len(df)
+    buy_pct = buy_label_count / total_labels if total_labels > 0 else 0.0
+
+    if buy_pct < 0.15:
+        logger.warning(
+            "%s: BUY label frequency = %.1f%% (%d/%d) — below 15%% floor. "
+            "Consider adding to TICKER_ATR_THRESHOLD_SCALE.",
+            ticker, buy_pct * 100, buy_label_count, total_labels,
+        )
 
     required_columns = [
         "rsi",
@@ -535,10 +571,10 @@ def _optuna_objective(trial, X_train, y_train):
         "learning_rate":     trial.suggest_float("learning_rate", 0.01, 0.3, log=True),
         "subsample":         trial.suggest_float("subsample", 0.6, 1.0),
         "colsample_bytree":  trial.suggest_float("colsample_bytree", 0.6, 1.0),
-        "min_child_weight":  trial.suggest_int("min_child_weight", 5, 25),
+        "min_child_weight":  trial.suggest_int("min_child_weight", 3, 15),
         "reg_lambda":        trial.suggest_float("reg_lambda", 2.0, 15.0),
         "reg_alpha":         trial.suggest_float("reg_alpha", 0.5, 5.0),
-        "gamma":             trial.suggest_float("gamma", 0.5, 5.0),
+        "gamma":             trial.suggest_float("gamma", 0.1, 3.0),
     }
 
     # Optuna-tunable SMOTE ratios — prevent BUY/SELL inflation per trial
@@ -609,6 +645,12 @@ def _optuna_objective(trial, X_train, y_train):
 
     return float(weighted_score / total_weight)
 
+SMOTE_FLOORS: dict[int, float] = {0: 0.50, 1: 0.50, 2: 0.50}
+
+TICKER_SMOTE_FLOOR_OVERRIDES: dict[str, dict[int, float]] = {
+    "NESTLEIND.NS": {0: 0.50, 1: 0.50, 2: 0.65},  # BUY f1=0.000 for 3 consecutive runs
+    "TECHM.NS":    {0: 0.50, 1: 0.50, 2: 0.65},  # BUY f1=0.04 for 3 consecutive runs
+}
 
 def train_model(df, ticker):
     """
@@ -646,7 +688,7 @@ def train_model(df, ticker):
     if y_train.nunique() < 2:
         logger.warning("%s: training split has single class, skipping", ticker)
         return
-    
+
     MIN_TRAIN_ROWS_FOR_CV = N_SPLITS * 30
     if len(X_train) < MIN_TRAIN_ROWS_FOR_CV:
         logger.warning(
@@ -677,16 +719,24 @@ def train_model(df, ticker):
     }
     logger.info("%s: best CV f1_macro = %.4f", ticker, study.best_value)
 
-    # --- Controlled SMOTE — cap minority oversampling to prevent BUY/SELL inflation ---
-    # Fixes: ITC BUY recall 0.74/precision 0.24, NTPC BUY recall 0.82, SBIN collapse
+    # --- Controlled SMOTE — ticker-aware floor overrides ---
+    # Global floor: {0: 0.50, 1: 0.50, 2: 0.50}
+    # NESTLEIND override: BUY floor raised to 0.65 (BUY f1=0.000 for 3 consecutive runs)
     label_counts   = y_train.value_counts()
     majority_count = label_counts.max()
-    minority_count  = label_counts.min()
-    SMOTE_FLOORS = {0: 0.50, 1: 0.50, 2: 0.50}
+    minority_count = label_counts.min()
+
+    smote_floors = TICKER_SMOTE_FLOOR_OVERRIDES.get(ticker, SMOTE_FLOORS)
+    logger.info(
+        "%s: SMOTE floors = %s%s",
+        ticker,
+        smote_floors,
+        " [TICKER OVERRIDE]" if ticker in TICKER_SMOTE_FLOOR_OVERRIDES else "",
+    )
 
     sampling_target = {}
     for label, count in label_counts.items():
-        floor = SMOTE_FLOORS.get(int(label), 0.50)
+        floor = smote_floors.get(int(label), 0.50)
         target = max(count, int(majority_count * floor))
         target = min(target, majority_count)
         sampling_target[label] = target
@@ -710,11 +760,12 @@ def train_model(df, ticker):
         n_jobs=-1,
         **best_params,
     )
+
     resampled_counts = pd.Series(y_train_resampled).value_counts()
     sell_count = resampled_counts.get(0, 1)
     hold_count = resampled_counts.get(1, 1)
     buy_count  = resampled_counts.get(2, 1)
-    raw_boost = (hold_count + buy_count) / max(sell_count, 1)
+    raw_boost  = (hold_count + buy_count) / max(sell_count, 1)
     sell_boost = min(raw_boost, 1.5)
     hold_boost = 1.2 if sell_boost > 1.2 else 1.0
 
@@ -731,7 +782,7 @@ def train_model(df, ticker):
 
     best_model.fit(X_train_resampled, y_train_resampled, sample_weight=sw)
 
-    y_pred = best_model.predict(X_test)
+    y_pred   = best_model.predict(X_test)
     f1_macro = f1_score(y_test, y_pred, average="macro", zero_division=0)
 
     precision, recall, f1_per_class, support = precision_recall_fscore_support(
@@ -741,9 +792,9 @@ def train_model(df, ticker):
     per_class_metrics = {
         class_names[idx]: {
             "precision": float(precision[i]),
-            "recall": float(recall[i]),
-            "f1": float(f1_per_class[i]),
-            "support": int(support[i]),
+            "recall":    float(recall[i]),
+            "f1":        float(f1_per_class[i]),
+            "support":   int(support[i]),
         }
         for i, idx in enumerate([0, 1, 2])
     }
@@ -766,32 +817,32 @@ def train_model(df, ticker):
     with open(features_filename, "w", encoding="utf-8") as feat_file:
         json.dump(features, feat_file)
 
-    y_proba = best_model.predict_proba(X_test)
-    max_probas = y_proba.max(axis=1)
-    sorted_probas = np.sort(y_proba, axis=1)[:, ::-1]
-    top2_margins = sorted_probas[:, 0] - sorted_probas[:, 1]
+    y_proba        = best_model.predict_proba(X_test)
+    max_probas     = y_proba.max(axis=1)
+    sorted_probas  = np.sort(y_proba, axis=1)[:, ::-1]
+    top2_margins   = sorted_probas[:, 0] - sorted_probas[:, 1]
 
     metrics_payload = {
         "ticker": ticker,
         "f1_macro": float(f1_macro),
         "per_class_metrics": per_class_metrics,
         "train_size": int(len(X_train)),
-        "test_size": int(len(X_test)),
+        "test_size":  int(len(X_test)),
         "total_rows_after_features": int(len(df)),
         "label_distribution": label_distribution,
         "confidence_stats": {
-            # Used by app.py to compute per-stock tier thresholds
-            "mean_max_proba": float(np.mean(max_probas)),
+            "mean_max_proba":   float(np.mean(max_probas)),
             "mean_top2_margin": float(np.mean(top2_margins)),
-            "f1_macro": float(f1_macro),       # redundant but explicit for tier lookup
+            "f1_macro":         float(f1_macro),
         },
         "optuna": {
             "best_value": float(study.best_value),
             "best_params": best_params,
-            "n_trials": N_OPTUNA_TRIALS,
-            "cv_splits": N_SPLITS,
-            "scoring": "f1_macro (recency-weighted)",
+            "n_trials":    N_OPTUNA_TRIALS,
+            "cv_splits":   N_SPLITS,
+            "scoring":     "f1_macro (recency-weighted)",
         },
+        "smote_floors_used": smote_floors,  # logged for audit across runs
     }
     with open(metrics_filename, "w", encoding="utf-8") as metrics_file:
         json.dump(metrics_payload, metrics_file, indent=2)
