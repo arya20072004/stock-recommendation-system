@@ -147,11 +147,12 @@ SECTOR_INDEX_NAME_MAP = {
 
 TICKER_HISTORY_OVERRIDE = {
     "MARUTI.NS": 3,  # confirmed concept drift across 15 runs
+    "HDFCBANK.NS": 3, # sector disable insufficient — regime mismatch
 }
 
 TICKER_ATR_THRESHOLD_SCALE: dict[str, float] = {
-    "NESTLEIND.NS": 0.75,  # Default 1.0× ATR produces too few BUY labels — low volatility stock
-    "TECHM.NS":     0.75,  # Same reason — BUY labels suppressed by high ATR threshold
+    #"NESTLEIND.NS": 0.75,  # Default 1.0× ATR produces too few BUY labels — low volatility stock
+    #"TECHM.NS":     0.75,  # Same reason — BUY labels suppressed by high ATR threshold
 }
 
 def _prepare_nifty_data(start_date, end_date):
@@ -206,6 +207,7 @@ EVENT_DRIVEN_SECTORS_NO_INDEX = {"Healthcare", "InformationTechnology"}
 SECTOR_INDEX_DISABLED_TICKERS = {
     "TITAN.NS", 
     "HDFCBANK.NS",
+    "NESTLEIND.NS",
 }
 
 def _prepare_sector_data(ticker, client):
@@ -235,12 +237,6 @@ def _prepare_sector_data(ticker, client):
         {"date": 1, "return": 1, "peer_count": 1, "_id": 0}
     ))
     logger.info("%s: sector index query '%s' returned %d docs", ticker, index_sector_name, len(index_docs))
-
-    # Then use index_sector_name in the find() query:
-    index_docs = list(db.sector_indices.find(
-        {"sector": index_sector_name, "date": {"$gte": cutoff_date}},
-        {"date": 1, "return": 1, "peer_count": 1, "_id": 0}
-    ))
 
     if len(index_docs) >= 50:
         index_df = pd.DataFrame(index_docs)
@@ -564,14 +560,16 @@ def _make_feature_list(df):
 # Exponential fold weights: later folds penalize overfitting to early regimes
 FOLD_WEIGHTS = {1: 1.0, 2: 1.2, 3: 1.5, 4: 2.0, 5: 2.5}
 
-def _optuna_objective(trial, X_train, y_train):
+def _optuna_objective(trial, X_train, y_train, ticker=""):
+    _mcw_floor = TICKER_MIN_CHILD_WEIGHT_FLOOR.get(ticker, 3)
+
     params = {
         "n_estimators":      trial.suggest_int("n_estimators", 100, 700),
         "max_depth":         trial.suggest_int("max_depth", 3, 7),
         "learning_rate":     trial.suggest_float("learning_rate", 0.01, 0.3, log=True),
         "subsample":         trial.suggest_float("subsample", 0.6, 1.0),
         "colsample_bytree":  trial.suggest_float("colsample_bytree", 0.6, 1.0),
-        "min_child_weight":  trial.suggest_int("min_child_weight", 3, 15),
+        "min_child_weight":  trial.suggest_int("min_child_weight", _mcw_floor, 15),
         "reg_lambda":        trial.suggest_float("reg_lambda", 2.0, 15.0),
         "reg_alpha":         trial.suggest_float("reg_alpha", 0.5, 5.0),
         "gamma":             trial.suggest_float("gamma", 0.1, 3.0),
@@ -632,9 +630,15 @@ def _optuna_objective(trial, X_train, y_train):
         fold_weight = FOLD_WEIGHTS.get(fold_idx, 1.0)
         try:
             model.fit(X_fold_train, y_fold_train)
-            preds        = model.predict(X_fold_valid)
-            fold_f1      = f1_score(y_fold_valid, preds, average="macro", zero_division=0)
-            weighted_score += fold_weight * fold_f1
+            preds   = model.predict(X_fold_valid)
+            f1_per  = f1_score(y_fold_valid, preds, average=None,
+                               labels=[0, 1, 2], zero_division=0)
+            hold_f1 = f1_per[1]  # class index 1 = HOLD
+            fold_f1 = f1_score(y_fold_valid, preds, average="macro", zero_division=0)
+            # Penalise runs where HOLD is completely ignored
+            hold_penalty = max(0.0, 0.10 - hold_f1) * 0.5
+            adjusted_f1  = fold_f1 - hold_penalty
+            weighted_score += fold_weight * adjusted_f1
             total_weight   += fold_weight
         except ValueError as ex:
             logger.debug("Fold %s failed for trial %s: %s", fold_idx, trial.number, ex)
@@ -648,8 +652,42 @@ def _optuna_objective(trial, X_train, y_train):
 SMOTE_FLOORS: dict[int, float] = {0: 0.50, 1: 0.50, 2: 0.50}
 
 TICKER_SMOTE_FLOOR_OVERRIDES: dict[str, dict[int, float]] = {
-    "NESTLEIND.NS": {0: 0.50, 1: 0.50, 2: 0.65},  # BUY f1=0.000 for 3 consecutive runs
-    "TECHM.NS":    {0: 0.50, 1: 0.50, 2: 0.65},  # BUY f1=0.04 for 3 consecutive runs
+    "NESTLEIND.NS":  {0: 0.50, 1: 0.40, 2: 0.65},  # BUY f1=0.000 for 3 consecutive runs
+    "BAJFINANCE.NS": {0: 0.50, 1: 0.50, 2: 0.65},  # BUY f1≈0.05 two consecutive runs
+    # HOLD-collapse tickers: raise HOLD floor to 0.70 to force resampling
+    "ADANIENT.NS":   {0: 0.50, 1: 0.70, 2: 0.50},  # HOLD f1=0.08 this run
+    "BAJAJ-AUTO.NS": {0: 0.50, 1: 0.75, 2: 0.50},  # HOLD f1=0.14 this run
+    "BEL.NS":        {0: 0.50, 1: 0.70, 2: 0.60},  # HOLD f1=0.12 this run
+    "NTPC.NS":       {0: 0.50, 1: 0.65, 2: 0.50},  # HOLD f1=0.26, partial boost
+    "ADANIPORTS.NS": {0: 0.50, 1: 0.50, 2: 0.65},  # BUY precision=1.0 recall=4% — forcing BUY samples
+}
+
+TICKER_HOLD_WEIGHT_OVERRIDE: dict[str, float] = {
+    "ADANIENT.NS":   1.80,   # HOLD at 0.35 — holding
+    "BAJAJ-AUTO.NS": 2.00,   # HOLD still 0.24 after 1.80 — escalating
+    "BEL.NS":        1.40,   # HOLD at 0.46 — holding; BUY floor added instead
+    "NTPC.NS":       1.50,   # HOLD at 0.47 — holding
+}
+
+TICKER_MIN_CHILD_WEIGHT_FLOOR: dict[str, int] = {
+    "BAJAJ-AUTO.NS": 8,   # HOLD still 0.24 after SMOTE+weight — force coarser splits
+    "TRENT.NS":      8,   # SELL at 0.12, all classes weak — same pathology
+    "RELIANCE.NS":   8,   # HOLD/BUY suppressed across runs
+    "POWERGRID.NS":  8,   # SELL refusal + BUY inflation across multiple runs
+}
+
+# Add near TICKER_HISTORY_OVERRIDE at module level:
+VERY_LOW_CONFIDENCE_TICKERS = {
+    "TITAN.NS",      # HOLD structurally broken, gold/wedding cycle unlearnable at 10d horizon
+    "TECHM.NS",      # BUY structurally broken across 4+ runs, all interventions failed
+    "MARUTI.NS",     # 3yr lookback — thin test set (134 rows), BUY recall persistently near 0
+    "NESTLEIND.NS",  # BUY f1 near-zero across 4 consecutive runs; sector index disabled
+    "BAJFINANCE.NS", # BUY structural collapse; SMOTE BUY floor override applied
+    "ETERNAL.NS",    # All three classes weak across runs; no recoverable signal at 10d
+    "ITC.NS",        # SELL recall=10%, model non-functional for SELL/BUY signals
+    "SBILIFE.NS",    # Recovered to 0.3384 this run — monitoring, keeping flag for now
+    "BAJAJFINSV.NS", # 0.3165→0.2686, SELL dominance across two runs, no intervention path
+    "HDFCLIFE.NS",   # 0.3083→0.2623, BUY near-zero two consecutive runs
 }
 
 def train_model(df, ticker):
@@ -660,6 +698,13 @@ def train_model(df, ticker):
     logger.info("Training model for %s", ticker)
     os.makedirs(MODELS_DIR, exist_ok=True)
     os.makedirs(FEATURES_DIR, exist_ok=True)
+
+    if ticker in VERY_LOW_CONFIDENCE_TICKERS:
+        logger.warning(
+            "%s: ticker is in VERY_LOW_CONFIDENCE_TICKERS — "
+            "model will train but signals should not be acted on",
+            ticker,
+        )
 
     if len(df) < MIN_ROWS_AFTER_FEATURES:
         logger.warning("%s: insufficient rows after feature engineering (%s), skipping", ticker, len(df))
@@ -697,11 +742,13 @@ def train_model(df, ticker):
         )
         return
 
+    effective_trials = 30 if ticker in VERY_LOW_CONFIDENCE_TICKERS else N_OPTUNA_TRIALS
+
     try:
         study = optuna.create_study(direction="maximize")
         study.optimize(
-            lambda trial: _optuna_objective(trial, X_train, y_train),
-            n_trials=N_OPTUNA_TRIALS,
+            lambda trial: _optuna_objective(trial, X_train, y_train, ticker),
+            n_trials=effective_trials,
             show_progress_bar=False,
         )
     except Exception as ex:
@@ -768,6 +815,8 @@ def train_model(df, ticker):
     raw_boost  = (hold_count + buy_count) / max(sell_count, 1)
     sell_boost = min(raw_boost, 1.5)
     hold_boost = 1.2 if sell_boost > 1.2 else 1.0
+    # Apply ticker-level HOLD weight override if configured
+    hold_boost = max(hold_boost, TICKER_HOLD_WEIGHT_OVERRIDE.get(ticker, 0.0))
 
     sw = np.where(
         y_train_resampled == 0, sell_boost,

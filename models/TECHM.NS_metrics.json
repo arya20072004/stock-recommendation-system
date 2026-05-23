@@ -1,51 +1,51 @@
 {
   "ticker": "TECHM.NS",
-  "f1_macro": 0.2586095064355934,
+  "f1_macro": 0.28569741184644787,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.27325581395348836,
-      "recall": 0.8103448275862069,
-      "f1": 0.40869565217391307,
-      "support": 58
+      "precision": 0.26143790849673204,
+      "recall": 0.8163265306122449,
+      "f1": 0.39603960396039606,
+      "support": 49
     },
     "HOLD": {
-      "precision": 0.2926829268292683,
-      "recall": 0.19047619047619047,
-      "f1": 0.23076923076923078,
-      "support": 63
+      "precision": 0.3835616438356164,
+      "recall": 0.36363636363636365,
+      "f1": 0.37333333333333335,
+      "support": 77
     },
     "BUY": {
-      "precision": 0.45,
-      "recall": 0.08035714285714286,
-      "f1": 0.13636363636363635,
-      "support": 112
+      "precision": 0.7142857142857143,
+      "recall": 0.04672897196261682,
+      "f1": 0.08771929824561403,
+      "support": 107
     }
   },
-  "train_size": 930,
+  "train_size": 929,
   "test_size": 233,
-  "total_rows_after_features": 1163,
+  "total_rows_after_features": 1162,
   "label_distribution": {
-    "0": 352,
-    "1": 323,
-    "2": 488
+    "0": 305,
+    "1": 417,
+    "2": 440
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5640212893486023,
-    "mean_top2_margin": 0.29063668847084045,
-    "f1_macro": 0.2586095064355934
+    "mean_max_proba": 0.5128294229507446,
+    "mean_top2_margin": 0.22128531336784363,
+    "f1_macro": 0.28569741184644787
   },
   "optuna": {
-    "best_value": 0.3055237246841378,
+    "best_value": 0.3189216224831266,
     "best_params": {
-      "n_estimators": 477,
-      "max_depth": 7,
-      "learning_rate": 0.07820433555762037,
-      "subsample": 0.7637786421790194,
-      "colsample_bytree": 0.8227305039251173,
+      "n_estimators": 156,
+      "max_depth": 4,
+      "learning_rate": 0.03728098592892883,
+      "subsample": 0.9803760795908302,
+      "colsample_bytree": 0.6425528991228587,
       "min_child_weight": 6,
-      "reg_lambda": 7.033894645999404,
-      "reg_alpha": 0.8371343136884684,
-      "gamma": 1.2347824660510613
+      "reg_lambda": 4.081890769577549,
+      "reg_alpha": 2.7493527078080096,
+      "gamma": 0.10624312714901835
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -54,6 +54,6 @@
   "smote_floors_used": {
     "0": 0.5,
     "1": 0.5,
-    "2": 0.65
+    "2": 0.5
   }
 }

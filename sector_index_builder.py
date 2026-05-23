@@ -336,7 +336,6 @@ NIFTY500_SECTOR_MAP: dict[str, list[str]] = {
         "INDUSINDBK.NS",
         "JMFINANCIL.NS",
         "J&KBANK.NS",
-        "JIOFIN.NS",
         "KARURVYSYA.NS",
         "KFINTECH.NS",
         "KOTAKBANK.NS",
@@ -376,6 +375,7 @@ NIFTY500_SECTOR_MAP: dict[str, list[str]] = {
         "UCOBANK.NS",
         "UTIAMC.NS",
         "UNIONBANK.NS",
+        "JIOFIN.NS",
         "YESBANK.NS"
     ],
 
