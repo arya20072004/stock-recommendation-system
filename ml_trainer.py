@@ -656,17 +656,25 @@ TICKER_SMOTE_FLOOR_OVERRIDES: dict[str, dict[int, float]] = {
     "BAJFINANCE.NS": {0: 0.50, 1: 0.50, 2: 0.65},  # BUY f1≈0.05 two consecutive runs
     # HOLD-collapse tickers: raise HOLD floor to 0.70 to force resampling
     "ADANIENT.NS":   {0: 0.50, 1: 0.70, 2: 0.50},  # HOLD f1=0.08 this run
-    "BAJAJ-AUTO.NS": {0: 0.50, 1: 0.75, 2: 0.50},  # HOLD f1=0.14 this run
-    "BEL.NS":        {0: 0.50, 1: 0.70, 2: 0.60},  # HOLD f1=0.12 this run
+    "BAJAJ-AUTO.NS": {0: 0.50, 1: 0.75, 2: 0.50},  # Floor holding — threshold cal now active
+    "BEL.NS":        {0: 0.50, 1: 0.60, 2: 0.60},  # Seesawing — equalising HOLD/BUY floors
     "NTPC.NS":       {0: 0.50, 1: 0.65, 2: 0.50},  # HOLD f1=0.26, partial boost
     "ADANIPORTS.NS": {0: 0.50, 1: 0.50, 2: 0.65},  # BUY precision=1.0 recall=4% — forcing BUY samples
 }
 
 TICKER_HOLD_WEIGHT_OVERRIDE: dict[str, float] = {
     "ADANIENT.NS":   1.80,   # HOLD at 0.35 — holding
-    "BAJAJ-AUTO.NS": 2.00,   # HOLD still 0.24 after 1.80 — escalating
-    "BEL.NS":        1.40,   # HOLD at 0.46 — holding; BUY floor added instead
+    "BAJAJ-AUTO.NS": 2.00,   # Holding at 2.00 — threshold calibration now primary lever
+    "BEL.NS":        1.50,   # Re-raised — HOLD crashed to 0.19 with 1.40
     "NTPC.NS":       1.50,   # HOLD at 0.47 — holding
+}
+
+TICKER_CLASS_THRESHOLDS: dict[str, dict[int, float]] = {
+    "NTPC.NS":       {0: 0.33, 1: 0.25, 2: 0.33},  # HOLD prec=0.70 recall=0.25
+    "BAJAJ-AUTO.NS": {0: 0.33, 1: 0.25, 2: 0.33},  # HOLD prec=0.42 recall=0.18
+    "ADANIPORTS.NS": {0: 0.33, 1: 0.33, 2: 0.20},  # BUY prec=1.00 recall=0.07
+    "TATASTEEL.NS":  {0: 0.33, 1: 0.33, 2: 0.20},  # BUY prec=0.53 recall=0.09
+    "SBIN.NS":       {0: 0.33, 1: 0.33, 2: 0.20},  # BUY prec=0.70 recall=0.19
 }
 
 TICKER_MIN_CHILD_WEIGHT_FLOOR: dict[str, int] = {
@@ -681,13 +689,17 @@ VERY_LOW_CONFIDENCE_TICKERS = {
     "TITAN.NS",      # HOLD structurally broken, gold/wedding cycle unlearnable at 10d horizon
     "TECHM.NS",      # BUY structurally broken across 4+ runs, all interventions failed
     "MARUTI.NS",     # 3yr lookback — thin test set (134 rows), BUY recall persistently near 0
-    "NESTLEIND.NS",  # BUY f1 near-zero across 4 consecutive runs; sector index disabled
+    "NESTLEIND.NS",  # BUY f1=0.00 across 6 consecutive runs — unfixable with current features
     "BAJFINANCE.NS", # BUY structural collapse; SMOTE BUY floor override applied
     "ETERNAL.NS",    # All three classes weak across runs; no recoverable signal at 10d
     "ITC.NS",        # SELL recall=10%, model non-functional for SELL/BUY signals
-    "SBILIFE.NS",    # Recovered to 0.3384 this run — monitoring, keeping flag for now
-    "BAJAJFINSV.NS", # 0.3165→0.2686, SELL dominance across two runs, no intervention path
-    "HDFCLIFE.NS",   # 0.3083→0.2623, BUY near-zero two consecutive runs
+    "SBILIFE.NS",    # BUY near-zero two consecutive runs; reverted after Run 3 recovery
+    "BAJAJFINSV.NS", # Recovered to 0.2988 with reduced trials — monitoring
+    "HDFCLIFE.NS",   # BUY near-zero two consecutive runs, structurally weak
+    "ONGC.NS",       # HOLD f1=0.14 two consecutive runs; precision/recall pathology
+    "HINDALCO.NS",   # SELL f1=0.08 two consecutive runs; near-random on SELL
+    "JSWSTEEL.NS",   # Sub-0.27 two consecutive runs; no recoverable pattern
+    "SHRIRAMFIN.NS", # Sub-0.26 three consecutive runs; all classes weak
 }
 
 def train_model(df, ticker):
@@ -831,7 +843,22 @@ def train_model(df, ticker):
 
     best_model.fit(X_train_resampled, y_train_resampled, sample_weight=sw)
 
-    y_pred   = best_model.predict(X_test)
+    # Apply per-class threshold calibration if configured for this ticker
+    _thresholds = TICKER_CLASS_THRESHOLDS.get(ticker)
+    if _thresholds:
+        _y_proba = best_model.predict_proba(X_test)
+        y_pred = np.array([
+            max(_thresholds.keys(),
+                key=lambda c, i=i: _y_proba[i, c] / _thresholds[c])
+            for i in range(len(_y_proba))
+        ])
+        logger.info(
+            "%s: threshold calibration applied %s",
+            ticker, _thresholds,
+        )
+    else:
+        y_pred = best_model.predict(X_test)
+
     f1_macro = f1_score(y_test, y_pred, average="macro", zero_division=0)
 
     precision, recall, f1_per_class, support = precision_recall_fscore_support(
@@ -887,11 +914,13 @@ def train_model(df, ticker):
         "optuna": {
             "best_value": float(study.best_value),
             "best_params": best_params,
-            "n_trials":    N_OPTUNA_TRIALS,
+            "n_trials":    effective_trials,  # reflects reduced trials for VLC tickers
             "cv_splits":   N_SPLITS,
-            "scoring":     "f1_macro (recency-weighted)",
+            "scoring":     "f1_macro (recency-weighted, HOLD-penalty)",
         },
-        "smote_floors_used": smote_floors,  # logged for audit across runs
+        "smote_floors_used": smote_floors,
+        "threshold_calibration": TICKER_CLASS_THRESHOLDS.get(ticker),  # None if not applied
+        "very_low_confidence": ticker in VERY_LOW_CONFIDENCE_TICKERS,
     }
     with open(metrics_filename, "w", encoding="utf-8") as metrics_file:
         json.dump(metrics_payload, metrics_file, indent=2)

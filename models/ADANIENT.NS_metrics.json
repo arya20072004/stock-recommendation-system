@@ -1,23 +1,23 @@
 {
   "ticker": "ADANIENT.NS",
-  "f1_macro": 0.3650270994129829,
+  "f1_macro": 0.24247487569654547,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.39705882352941174,
-      "recall": 0.34615384615384615,
-      "f1": 0.3698630136986301,
+      "precision": 0.3333333333333333,
+      "recall": 0.0641025641025641,
+      "f1": 0.10752688172043011,
       "support": 78
     },
     "HOLD": {
-      "precision": 0.34782608695652173,
-      "recall": 0.3764705882352941,
-      "f1": 0.3615819209039548,
+      "precision": 0.36893203883495146,
+      "recall": 0.8941176470588236,
+      "f1": 0.5223367697594502,
       "support": 85
     },
     "BUY": {
-      "precision": 0.3561643835616438,
-      "recall": 0.37142857142857144,
-      "f1": 0.36363636363636365,
+      "precision": 0.3333333333333333,
+      "recall": 0.05714285714285714,
+      "f1": 0.0975609756097561,
       "support": 70
     }
   },
@@ -30,30 +30,32 @@
     "2": 386
   },
   "confidence_stats": {
-    "mean_max_proba": 0.4774114787578583,
-    "mean_top2_margin": 0.16640356183052063,
-    "f1_macro": 0.3650270994129829
+    "mean_max_proba": 0.4253539741039276,
+    "mean_top2_margin": 0.10305175185203552,
+    "f1_macro": 0.24247487569654547
   },
   "optuna": {
-    "best_value": 0.3503303791698676,
+    "best_value": 0.34931227409459453,
     "best_params": {
-      "n_estimators": 194,
-      "max_depth": 7,
-      "learning_rate": 0.18692814322531642,
-      "subsample": 0.7052271998992745,
-      "colsample_bytree": 0.6920915167049905,
+      "n_estimators": 127,
+      "max_depth": 3,
+      "learning_rate": 0.013659878238047853,
+      "subsample": 0.6652335134394541,
+      "colsample_bytree": 0.9517676960545463,
       "min_child_weight": 12,
-      "reg_lambda": 14.454966381620775,
-      "reg_alpha": 4.7595326965773275,
-      "gamma": 1.4582500022281708
+      "reg_lambda": 9.89637568774715,
+      "reg_alpha": 1.5890697707529164,
+      "gamma": 2.0542497394292187
     },
     "n_trials": 75,
     "cv_splits": 5,
-    "scoring": "f1_macro (recency-weighted)"
+    "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
   },
   "smote_floors_used": {
     "0": 0.5,
     "1": 0.7,
     "2": 0.5
-  }
+  },
+  "threshold_calibration": null,
+  "very_low_confidence": false
 }

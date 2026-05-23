@@ -1,23 +1,23 @@
 {
   "ticker": "JSWSTEEL.NS",
-  "f1_macro": 0.2603143045425607,
+  "f1_macro": 0.3197026857960424,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.16,
-      "recall": 0.38095238095238093,
-      "f1": 0.22535211267605634,
+      "precision": 0.18556701030927836,
+      "recall": 0.42857142857142855,
+      "f1": 0.2589928057553957,
       "support": 42
     },
     "HOLD": {
-      "precision": 0.358695652173913,
-      "recall": 0.3235294117647059,
-      "f1": 0.3402061855670103,
+      "precision": 0.4090909090909091,
+      "recall": 0.35294117647058826,
+      "f1": 0.37894736842105264,
       "support": 102
     },
     "BUY": {
-      "precision": 0.34146341463414637,
-      "recall": 0.15730337078651685,
-      "f1": 0.2153846153846154,
+      "precision": 0.4583333333333333,
+      "recall": 0.24719101123595505,
+      "f1": 0.32116788321167883,
       "support": 89
     }
   },
@@ -30,30 +30,32 @@
     "2": 405
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5173394083976746,
-    "mean_top2_margin": 0.21413905918598175,
-    "f1_macro": 0.2603143045425607
+    "mean_max_proba": 0.7018392086029053,
+    "mean_top2_margin": 0.4806252419948578,
+    "f1_macro": 0.3197026857960424
   },
   "optuna": {
-    "best_value": 0.3364329308856687,
+    "best_value": 0.3424130915800043,
     "best_params": {
-      "n_estimators": 652,
-      "max_depth": 4,
-      "learning_rate": 0.05846350015994053,
-      "subsample": 0.6474320461973516,
-      "colsample_bytree": 0.8637394716570914,
-      "min_child_weight": 8,
-      "reg_lambda": 12.389786766972243,
-      "reg_alpha": 4.382429952397704,
-      "gamma": 1.2835102146738944
+      "n_estimators": 401,
+      "max_depth": 5,
+      "learning_rate": 0.2854526089302783,
+      "subsample": 0.733586111002654,
+      "colsample_bytree": 0.9882137108639413,
+      "min_child_weight": 11,
+      "reg_lambda": 2.377982714322865,
+      "reg_alpha": 2.0067598969495952,
+      "gamma": 0.14371806308446877
     },
-    "n_trials": 75,
+    "n_trials": 30,
     "cv_splits": 5,
-    "scoring": "f1_macro (recency-weighted)"
+    "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
   },
   "smote_floors_used": {
     "0": 0.5,
     "1": 0.5,
     "2": 0.5
-  }
+  },
+  "threshold_calibration": null,
+  "very_low_confidence": true
 }

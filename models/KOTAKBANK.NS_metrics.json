@@ -1,23 +1,23 @@
 {
   "ticker": "KOTAKBANK.NS",
-  "f1_macro": 0.3169025590811298,
+  "f1_macro": 0.33444009150435755,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.24271844660194175,
-      "recall": 0.3968253968253968,
-      "f1": 0.30120481927710846,
+      "precision": 0.24770642201834864,
+      "recall": 0.42857142857142855,
+      "f1": 0.313953488372093,
       "support": 63
     },
     "HOLD": {
-      "precision": 0.44086021505376344,
-      "recall": 0.41836734693877553,
-      "f1": 0.4293193717277487,
+      "precision": 0.45454545454545453,
+      "recall": 0.40816326530612246,
+      "f1": 0.43010752688172044,
       "support": 98
     },
     "BUY": {
-      "precision": 0.32432432432432434,
-      "recall": 0.16666666666666666,
-      "f1": 0.22018348623853212,
+      "precision": 0.3888888888888889,
+      "recall": 0.19444444444444445,
+      "f1": 0.25925925925925924,
       "support": 72
     }
   },
@@ -30,30 +30,32 @@
     "2": 375
   },
   "confidence_stats": {
-    "mean_max_proba": 0.657055139541626,
-    "mean_top2_margin": 0.41678130626678467,
-    "f1_macro": 0.3169025590811298
+    "mean_max_proba": 0.5414779186248779,
+    "mean_top2_margin": 0.24391193687915802,
+    "f1_macro": 0.33444009150435755
   },
   "optuna": {
-    "best_value": 0.33433172170835296,
+    "best_value": 0.33527483056855273,
     "best_params": {
-      "n_estimators": 298,
-      "max_depth": 4,
-      "learning_rate": 0.29314835886680674,
-      "subsample": 0.6010279521655368,
-      "colsample_bytree": 0.826564872377107,
-      "min_child_weight": 13,
-      "reg_lambda": 14.12152554323966,
-      "reg_alpha": 0.9933486523475104,
-      "gamma": 0.6034638747700733
+      "n_estimators": 425,
+      "max_depth": 6,
+      "learning_rate": 0.061841651443228826,
+      "subsample": 0.9404520868592401,
+      "colsample_bytree": 0.9686315998932765,
+      "min_child_weight": 11,
+      "reg_lambda": 5.7025368371335485,
+      "reg_alpha": 1.4525646397918166,
+      "gamma": 0.9108370772279276
     },
     "n_trials": 75,
     "cv_splits": 5,
-    "scoring": "f1_macro (recency-weighted)"
+    "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
   },
   "smote_floors_used": {
     "0": 0.5,
     "1": 0.5,
     "2": 0.5
-  }
+  },
+  "threshold_calibration": null,
+  "very_low_confidence": false
 }

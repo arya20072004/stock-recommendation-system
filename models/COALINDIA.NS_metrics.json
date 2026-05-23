@@ -1,23 +1,23 @@
 {
   "ticker": "COALINDIA.NS",
-  "f1_macro": 0.34882098577750753,
+  "f1_macro": 0.3115079365079365,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.24193548387096775,
+      "precision": 0.2631578947368421,
       "recall": 0.2727272727272727,
-      "f1": 0.2564102564102564,
+      "f1": 0.26785714285714285,
       "support": 55
     },
     "HOLD": {
-      "precision": 0.4507042253521127,
-      "recall": 0.3404255319148936,
-      "f1": 0.3878787878787879,
+      "precision": 0.3488372093023256,
+      "recall": 0.3191489361702128,
+      "f1": 0.3333333333333333,
       "support": 94
     },
     "BUY": {
-      "precision": 0.37,
-      "recall": 0.44047619047619047,
-      "f1": 0.40217391304347827,
+      "precision": 0.32222222222222224,
+      "recall": 0.34523809523809523,
+      "f1": 0.3333333333333333,
       "support": 84
     }
   },
@@ -30,30 +30,32 @@
     "2": 459
   },
   "confidence_stats": {
-    "mean_max_proba": 0.41908854246139526,
-    "mean_top2_margin": 0.0842815414071083,
-    "f1_macro": 0.34882098577750753
+    "mean_max_proba": 0.4802009165287018,
+    "mean_top2_margin": 0.1527293175458908,
+    "f1_macro": 0.3115079365079365
   },
   "optuna": {
-    "best_value": 0.22140945351936658,
+    "best_value": 0.2516180160913404,
     "best_params": {
-      "n_estimators": 340,
+      "n_estimators": 389,
       "max_depth": 7,
-      "learning_rate": 0.02319141458804475,
-      "subsample": 0.7818203909244472,
-      "colsample_bytree": 0.9594841136946984,
-      "min_child_weight": 4,
-      "reg_lambda": 3.8895445302715106,
-      "reg_alpha": 4.221101732786325,
-      "gamma": 1.7055848847909123
+      "learning_rate": 0.0187608237152163,
+      "subsample": 0.986581100361722,
+      "colsample_bytree": 0.9606252366007907,
+      "min_child_weight": 6,
+      "reg_lambda": 10.435695608014331,
+      "reg_alpha": 2.6154283751288943,
+      "gamma": 0.49801990829325776
     },
     "n_trials": 75,
     "cv_splits": 5,
-    "scoring": "f1_macro (recency-weighted)"
+    "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
   },
   "smote_floors_used": {
     "0": 0.5,
     "1": 0.5,
     "2": 0.5
-  }
+  },
+  "threshold_calibration": null,
+  "very_low_confidence": false
 }

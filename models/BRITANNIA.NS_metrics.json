@@ -1,23 +1,23 @@
 {
   "ticker": "BRITANNIA.NS",
-  "f1_macro": 0.3681714231586355,
+  "f1_macro": 0.3591514243380091,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.30120481927710846,
-      "recall": 0.43859649122807015,
-      "f1": 0.35714285714285715,
+      "precision": 0.30337078651685395,
+      "recall": 0.47368421052631576,
+      "f1": 0.3698630136986301,
       "support": 57
     },
     "HOLD": {
-      "precision": 0.5578947368421052,
-      "recall": 0.4732142857142857,
-      "f1": 0.5120772946859904,
+      "precision": 0.5604395604395604,
+      "recall": 0.45535714285714285,
+      "f1": 0.5024630541871922,
       "support": 112
     },
     "BUY": {
-      "precision": 0.2545454545454545,
-      "recall": 0.21875,
-      "f1": 0.23529411764705882,
+      "precision": 0.22641509433962265,
+      "recall": 0.1875,
+      "f1": 0.20512820512820512,
       "support": 64
     }
   },
@@ -30,30 +30,32 @@
     "2": 364
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6173617243766785,
-    "mean_top2_margin": 0.34548836946487427,
-    "f1_macro": 0.3681714231586355
+    "mean_max_proba": 0.5949203968048096,
+    "mean_top2_margin": 0.30560538172721863,
+    "f1_macro": 0.3591514243380091
   },
   "optuna": {
-    "best_value": 0.36315676065036695,
+    "best_value": 0.36114435462905153,
     "best_params": {
-      "n_estimators": 651,
+      "n_estimators": 374,
       "max_depth": 3,
-      "learning_rate": 0.13309540375945297,
-      "subsample": 0.6983600650139016,
-      "colsample_bytree": 0.8220559606528278,
-      "min_child_weight": 15,
-      "reg_lambda": 13.718212871991243,
-      "reg_alpha": 4.149655702309813,
-      "gamma": 0.20078435760347085
+      "learning_rate": 0.0693703408907966,
+      "subsample": 0.6603956247633502,
+      "colsample_bytree": 0.7292198269009547,
+      "min_child_weight": 13,
+      "reg_lambda": 14.057550832209461,
+      "reg_alpha": 1.694139280845055,
+      "gamma": 0.4119316736890384
     },
     "n_trials": 75,
     "cv_splits": 5,
-    "scoring": "f1_macro (recency-weighted)"
+    "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
   },
   "smote_floors_used": {
     "0": 0.5,
     "1": 0.5,
     "2": 0.5
-  }
+  },
+  "threshold_calibration": null,
+  "very_low_confidence": false
 }

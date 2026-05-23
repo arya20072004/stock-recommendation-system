@@ -1,23 +1,23 @@
 {
   "ticker": "HEROMOTOCO.NS",
-  "f1_macro": 0.32347403626750976,
+  "f1_macro": 0.4026916741539383,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.21428571428571427,
-      "recall": 0.4117647058823529,
-      "f1": 0.28187919463087246,
+      "precision": 0.25,
+      "recall": 0.5294117647058824,
+      "f1": 0.33962264150943394,
       "support": 51
     },
     "HOLD": {
-      "precision": 0.4177215189873418,
-      "recall": 0.375,
-      "f1": 0.39520958083832336,
+      "precision": 0.5416666666666666,
+      "recall": 0.4431818181818182,
+      "f1": 0.4875,
       "support": 88
     },
     "BUY": {
-      "precision": 0.39285714285714285,
-      "recall": 0.23404255319148937,
-      "f1": 0.29333333333333333,
+      "precision": 0.5283018867924528,
+      "recall": 0.2978723404255319,
+      "f1": 0.38095238095238093,
       "support": 94
     }
   },
@@ -30,30 +30,32 @@
     "2": 415
   },
   "confidence_stats": {
-    "mean_max_proba": 0.46515965461730957,
-    "mean_top2_margin": 0.14162059128284454,
-    "f1_macro": 0.32347403626750976
+    "mean_max_proba": 0.46940016746520996,
+    "mean_top2_margin": 0.15193328261375427,
+    "f1_macro": 0.4026916741539383
   },
   "optuna": {
-    "best_value": 0.3047600593194957,
+    "best_value": 0.3001919295949176,
     "best_params": {
-      "n_estimators": 140,
-      "max_depth": 7,
-      "learning_rate": 0.2603006986141061,
-      "subsample": 0.9085893249401052,
-      "colsample_bytree": 0.6903061292145731,
+      "n_estimators": 530,
+      "max_depth": 3,
+      "learning_rate": 0.03391619650060011,
+      "subsample": 0.8748681423925213,
+      "colsample_bytree": 0.9488699994561153,
       "min_child_weight": 11,
-      "reg_lambda": 10.594703059266898,
-      "reg_alpha": 1.968283486373417,
-      "gamma": 2.160468828979122
+      "reg_lambda": 2.0800267555496204,
+      "reg_alpha": 1.5100078918687532,
+      "gamma": 2.193152651482464
     },
     "n_trials": 75,
     "cv_splits": 5,
-    "scoring": "f1_macro (recency-weighted)"
+    "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
   },
   "smote_floors_used": {
     "0": 0.5,
     "1": 0.5,
     "2": 0.5
-  }
+  },
+  "threshold_calibration": null,
+  "very_low_confidence": false
 }

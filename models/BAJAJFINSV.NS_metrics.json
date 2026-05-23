@@ -1,23 +1,23 @@
 {
   "ticker": "BAJAJFINSV.NS",
-  "f1_macro": 0.2988395503365563,
+  "f1_macro": 0.24001119875353003,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.24183006535947713,
-      "recall": 0.5362318840579711,
-      "f1": 0.3333333333333333,
+      "precision": 0.27485380116959063,
+      "recall": 0.6811594202898551,
+      "f1": 0.39166666666666666,
       "support": 69
     },
     "HOLD": {
-      "precision": 0.39622641509433965,
-      "recall": 0.18421052631578946,
-      "f1": 0.25149700598802394,
+      "precision": 0.3877551020408163,
+      "recall": 0.16666666666666666,
+      "f1": 0.2331288343558282,
       "support": 114
     },
     "BUY": {
-      "precision": 0.4444444444444444,
-      "recall": 0.24,
-      "f1": 0.3116883116883117,
+      "precision": 0.23076923076923078,
+      "recall": 0.06,
+      "f1": 0.09523809523809523,
       "support": 50
     }
   },
@@ -30,30 +30,32 @@
     "2": 402
   },
   "confidence_stats": {
-    "mean_max_proba": 0.526688814163208,
-    "mean_top2_margin": 0.22527119517326355,
-    "f1_macro": 0.2988395503365563
+    "mean_max_proba": 0.5059195756912231,
+    "mean_top2_margin": 0.2012426257133484,
+    "f1_macro": 0.24001119875353003
   },
   "optuna": {
-    "best_value": 0.3241380531030423,
+    "best_value": 0.31260289082749027,
     "best_params": {
-      "n_estimators": 267,
-      "max_depth": 4,
-      "learning_rate": 0.10603289600975285,
-      "subsample": 0.9998148510108676,
-      "colsample_bytree": 0.7353526460802273,
-      "min_child_weight": 4,
-      "reg_lambda": 6.857756442146665,
-      "reg_alpha": 3.699330718369937,
-      "gamma": 0.12458254972782573
+      "n_estimators": 418,
+      "max_depth": 7,
+      "learning_rate": 0.13075261875267707,
+      "subsample": 0.8789637275072439,
+      "colsample_bytree": 0.8849346740815738,
+      "min_child_weight": 15,
+      "reg_lambda": 12.76912515459676,
+      "reg_alpha": 0.768414449518523,
+      "gamma": 2.000305154674799
     },
-    "n_trials": 75,
+    "n_trials": 30,
     "cv_splits": 5,
-    "scoring": "f1_macro (recency-weighted)"
+    "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
   },
   "smote_floors_used": {
     "0": 0.5,
     "1": 0.5,
     "2": 0.5
-  }
+  },
+  "threshold_calibration": null,
+  "very_low_confidence": true
 }

@@ -1,23 +1,23 @@
 {
   "ticker": "SHRIRAMFIN.NS",
-  "f1_macro": 0.24316635950566448,
+  "f1_macro": 0.24200375269870553,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.15789473684210525,
+      "precision": 0.15517241379310345,
       "recall": 0.15,
-      "f1": 0.15384615384615385,
+      "f1": 0.15254237288135594,
       "support": 60
     },
     "HOLD": {
-      "precision": 0.23529411764705882,
-      "recall": 0.16666666666666666,
-      "f1": 0.1951219512195122,
+      "precision": 0.1864406779661017,
+      "recall": 0.1527777777777778,
+      "f1": 0.16793893129770993,
       "support": 72
     },
     "BUY": {
-      "precision": 0.344,
-      "recall": 0.42574257425742573,
-      "f1": 0.3805309734513274,
+      "precision": 0.3793103448275862,
+      "recall": 0.43564356435643564,
+      "f1": 0.4055299539170507,
       "support": 101
     }
   },
@@ -30,30 +30,32 @@
     "2": 433
   },
   "confidence_stats": {
-    "mean_max_proba": 0.4355345368385315,
-    "mean_top2_margin": 0.10707440972328186,
-    "f1_macro": 0.24316635950566448
+    "mean_max_proba": 0.44280362129211426,
+    "mean_top2_margin": 0.11620727181434631,
+    "f1_macro": 0.24200375269870553
   },
   "optuna": {
-    "best_value": 0.35130494057371736,
+    "best_value": 0.3450579353424311,
     "best_params": {
-      "n_estimators": 197,
+      "n_estimators": 646,
       "max_depth": 3,
-      "learning_rate": 0.016069018664362014,
-      "subsample": 0.9053267778338473,
-      "colsample_bytree": 0.921257514314614,
-      "min_child_weight": 11,
-      "reg_lambda": 11.28134696829707,
-      "reg_alpha": 0.6519743603184038,
-      "gamma": 2.374863271534627
+      "learning_rate": 0.07252321552741484,
+      "subsample": 0.9797315776880847,
+      "colsample_bytree": 0.7617582562320635,
+      "min_child_weight": 8,
+      "reg_lambda": 7.520277136455625,
+      "reg_alpha": 3.1104001367366254,
+      "gamma": 1.9347378422977672
     },
-    "n_trials": 75,
+    "n_trials": 30,
     "cv_splits": 5,
-    "scoring": "f1_macro (recency-weighted)"
+    "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
   },
   "smote_floors_used": {
     "0": 0.5,
     "1": 0.5,
     "2": 0.5
-  }
+  },
+  "threshold_calibration": null,
+  "very_low_confidence": true
 }
