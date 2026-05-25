@@ -1,23 +1,23 @@
 {
   "ticker": "ADANIPORTS.NS",
-  "f1_macro": 0.34298635279027434,
+  "f1_macro": 0.3649873763694902,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.3229166666666667,
-      "recall": 0.5344827586206896,
-      "f1": 0.4025974025974026,
+      "precision": 0.27692307692307694,
+      "recall": 0.3103448275862069,
+      "f1": 0.2926829268292683,
       "support": 58
     },
     "HOLD": {
-      "precision": 0.36,
-      "recall": 0.569620253164557,
-      "f1": 0.4411764705882353,
+      "precision": 0.37209302325581395,
+      "recall": 0.6075949367088608,
+      "f1": 0.46153846153846156,
       "support": 79
     },
     "BUY": {
-      "precision": 0.8333333333333334,
-      "recall": 0.10416666666666667,
-      "f1": 0.18518518518518517,
+      "precision": 0.5897435897435898,
+      "recall": 0.23958333333333334,
+      "f1": 0.34074074074074073,
       "support": 96
     }
   },
@@ -30,36 +30,36 @@
     "2": 404
   },
   "confidence_stats": {
-    "mean_max_proba": 0.536185622215271,
-    "mean_top2_margin": 0.21769969165325165,
-    "f1_macro": 0.34298635279027434
+    "mean_max_proba": 0.59173583984375,
+    "mean_top2_margin": 0.3072132170200348,
+    "f1_macro": 0.3649873763694902
   },
   "optuna": {
-    "best_value": 0.38418261074038335,
+    "best_value": 0.39030919912367645,
     "best_params": {
-      "n_estimators": 149,
-      "max_depth": 7,
-      "learning_rate": 0.05781753592863424,
-      "subsample": 0.8815385975163981,
-      "colsample_bytree": 0.9467324461371189,
-      "min_child_weight": 5,
-      "reg_lambda": 14.657905893093913,
-      "reg_alpha": 1.886525832169541,
-      "gamma": 0.7129313070769433
+      "n_estimators": 478,
+      "max_depth": 6,
+      "learning_rate": 0.03317406664770861,
+      "subsample": 0.9974342857144755,
+      "colsample_bytree": 0.6047443025348772,
+      "min_child_weight": 3,
+      "reg_lambda": 10.302104139738308,
+      "reg_alpha": 0.6095714892406554,
+      "gamma": 0.12086117365507405
     },
-    "n_trials": 75,
+    "n_trials": 30,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
   },
   "smote_floors_used": {
     "0": 0.5,
     "1": 0.5,
-    "2": 0.65
+    "2": 0.5
   },
   "threshold_calibration": {
     "0": 0.33,
     "1": 0.33,
     "2": 0.2
   },
-  "very_low_confidence": false
+  "very_low_confidence": true
 }

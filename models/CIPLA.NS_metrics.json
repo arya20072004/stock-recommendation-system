@@ -1,23 +1,23 @@
 {
   "ticker": "CIPLA.NS",
-  "f1_macro": 0.39843883150969767,
+  "f1_macro": 0.366078262265581,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.3333333333333333,
-      "recall": 0.2714285714285714,
-      "f1": 0.2992125984251969,
+      "precision": 0.38596491228070173,
+      "recall": 0.3142857142857143,
+      "f1": 0.3464566929133858,
       "support": 70
     },
     "HOLD": {
-      "precision": 0.5118110236220472,
-      "recall": 0.625,
-      "f1": 0.5627705627705628,
+      "precision": 0.47580645161290325,
+      "recall": 0.5673076923076923,
+      "f1": 0.5175438596491229,
       "support": 104
     },
     "BUY": {
-      "precision": 0.3673469387755102,
-      "recall": 0.3050847457627119,
-      "f1": 0.3333333333333333,
+      "precision": 0.25,
+      "recall": 0.22033898305084745,
+      "f1": 0.23423423423423423,
       "support": 59
     }
   },
@@ -30,22 +30,22 @@
     "2": 371
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5631147027015686,
-    "mean_top2_margin": 0.2663346529006958,
-    "f1_macro": 0.39843883150969767
+    "mean_max_proba": 0.5164058208465576,
+    "mean_top2_margin": 0.20806540548801422,
+    "f1_macro": 0.366078262265581
   },
   "optuna": {
-    "best_value": 0.35046548028137026,
+    "best_value": 0.35671245961126474,
     "best_params": {
-      "n_estimators": 169,
-      "max_depth": 4,
-      "learning_rate": 0.2080114643907301,
-      "subsample": 0.9248049153371338,
-      "colsample_bytree": 0.861601224007343,
-      "min_child_weight": 10,
-      "reg_lambda": 13.865075495145105,
-      "reg_alpha": 0.7104435776634528,
-      "gamma": 0.5316195731350886
+      "n_estimators": 119,
+      "max_depth": 5,
+      "learning_rate": 0.06288314083674224,
+      "subsample": 0.7981973383624128,
+      "colsample_bytree": 0.9121486605448805,
+      "min_child_weight": 4,
+      "reg_lambda": 2.4707549099928636,
+      "reg_alpha": 2.5582616801842315,
+      "gamma": 0.3562266645069402
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -56,6 +56,10 @@
     "1": 0.5,
     "2": 0.5
   },
-  "threshold_calibration": null,
+  "threshold_calibration": {
+    "0": 0.28,
+    "1": 0.33,
+    "2": 0.33
+  },
   "very_low_confidence": false
 }

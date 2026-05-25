@@ -1,23 +1,23 @@
 {
   "ticker": "TRENT.NS",
-  "f1_macro": 0.2638904981547541,
+  "f1_macro": 0.2574929092970923,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.21951219512195122,
-      "recall": 0.09473684210526316,
-      "f1": 0.1323529411764706,
+      "precision": 0.2631578947368421,
+      "recall": 0.10526315789473684,
+      "f1": 0.15037593984962405,
       "support": 95
     },
     "HOLD": {
-      "precision": 0.5454545454545454,
-      "recall": 0.24324324324324326,
-      "f1": 0.3364485981308411,
+      "precision": 0.5333333333333333,
+      "recall": 0.21621621621621623,
+      "f1": 0.3076923076923077,
       "support": 74
     },
     "BUY": {
-      "precision": 0.22641509433962265,
+      "precision": 0.21818181818181817,
       "recall": 0.5625,
-      "f1": 0.32286995515695066,
+      "f1": 0.314410480349345,
       "support": 64
     }
   },
@@ -30,24 +30,24 @@
     "2": 463
   },
   "confidence_stats": {
-    "mean_max_proba": 0.49593350291252136,
-    "mean_top2_margin": 0.2040981948375702,
-    "f1_macro": 0.2638904981547541
+    "mean_max_proba": 0.4782103896141052,
+    "mean_top2_margin": 0.18074320256710052,
+    "f1_macro": 0.2574929092970923
   },
   "optuna": {
-    "best_value": 0.2892685850067433,
+    "best_value": 0.26169017387600724,
     "best_params": {
-      "n_estimators": 245,
-      "max_depth": 7,
-      "learning_rate": 0.17791011378787175,
-      "subsample": 0.6486715223834961,
-      "colsample_bytree": 0.6556615050853829,
+      "n_estimators": 296,
+      "max_depth": 4,
+      "learning_rate": 0.11156922016902253,
+      "subsample": 0.66440343320622,
+      "colsample_bytree": 0.8246160228923549,
       "min_child_weight": 14,
-      "reg_lambda": 6.575142946008757,
-      "reg_alpha": 2.8374455359029755,
-      "gamma": 2.0323372687287686
+      "reg_lambda": 12.39623675455997,
+      "reg_alpha": 1.602558679163952,
+      "gamma": 2.987054987647052
     },
-    "n_trials": 75,
+    "n_trials": 30,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
   },
@@ -57,5 +57,5 @@
     "2": 0.5
   },
   "threshold_calibration": null,
-  "very_low_confidence": false
+  "very_low_confidence": true
 }

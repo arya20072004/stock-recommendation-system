@@ -1,23 +1,23 @@
 {
   "ticker": "SBIN.NS",
-  "f1_macro": 0.381784027080311,
+  "f1_macro": 0.3398018068469651,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.26666666666666666,
-      "recall": 0.4444444444444444,
-      "f1": 0.3333333333333333,
+      "precision": 0.2,
+      "recall": 0.2222222222222222,
+      "f1": 0.21052631578947367,
       "support": 54
     },
     "HOLD": {
-      "precision": 0.2542372881355932,
-      "recall": 0.2631578947368421,
-      "f1": 0.25862068965517243,
+      "precision": 0.2413793103448276,
+      "recall": 0.24561403508771928,
+      "f1": 0.24347826086956523,
       "support": 57
     },
     "BUY": {
-      "precision": 0.6785714285714286,
-      "recall": 0.4672131147540984,
-      "f1": 0.5533980582524272,
+      "precision": 0.5826086956521739,
+      "recall": 0.5491803278688525,
+      "f1": 0.5654008438818565,
       "support": 122
     }
   },
@@ -30,22 +30,22 @@
     "2": 479
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6465257406234741,
-    "mean_top2_margin": 0.4041948914527893,
-    "f1_macro": 0.381784027080311
+    "mean_max_proba": 0.5577483177185059,
+    "mean_top2_margin": 0.26772400736808777,
+    "f1_macro": 0.3398018068469651
   },
   "optuna": {
-    "best_value": 0.35341388898619347,
+    "best_value": 0.34510012591509637,
     "best_params": {
-      "n_estimators": 224,
-      "max_depth": 3,
-      "learning_rate": 0.23648031843959497,
-      "subsample": 0.6165363463424567,
-      "colsample_bytree": 0.6944999817039056,
+      "n_estimators": 203,
+      "max_depth": 5,
+      "learning_rate": 0.1907819699355629,
+      "subsample": 0.8308867687257387,
+      "colsample_bytree": 0.7438837320155568,
       "min_child_weight": 4,
-      "reg_lambda": 6.949899251498879,
-      "reg_alpha": 0.753184189445686,
-      "gamma": 0.10107638922413048
+      "reg_lambda": 2.433788315584624,
+      "reg_alpha": 0.5176543668183584,
+      "gamma": 0.6126199492277415
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -58,7 +58,7 @@
   },
   "threshold_calibration": {
     "0": 0.33,
-    "1": 0.33,
+    "1": 0.28,
     "2": 0.2
   },
   "very_low_confidence": false

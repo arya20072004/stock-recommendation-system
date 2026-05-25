@@ -1,23 +1,23 @@
 {
   "ticker": "EICHERMOT.NS",
-  "f1_macro": 0.413564701417877,
+  "f1_macro": 0.3966825296722116,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.35135135135135137,
-      "recall": 0.28888888888888886,
-      "f1": 0.3170731707317073,
+      "precision": 0.34146341463414637,
+      "recall": 0.3111111111111111,
+      "f1": 0.32558139534883723,
       "support": 45
     },
     "HOLD": {
-      "precision": 0.4854368932038835,
+      "precision": 0.44642857142857145,
       "recall": 0.5050505050505051,
-      "f1": 0.49504950495049505,
+      "f1": 0.47393364928909953,
       "support": 99
     },
     "BUY": {
-      "precision": 0.41935483870967744,
-      "recall": 0.43820224719101125,
-      "f1": 0.42857142857142855,
+      "precision": 0.4125,
+      "recall": 0.3707865168539326,
+      "f1": 0.3905325443786982,
       "support": 89
     }
   },
@@ -30,22 +30,22 @@
     "2": 433
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5367782711982727,
-    "mean_top2_margin": 0.21528412401676178,
-    "f1_macro": 0.413564701417877
+    "mean_max_proba": 0.5340064167976379,
+    "mean_top2_margin": 0.21096622943878174,
+    "f1_macro": 0.3966825296722116
   },
   "optuna": {
-    "best_value": 0.29935056350403644,
+    "best_value": 0.2898521062211763,
     "best_params": {
-      "n_estimators": 206,
+      "n_estimators": 645,
       "max_depth": 3,
-      "learning_rate": 0.12171281593568464,
-      "subsample": 0.9964677604644826,
-      "colsample_bytree": 0.9976339928231411,
-      "min_child_weight": 10,
-      "reg_lambda": 9.10019897829949,
-      "reg_alpha": 1.5501524906229873,
-      "gamma": 0.11734513114438688
+      "learning_rate": 0.1775981817038416,
+      "subsample": 0.9439864462817503,
+      "colsample_bytree": 0.658379925938585,
+      "min_child_weight": 6,
+      "reg_lambda": 3.7876906345149277,
+      "reg_alpha": 1.8595036733440649,
+      "gamma": 0.4266687702412614
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -56,6 +56,10 @@
     "1": 0.5,
     "2": 0.5
   },
-  "threshold_calibration": null,
+  "threshold_calibration": {
+    "0": 0.28,
+    "1": 0.33,
+    "2": 0.33
+  },
   "very_low_confidence": false
 }

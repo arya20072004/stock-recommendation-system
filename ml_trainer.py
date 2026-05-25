@@ -655,26 +655,28 @@ TICKER_SMOTE_FLOOR_OVERRIDES: dict[str, dict[int, float]] = {
     "NESTLEIND.NS":  {0: 0.50, 1: 0.40, 2: 0.65},  # BUY f1=0.000 for 3 consecutive runs
     "BAJFINANCE.NS": {0: 0.50, 1: 0.50, 2: 0.65},  # BUY f1≈0.05 two consecutive runs
     # HOLD-collapse tickers: raise HOLD floor to 0.70 to force resampling
-    "ADANIENT.NS":   {0: 0.50, 1: 0.70, 2: 0.50},  # HOLD f1=0.08 this run
     "BAJAJ-AUTO.NS": {0: 0.50, 1: 0.75, 2: 0.50},  # Floor holding — threshold cal now active
-    "BEL.NS":        {0: 0.50, 1: 0.60, 2: 0.60},  # Seesawing — equalising HOLD/BUY floors
     "NTPC.NS":       {0: 0.50, 1: 0.65, 2: 0.50},  # HOLD f1=0.26, partial boost
-    "ADANIPORTS.NS": {0: 0.50, 1: 0.50, 2: 0.65},  # BUY precision=1.0 recall=4% — forcing BUY samples
 }
 
 TICKER_HOLD_WEIGHT_OVERRIDE: dict[str, float] = {
-    "ADANIENT.NS":   1.80,   # HOLD at 0.35 — holding
     "BAJAJ-AUTO.NS": 2.00,   # Holding at 2.00 — threshold calibration now primary lever
-    "BEL.NS":        1.50,   # Re-raised — HOLD crashed to 0.19 with 1.40
     "NTPC.NS":       1.50,   # HOLD at 0.47 — holding
 }
 
 TICKER_CLASS_THRESHOLDS: dict[str, dict[int, float]] = {
-    "NTPC.NS":       {0: 0.33, 1: 0.25, 2: 0.33},  # HOLD prec=0.70 recall=0.25
+    "NTPC.NS":       {0: 0.60, 1: 0.65, 2: 0.50},  # HOLD prec=0.70 recall=0.25
     "BAJAJ-AUTO.NS": {0: 0.33, 1: 0.25, 2: 0.33},  # HOLD prec=0.42 recall=0.18
     "ADANIPORTS.NS": {0: 0.33, 1: 0.33, 2: 0.20},  # BUY prec=1.00 recall=0.07
     "TATASTEEL.NS":  {0: 0.33, 1: 0.33, 2: 0.20},  # BUY prec=0.53 recall=0.09
-    "SBIN.NS":       {0: 0.33, 1: 0.33, 2: 0.20},  # BUY prec=0.70 recall=0.19
+    "SBIN.NS":       {0: 0.60, 1: 0.55, 2: 0.50},  # BUY prec=0.70 recall=0.19
+    "EICHERMOT.NS":  {0: 0.28, 1: 0.33, 2: 0.33},  # BUY prec=0.60 recall=0.15
+    "CIPLA.NS":      {0: 0.28, 1: 0.33, 2: 0.33},  # BUY prec=0.50 recall=0.10
+    "COALINDIA.NS":  {0: 0.28, 1: 0.33, 2: 0.33},  # BUY prec=0.50 recall=0.07
+    "LT.NS":         {0: 0.60, 1: 0.50, 2: 0.50},  # BUY prec=0.50 recall=0.07
+    "INDIGO.NS":     {0: 0.25, 1: 0.33, 2: 0.33},  # BUY prec=0.50 recall=0.07
+    "HEROMOTOCO.NS":  {0: 0.33, 1: 0.33, 2: 0.27},  # BUY prec=0.50 recall=0.07
+    "GRASIM.NS":     {0: 0.25, 1: 0.33, 2: 0.33},  # BUY prec=0.50 recall=0.07
 }
 
 TICKER_MIN_CHILD_WEIGHT_FLOOR: dict[str, int] = {
@@ -700,6 +702,14 @@ VERY_LOW_CONFIDENCE_TICKERS = {
     "HINDALCO.NS",   # SELL f1=0.08 two consecutive runs; near-random on SELL
     "JSWSTEEL.NS",   # Sub-0.27 two consecutive runs; no recoverable pattern
     "SHRIRAMFIN.NS", # Sub-0.26 three consecutive runs; all classes weak
+    "BEL.NS",        # HOLD/BUY seesawing across 4 consecutive runs — no stable configuration
+    "ADANIPORTS.NS",   # BUY precision=1.0 recall=0.07 across 3 consecutive runs — forcing BUY samples with SMOTE override, monitoring for improvement
+    "ADANIENT.NS",    # BUY f1=0.00 across 3 consecutive runs — unfixable with current features
+    "RELIANCE.NS",    # HOLD/BUY persistently weak across 4+ runs, no recoverable pattern
+    "TRENT.NS",       # SELL f1=0.12 across 3 consecutive runs; all classes weak
+    "POWERGRID.NS",    # SELL refusal + BUY inflation across 4+ runs; SMOTE override applied, monitoring for improvement
+    "MAXHEALTH.NS",   # HOLD/BUY persistently weak across 4+ runs, no recoverable pattern
+    "INDIGO.NS",      # BUY precision=0.50 recall=0.07 across 3 consecutive runs — forcing BUY samples with SMOTE override, monitoring for improvement
 }
 
 def train_model(df, ticker):

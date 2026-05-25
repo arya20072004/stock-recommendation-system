@@ -1,23 +1,23 @@
 {
   "ticker": "COALINDIA.NS",
-  "f1_macro": 0.3115079365079365,
+  "f1_macro": 0.3390004462293619,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2631578947368421,
-      "recall": 0.2727272727272727,
-      "f1": 0.26785714285714285,
+      "precision": 0.24615384615384617,
+      "recall": 0.2909090909090909,
+      "f1": 0.26666666666666666,
       "support": 55
     },
     "HOLD": {
-      "precision": 0.3488372093023256,
+      "precision": 0.4166666666666667,
       "recall": 0.3191489361702128,
-      "f1": 0.3333333333333333,
+      "f1": 0.3614457831325301,
       "support": 94
     },
     "BUY": {
-      "precision": 0.32222222222222224,
-      "recall": 0.34523809523809523,
-      "f1": 0.3333333333333333,
+      "precision": 0.3645833333333333,
+      "recall": 0.4166666666666667,
+      "f1": 0.3888888888888889,
       "support": 84
     }
   },
@@ -30,22 +30,22 @@
     "2": 459
   },
   "confidence_stats": {
-    "mean_max_proba": 0.4802009165287018,
-    "mean_top2_margin": 0.1527293175458908,
-    "f1_macro": 0.3115079365079365
+    "mean_max_proba": 0.48957884311676025,
+    "mean_top2_margin": 0.16079846024513245,
+    "f1_macro": 0.3390004462293619
   },
   "optuna": {
-    "best_value": 0.2516180160913404,
+    "best_value": 0.25288472678596974,
     "best_params": {
-      "n_estimators": 389,
+      "n_estimators": 351,
       "max_depth": 7,
-      "learning_rate": 0.0187608237152163,
-      "subsample": 0.986581100361722,
-      "colsample_bytree": 0.9606252366007907,
-      "min_child_weight": 6,
-      "reg_lambda": 10.435695608014331,
-      "reg_alpha": 2.6154283751288943,
-      "gamma": 0.49801990829325776
+      "learning_rate": 0.010836273921130282,
+      "subsample": 0.9847811297941043,
+      "colsample_bytree": 0.9712532816263512,
+      "min_child_weight": 3,
+      "reg_lambda": 2.3692723384073373,
+      "reg_alpha": 1.7531026756262147,
+      "gamma": 0.764325041343066
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -56,6 +56,10 @@
     "1": 0.5,
     "2": 0.5
   },
-  "threshold_calibration": null,
+  "threshold_calibration": {
+    "0": 0.28,
+    "1": 0.33,
+    "2": 0.33
+  },
   "very_low_confidence": false
 }

@@ -1,23 +1,23 @@
 {
   "ticker": "MAXHEALTH.NS",
-  "f1_macro": 0.3750421680769939,
+  "f1_macro": 0.3074685009823998,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.40350877192982454,
-      "recall": 0.2948717948717949,
-      "f1": 0.34074074074074073,
+      "precision": 0.36363636363636365,
+      "recall": 0.20512820512820512,
+      "f1": 0.26229508196721313,
       "support": 78
     },
     "HOLD": {
-      "precision": 0.5151515151515151,
-      "recall": 0.5,
-      "f1": 0.5074626865671642,
+      "precision": 0.4266666666666667,
+      "recall": 0.6274509803921569,
+      "f1": 0.5079365079365079,
       "support": 102
     },
     "BUY": {
-      "precision": 0.23376623376623376,
-      "recall": 0.33962264150943394,
-      "f1": 0.27692307692307694,
+      "precision": 0.1794871794871795,
+      "recall": 0.1320754716981132,
+      "f1": 0.15217391304347827,
       "support": 53
     }
   },
@@ -30,24 +30,24 @@
     "2": 374
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5325201153755188,
-    "mean_top2_margin": 0.20271000266075134,
-    "f1_macro": 0.3750421680769939
+    "mean_max_proba": 0.4746633768081665,
+    "mean_top2_margin": 0.12858371436595917,
+    "f1_macro": 0.3074685009823998
   },
   "optuna": {
-    "best_value": 0.3701834197859179,
+    "best_value": 0.3566302250651806,
     "best_params": {
-      "n_estimators": 699,
-      "max_depth": 5,
-      "learning_rate": 0.21150480674289893,
-      "subsample": 0.6114595750362463,
-      "colsample_bytree": 0.775813995569129,
+      "n_estimators": 536,
+      "max_depth": 4,
+      "learning_rate": 0.010517203624385438,
+      "subsample": 0.6005996252665188,
+      "colsample_bytree": 0.9983543315729904,
       "min_child_weight": 15,
-      "reg_lambda": 4.383589827127581,
-      "reg_alpha": 1.9593173009900968,
-      "gamma": 1.8220223751445506
+      "reg_lambda": 7.483248860238386,
+      "reg_alpha": 1.8023557933956376,
+      "gamma": 2.0458297621248858
     },
-    "n_trials": 75,
+    "n_trials": 30,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
   },
@@ -57,5 +57,5 @@
     "2": 0.5
   },
   "threshold_calibration": null,
-  "very_low_confidence": false
+  "very_low_confidence": true
 }

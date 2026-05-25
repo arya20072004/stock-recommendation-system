@@ -1,23 +1,23 @@
 {
   "ticker": "LT.NS",
-  "f1_macro": 0.3135810540844866,
+  "f1_macro": 0.2914829124874787,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.14893617021276595,
-      "recall": 0.14583333333333334,
-      "f1": 0.14736842105263157,
+      "precision": 0.17857142857142858,
+      "recall": 0.20833333333333334,
+      "f1": 0.19230769230769232,
       "support": 48
     },
     "HOLD": {
-      "precision": 0.4,
-      "recall": 0.2376237623762376,
-      "f1": 0.2981366459627329,
+      "precision": 0.35555555555555557,
+      "recall": 0.15841584158415842,
+      "f1": 0.2191780821917808,
       "support": 101
     },
     "BUY": {
-      "precision": 0.4126984126984127,
-      "recall": 0.6190476190476191,
-      "f1": 0.49523809523809526,
+      "precision": 0.3787878787878788,
+      "recall": 0.5952380952380952,
+      "f1": 0.46296296296296297,
       "support": 84
     }
   },
@@ -30,22 +30,22 @@
     "2": 470
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5689365863800049,
-    "mean_top2_margin": 0.3067728579044342,
-    "f1_macro": 0.3135810540844866
+    "mean_max_proba": 0.5761911273002625,
+    "mean_top2_margin": 0.3159354031085968,
+    "f1_macro": 0.2914829124874787
   },
   "optuna": {
-    "best_value": 0.3806988325109124,
+    "best_value": 0.3802210182395994,
     "best_params": {
-      "n_estimators": 121,
+      "n_estimators": 264,
       "max_depth": 5,
-      "learning_rate": 0.09296171304716686,
-      "subsample": 0.898815985784137,
-      "colsample_bytree": 0.8748957148212713,
-      "min_child_weight": 10,
-      "reg_lambda": 5.128918302890771,
-      "reg_alpha": 2.000844008667952,
-      "gamma": 1.8960468044639798
+      "learning_rate": 0.09549240511458215,
+      "subsample": 0.7267019774868635,
+      "colsample_bytree": 0.7693169325956652,
+      "min_child_weight": 5,
+      "reg_lambda": 3.8067232250906167,
+      "reg_alpha": 1.462053166584982,
+      "gamma": 2.8501404308892773
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -56,6 +56,10 @@
     "1": 0.5,
     "2": 0.5
   },
-  "threshold_calibration": null,
+  "threshold_calibration": {
+    "0": 0.25,
+    "1": 0.33,
+    "2": 0.33
+  },
   "very_low_confidence": false
 }
