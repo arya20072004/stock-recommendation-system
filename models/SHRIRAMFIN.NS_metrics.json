@@ -1,51 +1,51 @@
 {
   "ticker": "SHRIRAMFIN.NS",
-  "f1_macro": 0.26872512758087924,
+  "f1_macro": 0.26971865817113266,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.15714285714285714,
-      "recall": 0.18333333333333332,
-      "f1": 0.16923076923076924,
-      "support": 60
+      "precision": 0.17647058823529413,
+      "recall": 0.05084745762711865,
+      "f1": 0.07894736842105263,
+      "support": 59
     },
     "HOLD": {
-      "precision": 0.23076923076923078,
-      "recall": 0.16666666666666666,
-      "f1": 0.1935483870967742,
-      "support": 72
+      "precision": 0.24271844660194175,
+      "recall": 0.36764705882352944,
+      "f1": 0.29239766081871343,
+      "support": 68
     },
     "BUY": {
-      "precision": 0.42342342342342343,
-      "recall": 0.46534653465346537,
-      "f1": 0.44339622641509435,
-      "support": 101
+      "precision": 0.4230769230769231,
+      "recall": 0.4536082474226804,
+      "f1": 0.43781094527363185,
+      "support": 97
     }
   },
-  "train_size": 929,
-  "test_size": 233,
-  "total_rows_after_features": 1162,
+  "train_size": 896,
+  "test_size": 224,
+  "total_rows_after_features": 1120,
   "label_distribution": {
-    "0": 279,
-    "1": 450,
-    "2": 433
+    "0": 274,
+    "1": 431,
+    "2": 415
   },
   "confidence_stats": {
-    "mean_max_proba": 0.48402878642082214,
-    "mean_top2_margin": 0.16754929721355438,
-    "f1_macro": 0.26872512758087924
+    "mean_max_proba": 0.502280592918396,
+    "mean_top2_margin": 0.17763470113277435,
+    "f1_macro": 0.26971865817113266
   },
   "optuna": {
-    "best_value": 0.3553912316152041,
+    "best_value": 0.32412542071926037,
     "best_params": {
-      "n_estimators": 319,
-      "max_depth": 4,
-      "learning_rate": 0.04315732092792238,
-      "subsample": 0.8940160120263146,
-      "colsample_bytree": 0.9287834272546448,
-      "min_child_weight": 7,
-      "reg_lambda": 12.527361207244361,
-      "reg_alpha": 3.1838742515564156,
-      "gamma": 0.9072815025919462
+      "n_estimators": 424,
+      "max_depth": 6,
+      "learning_rate": 0.1763036728588638,
+      "subsample": 0.8794277511364257,
+      "colsample_bytree": 0.6611570200688516,
+      "min_child_weight": 8,
+      "reg_lambda": 10.18667176890516,
+      "reg_alpha": 0.6450309835308425,
+      "gamma": 1.9818730691722628
     },
     "n_trials": 30,
     "cv_splits": 5,

@@ -1,51 +1,51 @@
 {
   "ticker": "ICICIBANK.NS",
-  "f1_macro": 0.3923304462131176,
+  "f1_macro": 0.36402508448188686,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.3979591836734694,
-      "recall": 0.46987951807228917,
-      "f1": 0.430939226519337,
-      "support": 83
+      "precision": 0.42857142857142855,
+      "recall": 0.4024390243902439,
+      "f1": 0.41509433962264153,
+      "support": 82
     },
     "HOLD": {
-      "precision": 0.4406779661016949,
-      "recall": 0.28888888888888886,
-      "f1": 0.348993288590604,
-      "support": 90
+      "precision": 0.391304347826087,
+      "recall": 0.3103448275862069,
+      "f1": 0.34615384615384615,
+      "support": 87
     },
     "BUY": {
-      "precision": 0.35526315789473684,
-      "recall": 0.45,
-      "f1": 0.39705882352941174,
-      "support": 60
+      "precision": 0.28205128205128205,
+      "recall": 0.4,
+      "f1": 0.3308270676691729,
+      "support": 55
     }
   },
-  "train_size": 929,
-  "test_size": 233,
-  "total_rows_after_features": 1162,
+  "train_size": 896,
+  "test_size": 224,
+  "total_rows_after_features": 1120,
   "label_distribution": {
-    "0": 321,
-    "1": 420,
-    "2": 421
+    "0": 311,
+    "1": 409,
+    "2": 400
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5439526438713074,
-    "mean_top2_margin": 0.258308470249176,
-    "f1_macro": 0.3923304462131176
+    "mean_max_proba": 0.6277733445167542,
+    "mean_top2_margin": 0.36731454730033875,
+    "f1_macro": 0.36402508448188686
   },
   "optuna": {
-    "best_value": 0.3416019871143376,
+    "best_value": 0.3510383941748256,
     "best_params": {
-      "n_estimators": 568,
-      "max_depth": 6,
-      "learning_rate": 0.2453551767432934,
-      "subsample": 0.6248396072635878,
-      "colsample_bytree": 0.8851138979238576,
-      "min_child_weight": 5,
-      "reg_lambda": 6.462996407473828,
-      "reg_alpha": 2.290042486261928,
-      "gamma": 0.8981081483772065
+      "n_estimators": 620,
+      "max_depth": 4,
+      "learning_rate": 0.1755285225402102,
+      "subsample": 0.6754317444352131,
+      "colsample_bytree": 0.940780089117326,
+      "min_child_weight": 14,
+      "reg_lambda": 11.665713161315889,
+      "reg_alpha": 1.11653463809682,
+      "gamma": 0.21151233857690088
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -56,6 +56,10 @@
     "1": 0.5,
     "2": 0.5
   },
-  "threshold_calibration": null,
+  "threshold_calibration": {
+    "0": 0.33,
+    "1": 0.28,
+    "2": 0.33
+  },
   "very_low_confidence": false
 }

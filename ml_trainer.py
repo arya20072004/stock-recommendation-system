@@ -177,6 +177,82 @@ def _prepare_nifty_data(start_date, end_date):
     nifty_df["market_regime"] = (nifty_df["nifty_close"] > nifty_df["nifty_sma_200"]).astype(int).shift(1)
     return nifty_df
 
+def _prepare_macro_data(start_date, end_date):
+    """
+    Downloads Nifty 50 index (multi-timeframe), USD/INR, and Nasdaq-100.
+    Returns a DataFrame indexed by date with 10 leakage-safe macro features.
+    All features are shifted by 1 day before returning.
+    """
+    macro = pd.DataFrame()
+
+    # --- Nifty multi-timeframe returns + volatility ---
+    try:
+        nifty = yf.download(
+            "^NSEI",
+            start=start_date,
+            end=end_date + timedelta(days=1),
+            progress=False,
+            auto_adjust=True,
+        )
+        if not nifty.empty:
+            if isinstance(nifty.columns, pd.MultiIndex):
+                nifty.columns = nifty.columns.get_level_values(0)
+            c = nifty["Close"]
+            macro["nifty_ret_1d"]  = c.pct_change(1)
+            macro["nifty_ret_5d"]  = c.pct_change(5)
+            macro["nifty_ret_10d"] = c.pct_change(10)
+            macro["nifty_ret_20d"] = c.pct_change(20)
+            nifty_ret_1d_tmp = c.pct_change(1)
+            macro["nifty_ret_1d"]  = nifty_ret_1d_tmp
+            macro["nifty_vol_10d"] = nifty_ret_1d_tmp.rolling(10).std()
+    except Exception as ex:
+        logger.warning("macro: Nifty download failed — %s", ex)
+
+    # --- USD/INR ---
+    try:
+        usdinr = yf.download(
+            "INR=X",
+            start=start_date,
+            end=end_date + timedelta(days=1),
+            progress=False,
+            auto_adjust=True,
+        )
+        if not usdinr.empty:
+            if isinstance(usdinr.columns, pd.MultiIndex):
+                usdinr.columns = usdinr.columns.get_level_values(0)
+            c = usdinr["Close"]
+            macro["usdinr_ret_1d"]  = c.pct_change(1)
+            macro["usdinr_ret_5d"]  = c.pct_change(5)
+            usdinr_ret_1d_tmp = c.pct_change(1)
+            macro["usdinr_ret_1d"]  = usdinr_ret_1d_tmp
+            macro["usdinr_vol_10d"] = usdinr_ret_1d_tmp.rolling(10).std()
+    except Exception as ex:
+        logger.warning("macro: USD/INR download failed — %s", ex)
+
+    # --- Nasdaq-100 ---
+    try:
+        nasdaq = yf.download(
+            "^NDX",
+            start=start_date,
+            end=end_date + timedelta(days=1),
+            progress=False,
+            auto_adjust=True,
+        )
+        if not nasdaq.empty:
+            if isinstance(nasdaq.columns, pd.MultiIndex):
+                nasdaq.columns = nasdaq.columns.get_level_values(0)
+            c = nasdaq["Close"]
+            macro["nasdaq_ret_5d"]  = c.pct_change(5)
+            macro["nasdaq_ret_20d"] = c.pct_change(20)
+    except Exception as ex:
+        logger.warning("macro: Nasdaq download failed — %s", ex)
+
+    if macro.empty:
+        return pd.DataFrame()
+
+    # Shift all features by 1 day — avoids same-day lookahead
+    macro = macro.shift(1)
+    return macro
 
 def _prepare_sentiment_data(news_docs):
     news_df = pd.DataFrame(news_docs)
@@ -349,6 +425,21 @@ def create_dataset(ticker, client):
         return pd.DataFrame()
 
     df = prices_df.join(nifty_df[["nifty_return", "market_regime"]], how="left")
+    macro_df = _prepare_macro_data(start_date, end_date)
+    if not macro_df.empty:
+        df = df.join(macro_df, how="left")
+        logger.info(
+            "%s: macro features joined — nifty multi-tf, usdinr, nasdaq (%d cols)",
+            ticker, macro_df.shape[1],
+        )
+    else:
+        logger.warning("%s: macro data empty — macro features will be zeroed", ticker)
+        for col in [
+            "nifty_ret_1d", "nifty_ret_5d", "nifty_ret_10d", "nifty_ret_20d", "nifty_vol_10d",
+            "usdinr_ret_1d", "usdinr_ret_5d", "usdinr_vol_10d",
+            "nasdaq_ret_5d", "nasdaq_ret_20d",
+        ]:
+            df[col] = 0.0
     df["return"] = df["close"].pct_change()
     df["outperformance"] = df["return"].shift(1) - df["nifty_return"].shift(1)
 
@@ -526,6 +617,16 @@ def create_dataset(ticker, client):
         "sector_momentum",
         "adx",
         "target",
+        "nifty_ret_1d",
+        "nifty_ret_5d",
+        "nifty_ret_10d",
+        "nifty_ret_20d",
+        "nifty_vol_10d",
+        "usdinr_ret_1d",
+        "usdinr_ret_5d",
+        "usdinr_vol_10d",
+        "nasdaq_ret_5d",
+        "nasdaq_ret_20d",
     ]
     df = df.replace([float("inf"), float("-inf")], pd.NA)
     df = df.dropna(subset=required_columns)
@@ -553,6 +654,16 @@ def _make_feature_list(df):
         "sector_momentum_5d",
         "adx",
         "adx_trending",
+        "nifty_ret_1d",
+        "nifty_ret_5d",
+        "nifty_ret_10d",
+        "nifty_ret_20d",
+        "nifty_vol_10d",
+        "usdinr_ret_1d",
+        "usdinr_ret_5d",
+        "usdinr_vol_10d",
+        "nasdaq_ret_5d",
+        "nasdaq_ret_20d",
     ]
     return [feature for feature in candidate_features if feature in df.columns]
 
@@ -654,33 +765,29 @@ SMOTE_FLOORS: dict[int, float] = {0: 0.50, 1: 0.50, 2: 0.50}
 TICKER_SMOTE_FLOOR_OVERRIDES: dict[str, dict[int, float]] = {
     "NESTLEIND.NS":  {0: 0.50, 1: 0.40, 2: 0.65},  # BUY f1=0.000 for 3 consecutive runs
     "BAJFINANCE.NS": {0: 0.50, 1: 0.50, 2: 0.65},  # BUY f1≈0.05 two consecutive runs
-    # HOLD-collapse tickers: raise HOLD floor to 0.70 to force resampling
-    "BAJAJ-AUTO.NS": {0: 0.50, 1: 0.75, 2: 0.50},  # Floor holding — threshold cal now active
-    "NTPC.NS":       {0: 0.50, 1: 0.65, 2: 0.50},  # HOLD f1=0.26, partial boost
+    "SBIN.NS":       {0: 0.60, 1: 0.55, 2: 0.50},
 }
 
 TICKER_HOLD_WEIGHT_OVERRIDE: dict[str, float] = {
-    "BAJAJ-AUTO.NS": 2.00,   # Holding at 2.00 — threshold calibration now primary lever
-    "NTPC.NS":       1.50,   # HOLD at 0.47 — holding
+    #
 }
 
-TICKER_CLASS_THRESHOLDS: dict[str, dict[int, float]] = {
-    "NTPC.NS":       {0: 0.60, 1: 0.65, 2: 0.50},  # HOLD prec=0.70 recall=0.25
-    "BAJAJ-AUTO.NS": {0: 0.33, 1: 0.25, 2: 0.33},  # HOLD prec=0.42 recall=0.18
-    "ADANIPORTS.NS": {0: 0.33, 1: 0.33, 2: 0.20},  # BUY prec=1.00 recall=0.07
-    "TATASTEEL.NS":  {0: 0.33, 1: 0.33, 2: 0.20},  # BUY prec=0.53 recall=0.09
-    "SBIN.NS":       {0: 0.60, 1: 0.55, 2: 0.50},  # BUY prec=0.70 recall=0.19
-    "EICHERMOT.NS":  {0: 0.28, 1: 0.33, 2: 0.33},  # BUY prec=0.60 recall=0.15
-    "CIPLA.NS":      {0: 0.28, 1: 0.33, 2: 0.33},  # BUY prec=0.50 recall=0.10
-    "COALINDIA.NS":  {0: 0.28, 1: 0.33, 2: 0.33},  # BUY prec=0.50 recall=0.07
-    "LT.NS":         {0: 0.60, 1: 0.50, 2: 0.50},  # BUY prec=0.50 recall=0.07
-    "INDIGO.NS":     {0: 0.25, 1: 0.33, 2: 0.33},  # BUY prec=0.50 recall=0.07
-    "HEROMOTOCO.NS":  {0: 0.33, 1: 0.33, 2: 0.27},  # BUY prec=0.50 recall=0.07
-    "GRASIM.NS":     {0: 0.25, 1: 0.33, 2: 0.33},  # BUY prec=0.50 recall=0.07
+TICKER_CLASS_THRESHOLDS = {
+    "ADANIPORTS.NS": {0: 0.33, 1: 0.33, 2: 0.20},  # keep, VLC
+    "TATASTEEL.NS":  {0: 0.33, 1: 0.33, 2: 0.20},  # locked
+    "SBIN.NS":       {0: 0.33, 1: 0.28, 2: 0.20},  # hold
+    "CIPLA.NS":      {0: 0.28, 1: 0.33, 2: 0.33},  # locked
+    "COALINDIA.NS":  {0: 0.28, 1: 0.33, 2: 0.33},  # hold
+    "EICHERMOT.NS":  {0: 0.28, 1: 0.33, 2: 0.33},  # hold
+    "INDIGO.NS":     {0: 0.25, 1: 0.33, 2: 0.33},  # keep, VLC
+    "HEROMOTOCO.NS": {0: 0.33, 1: 0.33, 2: 0.27},  # locked
+    "GRASIM.NS":     {0: 0.25, 1: 0.33, 2: 0.33},  # hold
+    "M&M.NS":        {0: 0.33, 1: 0.28, 2: 0.33},  # confirmed
+    "ICICIBANK.NS":  {0: 0.33, 1: 0.28, 2: 0.33},  # new
+    "APOLLOHOSP.NS": {0: 0.25, 1: 0.33, 2: 0.33},  # Run 15 — SELL needs boost
 }
 
 TICKER_MIN_CHILD_WEIGHT_FLOOR: dict[str, int] = {
-    "BAJAJ-AUTO.NS": 8,   # HOLD still 0.24 after SMOTE+weight — force coarser splits
     "TRENT.NS":      8,   # SELL at 0.12, all classes weak — same pathology
     "RELIANCE.NS":   8,   # HOLD/BUY suppressed across runs
     "POWERGRID.NS":  8,   # SELL refusal + BUY inflation across multiple runs
@@ -710,6 +817,10 @@ VERY_LOW_CONFIDENCE_TICKERS = {
     "POWERGRID.NS",    # SELL refusal + BUY inflation across 4+ runs; SMOTE override applied, monitoring for improvement
     "MAXHEALTH.NS",   # HOLD/BUY persistently weak across 4+ runs, no recoverable pattern
     "INDIGO.NS",      # BUY precision=0.50 recall=0.07 across 3 consecutive runs — forcing BUY samples with SMOTE override, monitoring for improvement
+    "NTPC.NS",      # 6+ threshold/SMOTE iterations, no structural convergence
+    "BAJAJ-AUTO.NS",  # 3 consecutive sub-0.33 runs, declining CV scores
+    "LT.NS",        # train/test disconnect confirmed, HOLD structural failure
+    "ASIANPAINT.NS"  # 3 consecutive sub-0.30 runs, no recoverable pattern
 }
 
 def train_model(df, ticker):

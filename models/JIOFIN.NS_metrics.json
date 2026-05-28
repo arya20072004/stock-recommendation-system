@@ -1,51 +1,51 @@
 {
   "ticker": "JIOFIN.NS",
-  "f1_macro": 0.23141170709308648,
+  "f1_macro": 0.25416693905751486,
   "per_class_metrics": {
     "SELL": {
       "precision": 0.3333333333333333,
-      "recall": 0.05172413793103448,
-      "f1": 0.08955223880597014,
-      "support": 58
+      "recall": 0.03636363636363636,
+      "f1": 0.06557377049180328,
+      "support": 55
     },
     "HOLD": {
-      "precision": 0.3103448275862069,
-      "recall": 0.375,
-      "f1": 0.33962264150943394,
-      "support": 48
+      "precision": 0.28846153846153844,
+      "recall": 0.32608695652173914,
+      "f1": 0.30612244897959184,
+      "support": 46
     },
     "BUY": {
-      "precision": 0.18032786885245902,
-      "recall": 0.5,
-      "f1": 0.26506024096385544,
+      "precision": 0.26153846153846155,
+      "recall": 0.7727272727272727,
+      "f1": 0.39080459770114945,
       "support": 22
     }
   },
-  "train_size": 508,
-  "test_size": 128,
-  "total_rows_after_features": 636,
+  "train_size": 490,
+  "test_size": 123,
+  "total_rows_after_features": 613,
   "label_distribution": {
-    "0": 193,
-    "1": 240,
-    "2": 203
+    "0": 183,
+    "1": 233,
+    "2": 197
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6160928010940552,
-    "mean_top2_margin": 0.3430490493774414,
-    "f1_macro": 0.23141170709308648
+    "mean_max_proba": 0.7047536969184875,
+    "mean_top2_margin": 0.48793724179267883,
+    "f1_macro": 0.25416693905751486
   },
   "optuna": {
-    "best_value": 0.2553912161038766,
+    "best_value": 0.23853225361153244,
     "best_params": {
-      "n_estimators": 198,
-      "max_depth": 3,
-      "learning_rate": 0.23241444644268586,
-      "subsample": 0.6168986289167575,
-      "colsample_bytree": 0.9143533689853258,
-      "min_child_weight": 14,
-      "reg_lambda": 10.016722229103722,
-      "reg_alpha": 0.8247375067408422,
-      "gamma": 0.2119307857382767
+      "n_estimators": 688,
+      "max_depth": 7,
+      "learning_rate": 0.269002374481638,
+      "subsample": 0.682663264671085,
+      "colsample_bytree": 0.9960057656619378,
+      "min_child_weight": 9,
+      "reg_lambda": 12.065159562904233,
+      "reg_alpha": 0.5449567944005484,
+      "gamma": 0.1713165058126559
     },
     "n_trials": 75,
     "cv_splits": 5,

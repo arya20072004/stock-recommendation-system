@@ -1,51 +1,51 @@
 {
   "ticker": "SUNPHARMA.NS",
-  "f1_macro": 0.33773908270487896,
+  "f1_macro": 0.27454240901477084,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.42105263157894735,
-      "recall": 0.2318840579710145,
-      "f1": 0.29906542056074764,
-      "support": 69
+      "precision": 0.2727272727272727,
+      "recall": 0.5373134328358209,
+      "f1": 0.36180904522613067,
+      "support": 67
     },
     "HOLD": {
-      "precision": 0.45454545454545453,
-      "recall": 0.30303030303030304,
-      "f1": 0.36363636363636365,
-      "support": 99
+      "precision": 0.38181818181818183,
+      "recall": 0.22105263157894736,
+      "f1": 0.28,
+      "support": 95
     },
     "BUY": {
-      "precision": 0.26356589147286824,
-      "recall": 0.5230769230769231,
-      "f1": 0.35051546391752575,
-      "support": 65
+      "precision": 0.24324324324324326,
+      "recall": 0.14516129032258066,
+      "f1": 0.18181818181818182,
+      "support": 62
     }
   },
-  "train_size": 929,
-  "test_size": 233,
-  "total_rows_after_features": 1162,
+  "train_size": 896,
+  "test_size": 224,
+  "total_rows_after_features": 1120,
   "label_distribution": {
-    "0": 289,
-    "1": 426,
-    "2": 447
+    "0": 283,
+    "1": 407,
+    "2": 430
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5594653487205505,
-    "mean_top2_margin": 0.28660792112350464,
-    "f1_macro": 0.33773908270487896
+    "mean_max_proba": 0.44780677556991577,
+    "mean_top2_margin": 0.1406985968351364,
+    "f1_macro": 0.27454240901477084
   },
   "optuna": {
-    "best_value": 0.33116695099193266,
+    "best_value": 0.3948882548230118,
     "best_params": {
-      "n_estimators": 458,
-      "max_depth": 5,
-      "learning_rate": 0.14402947831794624,
-      "subsample": 0.9126554155553883,
-      "colsample_bytree": 0.7250462975030811,
-      "min_child_weight": 6,
-      "reg_lambda": 5.887900402874171,
-      "reg_alpha": 0.8104090194791913,
-      "gamma": 1.2042638195190318
+      "n_estimators": 132,
+      "max_depth": 7,
+      "learning_rate": 0.012192398553438951,
+      "subsample": 0.9586100168884762,
+      "colsample_bytree": 0.9933070090511124,
+      "min_child_weight": 11,
+      "reg_lambda": 13.985273998902294,
+      "reg_alpha": 1.9769553580316057,
+      "gamma": 1.316423860186598
     },
     "n_trials": 75,
     "cv_splits": 5,
