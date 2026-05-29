@@ -1,17 +1,17 @@
 {
   "ticker": "BAJAJ-AUTO.NS",
-  "f1_macro": 0.3561726169010699,
+  "f1_macro": 0.36483857949959647,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.3181818181818182,
-      "recall": 0.40384615384615385,
-      "f1": 0.3559322033898305,
+      "precision": 0.3333333333333333,
+      "recall": 0.3076923076923077,
+      "f1": 0.32,
       "support": 52
     },
     "HOLD": {
-      "precision": 0.6666666666666666,
-      "recall": 0.0975609756097561,
-      "f1": 0.1702127659574468,
+      "precision": 0.43333333333333335,
+      "recall": 0.15853658536585366,
+      "f1": 0.23214285714285715,
       "support": 82
     },
     "BUY": {
@@ -21,31 +21,31 @@
       "support": 90
     }
   },
-  "train_size": 896,
+  "train_size": 895,
   "test_size": 224,
-  "total_rows_after_features": 1120,
+  "total_rows_after_features": 1119,
   "label_distribution": {
-    "0": 277,
+    "0": 276,
     "1": 405,
     "2": 438
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6945053935050964,
-    "mean_top2_margin": 0.4860025942325592,
-    "f1_macro": 0.3561726169010699
+    "mean_max_proba": 0.6038904190063477,
+    "mean_top2_margin": 0.3493344783782959,
+    "f1_macro": 0.36483857949959647
   },
   "optuna": {
-    "best_value": 0.27352220888027784,
+    "best_value": 0.2554656844447474,
     "best_params": {
-      "n_estimators": 653,
-      "max_depth": 7,
-      "learning_rate": 0.2886543197848192,
-      "subsample": 0.6075465793897113,
-      "colsample_bytree": 0.8688886608238271,
-      "min_child_weight": 14,
-      "reg_lambda": 12.20494530019288,
-      "reg_alpha": 3.969822296517745,
-      "gamma": 0.20112403663316902
+      "n_estimators": 454,
+      "max_depth": 4,
+      "learning_rate": 0.09217744077970551,
+      "subsample": 0.9966215911292258,
+      "colsample_bytree": 0.7087020322493793,
+      "min_child_weight": 12,
+      "reg_lambda": 8.665441635260763,
+      "reg_alpha": 1.1072139305801787,
+      "gamma": 0.42271832629888073
     },
     "n_trials": 30,
     "cv_splits": 5,

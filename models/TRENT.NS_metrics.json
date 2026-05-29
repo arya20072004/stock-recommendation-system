@@ -1,59 +1,59 @@
 {
   "ticker": "TRENT.NS",
-  "f1_macro": 0.23902018548827061,
+  "f1_macro": 0.3169162826420891,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.75,
-      "recall": 0.03333333333333333,
-      "f1": 0.06382978723404255,
+      "precision": 0.38235294117647056,
+      "recall": 0.14444444444444443,
+      "f1": 0.20967741935483872,
       "support": 90
     },
     "HOLD": {
-      "precision": 0.4375,
-      "recall": 0.19444444444444445,
-      "f1": 0.2692307692307692,
+      "precision": 0.35714285714285715,
+      "recall": 0.2777777777777778,
+      "f1": 0.3125,
       "support": 72
     },
     "BUY": {
-      "precision": 0.2553191489361702,
-      "recall": 0.7741935483870968,
-      "f1": 0.384,
+      "precision": 0.31343283582089554,
+      "recall": 0.6774193548387096,
+      "f1": 0.42857142857142855,
       "support": 62
     }
   },
-  "train_size": 896,
+  "train_size": 895,
   "test_size": 224,
-  "total_rows_after_features": 1120,
+  "total_rows_after_features": 1119,
   "label_distribution": {
     "0": 267,
-    "1": 402,
+    "1": 401,
     "2": 451
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5033950209617615,
-    "mean_top2_margin": 0.2013837844133377,
-    "f1_macro": 0.23902018548827061
+    "mean_max_proba": 0.4637463390827179,
+    "mean_top2_margin": 0.14550544321537018,
+    "f1_macro": 0.3169162826420891
   },
   "optuna": {
-    "best_value": 0.2756092288500479,
+    "best_value": 0.27632158303186655,
     "best_params": {
-      "n_estimators": 417,
-      "max_depth": 4,
-      "learning_rate": 0.0730918237877808,
-      "subsample": 0.7609734904680296,
-      "colsample_bytree": 0.8303200261843702,
-      "min_child_weight": 9,
-      "reg_lambda": 7.9303826236452,
-      "reg_alpha": 2.2438593289144384,
-      "gamma": 2.6033207294453087
+      "n_estimators": 522,
+      "max_depth": 6,
+      "learning_rate": 0.2814431073599867,
+      "subsample": 0.7171763847036925,
+      "colsample_bytree": 0.7303058302451672,
+      "min_child_weight": 11,
+      "reg_lambda": 8.515957996887305,
+      "reg_alpha": 4.569672149345086,
+      "gamma": 2.3407955582102833
     },
     "n_trials": 30,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
   },
   "smote_floors_used": {
-    "0": 0.5,
-    "1": 0.5,
+    "0": 0.75,
+    "1": 0.4,
     "2": 0.5
   },
   "threshold_calibration": null,

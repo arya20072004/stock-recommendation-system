@@ -153,6 +153,10 @@ TICKER_HISTORY_OVERRIDE = {
 TICKER_ATR_THRESHOLD_SCALE: dict[str, float] = {
     #"NESTLEIND.NS": 0.75,  # Default 1.0× ATR produces too few BUY labels — low volatility stock
     #"TECHM.NS":     0.75,  # Same reason — BUY labels suppressed by high ATR threshold
+    "NTPC.NS":      0.70,   # ADD — currently generates BUY=263 SELL=263 but model ignores SELL
+    "POWERGRID.NS": 0.65,   # ADD — SELL recall=0.01 is a labeling problem, not a model problem
+    "COALINDIA.NS": 0.75,   # ADD — all three classes weak, threshold too conservative
+    "SHRIRAMFIN.NS": 0.75, # ADD — SELL recall=0.0 is a labeling problem, not a model problem
 }
 
 def _prepare_nifty_data(start_date, end_date):
@@ -285,6 +289,8 @@ SECTOR_INDEX_DISABLED_TICKERS = {
     "HDFCBANK.NS",
     "NESTLEIND.NS",
 }
+
+IT_MACRO_DISABLED_TICKERS = {"INFY.NS", "TCS.NS", "HCLTECH.NS", "WIPRO.NS", "TECHM.NS"}
 
 def _prepare_sector_data(ticker, client):
     """
@@ -766,6 +772,11 @@ TICKER_SMOTE_FLOOR_OVERRIDES: dict[str, dict[int, float]] = {
     "NESTLEIND.NS":  {0: 0.50, 1: 0.40, 2: 0.65},  # BUY f1=0.000 for 3 consecutive runs
     "BAJFINANCE.NS": {0: 0.50, 1: 0.50, 2: 0.65},  # BUY f1≈0.05 two consecutive runs
     "SBIN.NS":       {0: 0.60, 1: 0.55, 2: 0.50},
+    "BAJAJFINSV.NS":  {0: 0.65, 1: 0.45, 2: 0.65},
+    "NTPC.NS":      {0: 0.70, 1: 0.45, 2: 0.50},  # force SELL samples
+    "POWERGRID.NS": {0: 0.75, 1: 0.40, 2: 0.50},  # SELL floor very high
+    "TRENT.NS": {0: 0.75, 1: 0.40, 2: 0.50},  # force massive SELL oversampling
+    "SHRIRAMFIN.NS": {0: 0.70, 1: 0.45, 2: 0.50},
 }
 
 TICKER_HOLD_WEIGHT_OVERRIDE: dict[str, float] = {
@@ -775,22 +786,27 @@ TICKER_HOLD_WEIGHT_OVERRIDE: dict[str, float] = {
 TICKER_CLASS_THRESHOLDS = {
     "ADANIPORTS.NS": {0: 0.33, 1: 0.33, 2: 0.20},  # keep, VLC
     "TATASTEEL.NS":  {0: 0.33, 1: 0.33, 2: 0.20},  # locked
-    "SBIN.NS":       {0: 0.33, 1: 0.28, 2: 0.20},  # hold
+    "SBIN.NS":       {0: 0.33, 1: 0.28, 2: 0.28},  # hold
     "CIPLA.NS":      {0: 0.28, 1: 0.33, 2: 0.33},  # locked
     "COALINDIA.NS":  {0: 0.28, 1: 0.33, 2: 0.33},  # hold
-    "EICHERMOT.NS":  {0: 0.28, 1: 0.33, 2: 0.33},  # hold
+    "EICHERMOT.NS":  {0: 0.20, 1: 0.33, 2: 0.33},  # hold
     "INDIGO.NS":     {0: 0.25, 1: 0.33, 2: 0.33},  # keep, VLC
     "HEROMOTOCO.NS": {0: 0.33, 1: 0.33, 2: 0.27},  # locked
     "GRASIM.NS":     {0: 0.25, 1: 0.33, 2: 0.33},  # hold
     "M&M.NS":        {0: 0.33, 1: 0.28, 2: 0.33},  # confirmed
     "ICICIBANK.NS":  {0: 0.33, 1: 0.28, 2: 0.33},  # new
     "APOLLOHOSP.NS": {0: 0.25, 1: 0.33, 2: 0.33},  # Run 15 — SELL needs boost
+    "BAJAJFINSV.NS": {0: 0.28, 1: 0.38, 2: 0.28},
+    "NTPC.NS":      {0: 0.22, 1: 0.38, 2: 0.38},  # heavily lower SELL threshold
+    "POWERGRID.NS": {0: 0.20, 1: 0.38, 2: 0.38},  # SELL needs extreme boost
+    "SHRIRAMFIN.NS": {0: 0.22, 1: 0.38, 2: 0.38},
 }
 
 TICKER_MIN_CHILD_WEIGHT_FLOOR: dict[str, int] = {
     "TRENT.NS":      8,   # SELL at 0.12, all classes weak — same pathology
     "RELIANCE.NS":   8,   # HOLD/BUY suppressed across runs
     "POWERGRID.NS":  8,   # SELL refusal + BUY inflation across multiple runs
+    "BAJAJFINSV.NS": 6,
 }
 
 # Add near TICKER_HISTORY_OVERRIDE at module level:
@@ -828,6 +844,12 @@ def train_model(df, ticker):
     Tunes with Optuna + TimeSeriesSplit (SMOTE inside fold), trains final model,
     and saves model, feature list, and metrics.
     """
+    TICKER_SELL_BOOST_OVERRIDE: dict[str, float] = {
+        "TRENT.NS":     2.0,   # current cap is 1.5, need more
+        "NTPC.NS":      2.0,
+        "POWERGRID.NS": 2.0,
+        "SHRIRAMFIN.NS":2.0,
+    }
     logger.info("Training model for %s", ticker)
     os.makedirs(MODELS_DIR, exist_ok=True)
     os.makedirs(FEATURES_DIR, exist_ok=True)
@@ -946,7 +968,8 @@ def train_model(df, ticker):
     hold_count = resampled_counts.get(1, 1)
     buy_count  = resampled_counts.get(2, 1)
     raw_boost  = (hold_count + buy_count) / max(sell_count, 1)
-    sell_boost = min(raw_boost, 1.5)
+    max_boost  = TICKER_SELL_BOOST_OVERRIDE.get(ticker, 1.5)
+    sell_boost = min(raw_boost, max_boost)
     hold_boost = 1.2 if sell_boost > 1.2 else 1.0
     # Apply ticker-level HOLD weight override if configured
     hold_boost = max(hold_boost, TICKER_HOLD_WEIGHT_OVERRIDE.get(ticker, 0.0))

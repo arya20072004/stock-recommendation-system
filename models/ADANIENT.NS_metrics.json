@@ -1,51 +1,51 @@
 {
   "ticker": "ADANIENT.NS",
-  "f1_macro": 0.32855020796197265,
+  "f1_macro": 0.346645078641625,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.3804347826086957,
-      "recall": 0.4605263157894737,
-      "f1": 0.4166666666666667,
+      "precision": 0.41836734693877553,
+      "recall": 0.5394736842105263,
+      "f1": 0.47126436781609193,
       "support": 76
     },
     "HOLD": {
-      "precision": 0.2962962962962963,
-      "recall": 0.0963855421686747,
-      "f1": 0.14545454545454545,
+      "precision": 0.35,
+      "recall": 0.08433734939759036,
+      "f1": 0.13592233009708737,
       "support": 83
     },
     "BUY": {
-      "precision": 0.34285714285714286,
-      "recall": 0.5538461538461539,
-      "f1": 0.4235294117647059,
+      "precision": 0.3490566037735849,
+      "recall": 0.5692307692307692,
+      "f1": 0.4327485380116959,
       "support": 65
     }
   },
-  "train_size": 896,
+  "train_size": 895,
   "test_size": 224,
-  "total_rows_after_features": 1120,
+  "total_rows_after_features": 1119,
   "label_distribution": {
     "0": 296,
-    "1": 448,
+    "1": 447,
     "2": 376
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5441535115242004,
-    "mean_top2_margin": 0.26126641035079956,
-    "f1_macro": 0.32855020796197265
+    "mean_max_proba": 0.48500579595565796,
+    "mean_top2_margin": 0.18440090119838715,
+    "f1_macro": 0.346645078641625
   },
   "optuna": {
-    "best_value": 0.33220942817684257,
+    "best_value": 0.33161076379419707,
     "best_params": {
-      "n_estimators": 673,
-      "max_depth": 5,
-      "learning_rate": 0.28539851029576924,
-      "subsample": 0.6835666178467775,
-      "colsample_bytree": 0.8737344770504712,
-      "min_child_weight": 11,
-      "reg_lambda": 9.423736609972117,
-      "reg_alpha": 2.0143396565731004,
-      "gamma": 1.7118578192078902
+      "n_estimators": 263,
+      "max_depth": 6,
+      "learning_rate": 0.08652850055662842,
+      "subsample": 0.6525428585573677,
+      "colsample_bytree": 0.9971169216485326,
+      "min_child_weight": 6,
+      "reg_lambda": 11.328973505109202,
+      "reg_alpha": 1.8765195068371376,
+      "gamma": 2.3976225302841936
     },
     "n_trials": 30,
     "cv_splits": 5,

@@ -1,61 +1,65 @@
 {
   "ticker": "SHRIRAMFIN.NS",
-  "f1_macro": 0.26971865817113266,
+  "f1_macro": 0.2994894739861183,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.17647058823529413,
-      "recall": 0.05084745762711865,
-      "f1": 0.07894736842105263,
-      "support": 59
+      "precision": 0.27380952380952384,
+      "recall": 0.35384615384615387,
+      "f1": 0.3087248322147651,
+      "support": 65
     },
     "HOLD": {
-      "precision": 0.24271844660194175,
-      "recall": 0.36764705882352944,
-      "f1": 0.29239766081871343,
-      "support": 68
+      "precision": 0.2631578947368421,
+      "recall": 0.0847457627118644,
+      "f1": 0.1282051282051282,
+      "support": 59
     },
     "BUY": {
-      "precision": 0.4230769230769231,
-      "recall": 0.4536082474226804,
-      "f1": 0.43781094527363185,
-      "support": 97
+      "precision": 0.4214876033057851,
+      "recall": 0.51,
+      "f1": 0.46153846153846156,
+      "support": 100
     }
   },
-  "train_size": 896,
+  "train_size": 895,
   "test_size": 224,
-  "total_rows_after_features": 1120,
+  "total_rows_after_features": 1119,
   "label_distribution": {
-    "0": 274,
-    "1": 431,
-    "2": 415
+    "0": 316,
+    "1": 339,
+    "2": 464
   },
   "confidence_stats": {
-    "mean_max_proba": 0.502280592918396,
-    "mean_top2_margin": 0.17763470113277435,
-    "f1_macro": 0.26971865817113266
+    "mean_max_proba": 0.5385257601737976,
+    "mean_top2_margin": 0.23393096029758453,
+    "f1_macro": 0.2994894739861183
   },
   "optuna": {
-    "best_value": 0.32412542071926037,
+    "best_value": 0.3039198803315806,
     "best_params": {
-      "n_estimators": 424,
-      "max_depth": 6,
-      "learning_rate": 0.1763036728588638,
-      "subsample": 0.8794277511364257,
-      "colsample_bytree": 0.6611570200688516,
+      "n_estimators": 337,
+      "max_depth": 5,
+      "learning_rate": 0.10951663240336536,
+      "subsample": 0.9998251307797981,
+      "colsample_bytree": 0.831121277448819,
       "min_child_weight": 8,
-      "reg_lambda": 10.18667176890516,
-      "reg_alpha": 0.6450309835308425,
-      "gamma": 1.9818730691722628
+      "reg_lambda": 4.303066415335401,
+      "reg_alpha": 4.008428701481353,
+      "gamma": 0.21823271099456798
     },
     "n_trials": 30,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
   },
   "smote_floors_used": {
-    "0": 0.5,
-    "1": 0.5,
+    "0": 0.7,
+    "1": 0.45,
     "2": 0.5
   },
-  "threshold_calibration": null,
+  "threshold_calibration": {
+    "0": 0.22,
+    "1": 0.38,
+    "2": 0.38
+  },
   "very_low_confidence": true
 }
