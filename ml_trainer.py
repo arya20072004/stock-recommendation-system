@@ -182,65 +182,49 @@ def _prepare_nifty_data(start_date, end_date):
     return nifty_df
 
 def _prepare_macro_data(start_date, end_date):
-    """
-    Downloads Nifty 50 index (multi-timeframe), USD/INR, and Nasdaq-100.
-    Returns a DataFrame indexed by date with 10 leakage-safe macro features.
-    All features are shifted by 1 day before returning.
-    """
     macro = pd.DataFrame()
 
-    # --- Nifty multi-timeframe returns + volatility ---
     try:
         nifty = yf.download(
-            "^NSEI",
-            start=start_date,
+            "^NSEI", start=start_date,
             end=end_date + timedelta(days=1),
-            progress=False,
-            auto_adjust=True,
+            progress=False, auto_adjust=True,
         )
         if not nifty.empty:
             if isinstance(nifty.columns, pd.MultiIndex):
                 nifty.columns = nifty.columns.get_level_values(0)
             c = nifty["Close"]
-            macro["nifty_ret_1d"]  = c.pct_change(1)
+            nifty_ret_1d = c.pct_change(1)
+            macro["nifty_ret_1d"]  = nifty_ret_1d
             macro["nifty_ret_5d"]  = c.pct_change(5)
             macro["nifty_ret_10d"] = c.pct_change(10)
             macro["nifty_ret_20d"] = c.pct_change(20)
-            nifty_ret_1d_tmp = c.pct_change(1)
-            macro["nifty_ret_1d"]  = nifty_ret_1d_tmp
-            macro["nifty_vol_10d"] = nifty_ret_1d_tmp.rolling(10).std()
+            macro["nifty_vol_10d"] = nifty_ret_1d.rolling(10).std()
     except Exception as ex:
         logger.warning("macro: Nifty download failed — %s", ex)
 
-    # --- USD/INR ---
     try:
         usdinr = yf.download(
-            "INR=X",
-            start=start_date,
+            "INR=X", start=start_date,
             end=end_date + timedelta(days=1),
-            progress=False,
-            auto_adjust=True,
+            progress=False, auto_adjust=True,
         )
         if not usdinr.empty:
             if isinstance(usdinr.columns, pd.MultiIndex):
                 usdinr.columns = usdinr.columns.get_level_values(0)
             c = usdinr["Close"]
-            macro["usdinr_ret_1d"]  = c.pct_change(1)
+            usdinr_ret_1d = c.pct_change(1)
+            macro["usdinr_ret_1d"]  = usdinr_ret_1d
             macro["usdinr_ret_5d"]  = c.pct_change(5)
-            usdinr_ret_1d_tmp = c.pct_change(1)
-            macro["usdinr_ret_1d"]  = usdinr_ret_1d_tmp
-            macro["usdinr_vol_10d"] = usdinr_ret_1d_tmp.rolling(10).std()
+            macro["usdinr_vol_10d"] = usdinr_ret_1d.rolling(10).std()
     except Exception as ex:
         logger.warning("macro: USD/INR download failed — %s", ex)
 
-    # --- Nasdaq-100 ---
     try:
         nasdaq = yf.download(
-            "^NDX",
-            start=start_date,
+            "^NDX", start=start_date,
             end=end_date + timedelta(days=1),
-            progress=False,
-            auto_adjust=True,
+            progress=False, auto_adjust=True,
         )
         if not nasdaq.empty:
             if isinstance(nasdaq.columns, pd.MultiIndex):
@@ -248,13 +232,20 @@ def _prepare_macro_data(start_date, end_date):
             c = nasdaq["Close"]
             macro["nasdaq_ret_5d"]  = c.pct_change(5)
             macro["nasdaq_ret_20d"] = c.pct_change(20)
+        else:
+            # Download succeeded but returned empty — zero-fill
+            logger.warning("macro: Nasdaq returned empty data — zeroing nasdaq features")
+            macro["nasdaq_ret_5d"]  = 0.0
+            macro["nasdaq_ret_20d"] = 0.0
     except Exception as ex:
         logger.warning("macro: Nasdaq download failed — %s", ex)
+        # Zero-fill so downstream code always sees these columns
+        macro["nasdaq_ret_5d"]  = 0.0
+        macro["nasdaq_ret_20d"] = 0.0
 
     if macro.empty:
         return pd.DataFrame()
 
-    # Shift all features by 1 day — avoids same-day lookahead
     macro = macro.shift(1)
     return macro
 
@@ -404,6 +395,12 @@ def create_dataset(ticker, client):
     """
     Pulls 5 years of data from MongoDB and engineers leakage-safe features.
     """
+    ALL_MACRO_COLS = [
+        "nifty_ret_1d", "nifty_ret_5d", "nifty_ret_10d", "nifty_ret_20d",
+        "nifty_vol_10d", "usdinr_ret_1d", "usdinr_ret_5d", "usdinr_vol_10d",
+        "nasdaq_ret_5d", "nasdaq_ret_20d",
+    ]
+
     db = client["stock_market_db"]
     history_years = TICKER_HISTORY_OVERRIDE.get(ticker, HISTORY_YEARS)
     cutoff_date = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=365 * history_years + 10)
@@ -431,21 +428,28 @@ def create_dataset(ticker, client):
         return pd.DataFrame()
 
     df = prices_df.join(nifty_df[["nifty_return", "market_regime"]], how="left")
+
     macro_df = _prepare_macro_data(start_date, end_date)
     if not macro_df.empty:
         df = df.join(macro_df, how="left")
+        # Safety net: zero-fill any macro column that failed to download
+        # (e.g. Nasdaq timeout mid-run while Nifty/USDINR succeeded)
+        for col in ALL_MACRO_COLS:
+            if col not in df.columns:
+                logger.warning(
+                    "%s: macro column '%s' missing after join — zeroing",
+                    ticker, col,
+                )
+                df[col] = 0.0
         logger.info(
             "%s: macro features joined — nifty multi-tf, usdinr, nasdaq (%d cols)",
             ticker, macro_df.shape[1],
         )
     else:
         logger.warning("%s: macro data empty — macro features will be zeroed", ticker)
-        for col in [
-            "nifty_ret_1d", "nifty_ret_5d", "nifty_ret_10d", "nifty_ret_20d", "nifty_vol_10d",
-            "usdinr_ret_1d", "usdinr_ret_5d", "usdinr_vol_10d",
-            "nasdaq_ret_5d", "nasdaq_ret_20d",
-        ]:
+        for col in ALL_MACRO_COLS:
             df[col] = 0.0
+
     df["return"] = df["close"].pct_change()
     df["outperformance"] = df["return"].shift(1) - df["nifty_return"].shift(1)
 
@@ -488,26 +492,25 @@ def create_dataset(ticker, client):
     adx_col   = _find_col(df, "ADX")
 
     missing = {
-        "rsi": rsi_col,
+        "rsi":   rsi_col,
         "macdh": macdh_col,
-        "bbl": bbl_col,
-        "bbm": bbm_col,
-        "bbu": bbu_col,
-        "atr": atr_col,
+        "bbl":   bbl_col,
+        "bbm":   bbm_col,
+        "bbu":   bbu_col,
+        "atr":   atr_col,
     }
     missing_keys = [k for k, v in missing.items() if v is None]
     if missing_keys:
         logger.warning(
             "%s: missing indicator columns %s. Available ta cols: %s",
-            ticker,
-            missing_keys,
-            ta_cols,
+            ticker, missing_keys, ta_cols,
         )
         return pd.DataFrame()
 
     # Shift resolved indicator columns to avoid look-ahead bias
     resolved_indicator_cols = [
-        c for c in [rsi_col, macdh_col, bbl_col, bbm_col, bbu_col, atr_col, adx_col] if c is not None
+        c for c in [rsi_col, macdh_col, bbl_col, bbm_col, bbu_col, atr_col, adx_col]
+        if c is not None
     ]
     for col in resolved_indicator_cols:
         df[col] = df[col].shift(1)
@@ -528,12 +531,11 @@ def create_dataset(ticker, client):
             df["adx"] = 25.0
             df["adx_trending"] = 0
     else:
-        # Banking, IT, FinancialServices, Telecom, OilGas — ADX adds noise
-        df["adx"] = 25.0          # neutral, won't influence model
+        df["adx"] = 25.0
         df["adx_trending"] = 0
         logger.info(
             "%s: ADX disabled for sector '%s' — event-driven stock",
-            ticker, ticker_sector
+            ticker, ticker_sector,
         )
 
     df["sentiment_7d_avg"]  = df["sentiment"].shift(1).rolling(window=7).mean()
@@ -547,7 +549,7 @@ def create_dataset(ticker, client):
     )
 
     # --- OBV deviation ---
-    obv_raw = (np.sign(df["close"].diff()) * df["volume"]).fillna(0).cumsum()
+    obv_raw  = (np.sign(df["close"].diff()) * df["volume"]).fillna(0).cumsum()
     obv_mean = obv_raw.rolling(window=20).mean()
     df["obv_deviation"] = (
         (obv_raw - obv_mean) / obv_mean.abs().replace(0, pd.NA)
@@ -574,16 +576,17 @@ def create_dataset(ticker, client):
             - df["sector_return"].shift(1).rolling(5).sum()
         )
     else:
-        df["sector_momentum"] = 0.0
+        df["sector_momentum"]    = 0.0
         df["sector_momentum_5d"] = 0.0
 
     # --- TARGET LABEL ---
-    df["future_10d_return"] = df["close"].shift(-10) / df["close"] - 1
+    horizon = TICKER_HORIZON_OVERRIDE.get(ticker, 10)
+    df["future_return"] = df["close"].shift(-horizon) / df["close"] - 1
     atr_scale = TICKER_ATR_THRESHOLD_SCALE.get(ticker, 1.0)
     threshold = np.maximum(atr_scale * df["atr_pct"], 0.01)
     df["target"] = 1
-    df.loc[df["future_10d_return"] > threshold, "target"] = 2
-    df.loc[df["future_10d_return"] < -threshold, "target"] = 0
+    df.loc[df["future_return"] > threshold, "target"] = 2
+    df.loc[df["future_return"] < -threshold, "target"] = 0
     logger.info(
         "%s: label threshold scale = %.2f× ATR (BUY=%d, HOLD=%d, SELL=%d)",
         ticker,
@@ -593,11 +596,9 @@ def create_dataset(ticker, client):
         (df["target"] == 0).sum(),
     )
 
-    buy_label_count  = (df["target"] == 2).sum()
-    sell_label_count = (df["target"] == 0).sum()
-    hold_label_count = (df["target"] == 1).sum()
-    total_labels     = len(df)
-    buy_pct = buy_label_count / total_labels if total_labels > 0 else 0.0
+    buy_label_count = (df["target"] == 2).sum()
+    total_labels    = len(df)
+    buy_pct         = buy_label_count / total_labels if total_labels > 0 else 0.0
 
     if buy_pct < 0.15:
         logger.warning(
@@ -634,6 +635,17 @@ def create_dataset(ticker, client):
         "nasdaq_ret_5d",
         "nasdaq_ret_20d",
     ]
+
+    # Verify all required columns exist before dropna to give a clear error
+    missing_required = [c for c in required_columns if c not in df.columns]
+    if missing_required:
+        logger.error(
+            "%s: required columns still missing after all fallbacks — %s. "
+            "Skipping ticker.",
+            ticker, missing_required,
+        )
+        return pd.DataFrame()
+
     df = df.replace([float("inf"), float("-inf")], pd.NA)
     df = df.dropna(subset=required_columns)
 
@@ -773,8 +785,6 @@ TICKER_SMOTE_FLOOR_OVERRIDES: dict[str, dict[int, float]] = {
     "BAJFINANCE.NS": {0: 0.50, 1: 0.50, 2: 0.65},  # BUY f1≈0.05 two consecutive runs
     "SBIN.NS":       {0: 0.60, 1: 0.55, 2: 0.50},
     "BAJAJFINSV.NS":  {0: 0.65, 1: 0.45, 2: 0.65},
-    "NTPC.NS":      {0: 0.70, 1: 0.45, 2: 0.50},  # force SELL samples
-    "POWERGRID.NS": {0: 0.75, 1: 0.40, 2: 0.50},  # SELL floor very high
     "TRENT.NS": {0: 0.75, 1: 0.40, 2: 0.50},  # force massive SELL oversampling
     "SHRIRAMFIN.NS": {0: 0.70, 1: 0.45, 2: 0.50},
 }
@@ -796,10 +806,9 @@ TICKER_CLASS_THRESHOLDS = {
     "M&M.NS":        {0: 0.33, 1: 0.28, 2: 0.33},  # confirmed
     "ICICIBANK.NS":  {0: 0.33, 1: 0.28, 2: 0.33},  # new
     "APOLLOHOSP.NS": {0: 0.25, 1: 0.33, 2: 0.33},  # Run 15 — SELL needs boost
-    "BAJAJFINSV.NS": {0: 0.28, 1: 0.38, 2: 0.28},
-    "NTPC.NS":      {0: 0.22, 1: 0.38, 2: 0.38},  # heavily lower SELL threshold
-    "POWERGRID.NS": {0: 0.20, 1: 0.38, 2: 0.38},  # SELL needs extreme boost
+    "BAJAJFINSV.NS": {0: 0.30, 1: 0.30, 2: 0.30},
     "SHRIRAMFIN.NS": {0: 0.22, 1: 0.38, 2: 0.38},
+    "DRREDDY.NS": {0: 0.33, 1: 0.25, 2: 0.33},  # NEW — lower HOLD threshold
 }
 
 TICKER_MIN_CHILD_WEIGHT_FLOOR: dict[str, int] = {
@@ -821,7 +830,6 @@ VERY_LOW_CONFIDENCE_TICKERS = {
     "SBILIFE.NS",    # BUY near-zero two consecutive runs; reverted after Run 3 recovery
     "BAJAJFINSV.NS", # Recovered to 0.2988 with reduced trials — monitoring
     "HDFCLIFE.NS",   # BUY near-zero two consecutive runs, structurally weak
-    "ONGC.NS",       # HOLD f1=0.14 two consecutive runs; precision/recall pathology
     "HINDALCO.NS",   # SELL f1=0.08 two consecutive runs; near-random on SELL
     "JSWSTEEL.NS",   # Sub-0.27 two consecutive runs; no recoverable pattern
     "SHRIRAMFIN.NS", # Sub-0.26 three consecutive runs; all classes weak
@@ -839,6 +847,15 @@ VERY_LOW_CONFIDENCE_TICKERS = {
     "ASIANPAINT.NS"  # 3 consecutive sub-0.30 runs, no recoverable pattern
 }
 
+TICKER_HORIZON_OVERRIDE: dict[str, int] = {
+    "NTPC.NS":      5,
+    "POWERGRID.NS": 5,
+    "BAJAJFINSV.NS":5,
+    "INFY.NS":      5,   # ADD — 10d too noisy for IT earnings-driven stock
+    "WIPRO.NS":     5,   # ADD — same reasoning
+    "HCLTECH.NS":   5,   # ADD — same reasoning
+}
+
 def train_model(df, ticker):
     """
     Tunes with Optuna + TimeSeriesSplit (SMOTE inside fold), trains final model,
@@ -846,8 +863,6 @@ def train_model(df, ticker):
     """
     TICKER_SELL_BOOST_OVERRIDE: dict[str, float] = {
         "TRENT.NS":     2.0,   # current cap is 1.5, need more
-        "NTPC.NS":      2.0,
-        "POWERGRID.NS": 2.0,
         "SHRIRAMFIN.NS":2.0,
     }
     logger.info("Training model for %s", ticker)
@@ -900,7 +915,10 @@ def train_model(df, ticker):
     effective_trials = 30 if ticker in VERY_LOW_CONFIDENCE_TICKERS else N_OPTUNA_TRIALS
 
     try:
-        study = optuna.create_study(direction="maximize")
+        study = optuna.create_study(
+            direction="maximize",
+            sampler=optuna.samplers.TPESampler(seed=RANDOM_STATE),  # ADD THIS
+        )
         study.optimize(
             lambda trial: _optuna_objective(trial, X_train, y_train, ticker),
             n_trials=effective_trials,

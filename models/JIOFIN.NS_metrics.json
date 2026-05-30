@@ -1,23 +1,23 @@
 {
   "ticker": "JIOFIN.NS",
-  "f1_macro": 0.24132113821138212,
+  "f1_macro": 0.21883646780129337,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2222222222222222,
-      "recall": 0.03636363636363636,
-      "f1": 0.0625,
+      "precision": 0.25,
+      "recall": 0.01818181818181818,
+      "f1": 0.03389830508474576,
       "support": 55
     },
     "HOLD": {
-      "precision": 0.2962962962962963,
-      "recall": 0.34782608695652173,
-      "f1": 0.32,
+      "precision": 0.2727272727272727,
+      "recall": 0.32608695652173914,
+      "f1": 0.297029702970297,
       "support": 46
     },
     "BUY": {
-      "precision": 0.23333333333333334,
+      "precision": 0.21875,
       "recall": 0.6363636363636364,
-      "f1": 0.34146341463414637,
+      "f1": 0.32558139534883723,
       "support": 22
     }
   },
@@ -30,22 +30,22 @@
     "2": 197
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6400865316390991,
-    "mean_top2_margin": 0.39080289006233215,
-    "f1_macro": 0.24132113821138212
+    "mean_max_proba": 0.6345704793930054,
+    "mean_top2_margin": 0.3821406662464142,
+    "f1_macro": 0.21883646780129337
   },
   "optuna": {
-    "best_value": 0.22719502714074422,
+    "best_value": 0.23817834930670492,
     "best_params": {
-      "n_estimators": 559,
-      "max_depth": 6,
-      "learning_rate": 0.25105245911356655,
-      "subsample": 0.7106897504518443,
-      "colsample_bytree": 0.9328536587923804,
+      "n_estimators": 555,
+      "max_depth": 3,
+      "learning_rate": 0.25253830842574526,
+      "subsample": 0.7028567197774488,
+      "colsample_bytree": 0.9615287188831917,
       "min_child_weight": 15,
-      "reg_lambda": 3.018384263162595,
-      "reg_alpha": 1.2719179269873238,
-      "gamma": 1.0416348890489073
+      "reg_lambda": 5.960057413910969,
+      "reg_alpha": 1.001503853861849,
+      "gamma": 0.9935624650673572
     },
     "n_trials": 75,
     "cv_splits": 5,

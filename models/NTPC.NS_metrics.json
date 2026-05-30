@@ -1,65 +1,61 @@
 {
   "ticker": "NTPC.NS",
-  "f1_macro": 0.24816177083798965,
+  "f1_macro": 0.3437263029901067,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.3010752688172043,
-      "recall": 0.3684210526315789,
-      "f1": 0.33136094674556216,
-      "support": 76
+      "precision": 0.27906976744186046,
+      "recall": 0.21052631578947367,
+      "f1": 0.24,
+      "support": 57
     },
     "HOLD": {
-      "precision": 0.21052631578947367,
-      "recall": 0.05063291139240506,
-      "f1": 0.08163265306122448,
-      "support": 79
+      "precision": 0.4810126582278481,
+      "recall": 0.3584905660377358,
+      "f1": 0.41081081081081083,
+      "support": 106
     },
     "BUY": {
-      "precision": 0.26785714285714285,
-      "recall": 0.43478260869565216,
-      "f1": 0.3314917127071823,
-      "support": 69
+      "precision": 0.30392156862745096,
+      "recall": 0.5081967213114754,
+      "f1": 0.3803680981595092,
+      "support": 61
     }
   },
-  "train_size": 895,
+  "train_size": 894,
   "test_size": 224,
-  "total_rows_after_features": 1119,
+  "total_rows_after_features": 1118,
   "label_distribution": {
-    "0": 306,
-    "1": 322,
-    "2": 491
+    "0": 264,
+    "1": 461,
+    "2": 393
   },
   "confidence_stats": {
-    "mean_max_proba": 0.49722906947135925,
-    "mean_top2_margin": 0.1922544687986374,
-    "f1_macro": 0.24816177083798965
+    "mean_max_proba": 0.5303581357002258,
+    "mean_top2_margin": 0.22725193202495575,
+    "f1_macro": 0.3437263029901067
   },
   "optuna": {
-    "best_value": 0.30310410071749105,
+    "best_value": 0.309006592920607,
     "best_params": {
-      "n_estimators": 426,
+      "n_estimators": 688,
       "max_depth": 5,
-      "learning_rate": 0.047326105151042054,
-      "subsample": 0.845847067007709,
-      "colsample_bytree": 0.9697973191228495,
-      "min_child_weight": 8,
-      "reg_lambda": 12.412742359046007,
-      "reg_alpha": 4.227757699560706,
-      "gamma": 0.44699778532873763
+      "learning_rate": 0.2704729722717776,
+      "subsample": 0.8866896138540137,
+      "colsample_bytree": 0.848068981182222,
+      "min_child_weight": 14,
+      "reg_lambda": 14.477019697290457,
+      "reg_alpha": 1.7828595118040633,
+      "gamma": 0.7161626300179983
     },
     "n_trials": 30,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
   },
   "smote_floors_used": {
-    "0": 0.7,
-    "1": 0.45,
+    "0": 0.5,
+    "1": 0.5,
     "2": 0.5
   },
-  "threshold_calibration": {
-    "0": 0.22,
-    "1": 0.38,
-    "2": 0.38
-  },
+  "threshold_calibration": null,
   "very_low_confidence": true
 }
