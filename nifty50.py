@@ -46,7 +46,7 @@ NIFTY50_TICKER_MAP = {
     'SHRIRAMFIN.NS': 'Shriram Finance Ltd.',
     'SUNPHARMA.NS': 'Sun Pharmaceutical Industries Ltd.',
     'TATACONSUM.NS': 'Tata Consumer Products Ltd.',
-    'TMPV.NS': 'Tata Motors Ltd.',
+    #'TMPV.NS': 'Tata Motors Ltd.',
     'TATASTEEL.NS': 'Tata Steel Ltd.',
     'TCS.NS': 'Tata Consultancy Services Ltd.',
     'TECHM.NS': 'Tech Mahindra Ltd.',

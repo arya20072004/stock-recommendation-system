@@ -783,10 +783,13 @@ SMOTE_FLOORS: dict[int, float] = {0: 0.50, 1: 0.50, 2: 0.50}
 TICKER_SMOTE_FLOOR_OVERRIDES: dict[str, dict[int, float]] = {
     "NESTLEIND.NS":  {0: 0.50, 1: 0.40, 2: 0.65},  # BUY f1=0.000 for 3 consecutive runs
     "BAJFINANCE.NS": {0: 0.50, 1: 0.50, 2: 0.65},  # BUY f1≈0.05 two consecutive runs
-    "SBIN.NS":       {0: 0.60, 1: 0.55, 2: 0.50},
+    "SBIN.NS":       {0: 0.55, 1: 0.50, 2: 0.80},
     "BAJAJFINSV.NS":  {0: 0.65, 1: 0.45, 2: 0.65},
     "TRENT.NS": {0: 0.75, 1: 0.40, 2: 0.50},  # force massive SELL oversampling
     "SHRIRAMFIN.NS": {0: 0.70, 1: 0.45, 2: 0.50},
+    "TATACONSUM.NS": {0: 0.65, 1: 0.45, 2: 0.65},  # NEW — force SELL/BUY
+    "MAXHEALTH.NS":  {0: 0.65, 1: 0.45, 2: 0.65},  # NEW — force SELL/BUY
+    #"KOTAKBANK.NS": {0: 0.50, 1: 0.50, 2: 0.65},  # NEW — BUY f1=0.00 two consecutive runs
 }
 
 TICKER_HOLD_WEIGHT_OVERRIDE: dict[str, float] = {
@@ -796,19 +799,22 @@ TICKER_HOLD_WEIGHT_OVERRIDE: dict[str, float] = {
 TICKER_CLASS_THRESHOLDS = {
     "ADANIPORTS.NS": {0: 0.33, 1: 0.33, 2: 0.20},  # keep, VLC
     "TATASTEEL.NS":  {0: 0.33, 1: 0.33, 2: 0.20},  # locked
-    "SBIN.NS":       {0: 0.33, 1: 0.28, 2: 0.28},  # hold
+    "SBIN.NS":       {0: 0.33, 1: 0.33, 2: 0.25},  # hold
     "CIPLA.NS":      {0: 0.28, 1: 0.33, 2: 0.33},  # locked
-    "COALINDIA.NS":  {0: 0.28, 1: 0.33, 2: 0.33},  # hold
+    "COALINDIA.NS":  {0: 0.30, 1: 0.30, 2: 0.30},  # hold
     "EICHERMOT.NS":  {0: 0.20, 1: 0.33, 2: 0.33},  # hold
     "INDIGO.NS":     {0: 0.25, 1: 0.33, 2: 0.33},  # keep, VLC
     "HEROMOTOCO.NS": {0: 0.33, 1: 0.33, 2: 0.27},  # locked
     "GRASIM.NS":     {0: 0.25, 1: 0.33, 2: 0.33},  # hold
     "M&M.NS":        {0: 0.33, 1: 0.28, 2: 0.33},  # confirmed
-    "ICICIBANK.NS":  {0: 0.33, 1: 0.28, 2: 0.33},  # new
+    #"ICICIBANK.NS":  {0: 0.33, 1: 0.28, 2: 0.33},  # new
     "APOLLOHOSP.NS": {0: 0.25, 1: 0.33, 2: 0.33},  # Run 15 — SELL needs boost
     "BAJAJFINSV.NS": {0: 0.30, 1: 0.30, 2: 0.30},
-    "SHRIRAMFIN.NS": {0: 0.22, 1: 0.38, 2: 0.38},
     "DRREDDY.NS": {0: 0.33, 1: 0.25, 2: 0.33},  # NEW — lower HOLD threshold
+    "TATACONSUM.NS": {0: 0.28, 1: 0.38, 2: 0.28},  # NEW — penalise HOLD
+    "MAXHEALTH.NS":  {0: 0.28, 1: 0.38, 2: 0.28},  # NEW — penalise HOLD
+    "ONGC.NS": {0: 0.28, 1: 0.33, 2: 0.33},  # NEW — SELL was 0.25 in Run3
+    "KOTAKBANK.NS": {0: 0.33, 1: 0.38, 2: 0.28}
 }
 
 TICKER_MIN_CHILD_WEIGHT_FLOOR: dict[str, int] = {
@@ -834,17 +840,25 @@ VERY_LOW_CONFIDENCE_TICKERS = {
     "JSWSTEEL.NS",   # Sub-0.27 two consecutive runs; no recoverable pattern
     "SHRIRAMFIN.NS", # Sub-0.26 three consecutive runs; all classes weak
     "BEL.NS",        # HOLD/BUY seesawing across 4 consecutive runs — no stable configuration
-    "ADANIPORTS.NS",   # BUY precision=1.0 recall=0.07 across 3 consecutive runs — forcing BUY samples with SMOTE override, monitoring for improvement
     "ADANIENT.NS",    # BUY f1=0.00 across 3 consecutive runs — unfixable with current features
     "RELIANCE.NS",    # HOLD/BUY persistently weak across 4+ runs, no recoverable pattern
     "TRENT.NS",       # SELL f1=0.12 across 3 consecutive runs; all classes weak
-    "POWERGRID.NS",    # SELL refusal + BUY inflation across 4+ runs; SMOTE override applied, monitoring for improvement
+    #"POWERGRID.NS",    # SELL refusal + BUY inflation across 4+ runs; SMOTE override applied, monitoring for improvement
     "MAXHEALTH.NS",   # HOLD/BUY persistently weak across 4+ runs, no recoverable pattern
     "INDIGO.NS",      # BUY precision=0.50 recall=0.07 across 3 consecutive runs — forcing BUY samples with SMOTE override, monitoring for improvement
-    "NTPC.NS",      # 6+ threshold/SMOTE iterations, no structural convergence
+    #"NTPC.NS",      # 6+ threshold/SMOTE iterations, no structural convergence
     "BAJAJ-AUTO.NS",  # 3 consecutive sub-0.33 runs, declining CV scores
     "LT.NS",        # train/test disconnect confirmed, HOLD structural failure
     "ASIANPAINT.NS"  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    "JIOFIN.NS"  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    'BRITANIA.NS'  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    'SBIN.NS'  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    'INFY.NS'  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    'TATACONSUM.NS'  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    'COALINDIA.NS'  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    "HCLTECH.NS"  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    "BRITANNIA.NS"  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    "TCS.NS"  # 3 consecutive sub-0.30 runs, no recoverable pattern
 }
 
 TICKER_HORIZON_OVERRIDE: dict[str, int] = {
@@ -854,6 +868,7 @@ TICKER_HORIZON_OVERRIDE: dict[str, int] = {
     "INFY.NS":      5,   # ADD — 10d too noisy for IT earnings-driven stock
     "WIPRO.NS":     5,   # ADD — same reasoning
     "HCLTECH.NS":   5,   # ADD — same reasoning
+    "SBIN.NS":      5,   # ADD — same reasoning, persistent train/test disconnect
 }
 
 def train_model(df, ticker):

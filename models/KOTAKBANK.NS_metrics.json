@@ -1,51 +1,51 @@
 {
   "ticker": "KOTAKBANK.NS",
-  "f1_macro": 0.31110458810267017,
+  "f1_macro": 0.3593189964157706,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.26262626262626265,
-      "recall": 0.43333333333333335,
-      "f1": 0.3270440251572327,
+      "precision": 0.3,
+      "recall": 0.5,
+      "f1": 0.375,
       "support": 60
     },
     "HOLD": {
-      "precision": 0.5045871559633027,
-      "recall": 0.5670103092783505,
-      "f1": 0.5339805825242718,
+      "precision": 0.5168539325842697,
+      "recall": 0.4742268041237113,
+      "f1": 0.4946236559139785,
       "support": 97
     },
     "BUY": {
-      "precision": 0.1875,
-      "recall": 0.04477611940298507,
-      "f1": 0.07228915662650602,
-      "support": 67
+      "precision": 0.3125,
+      "recall": 0.15625,
+      "f1": 0.20833333333333334,
+      "support": 64
     }
   },
-  "train_size": 894,
-  "test_size": 224,
-  "total_rows_after_features": 1118,
+  "train_size": 884,
+  "test_size": 221,
+  "total_rows_after_features": 1105,
   "label_distribution": {
-    "0": 311,
-    "1": 446,
-    "2": 361
+    "0": 305,
+    "1": 445,
+    "2": 355
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5942087769508362,
-    "mean_top2_margin": 0.3158605098724365,
-    "f1_macro": 0.31110458810267017
+    "mean_max_proba": 0.6011239886283875,
+    "mean_top2_margin": 0.32891085743904114,
+    "f1_macro": 0.3593189964157706
   },
   "optuna": {
-    "best_value": 0.346595231223507,
+    "best_value": 0.3438981226463743,
     "best_params": {
-      "n_estimators": 698,
-      "max_depth": 5,
-      "learning_rate": 0.27342625797158526,
-      "subsample": 0.8862570177235483,
-      "colsample_bytree": 0.8411196119345863,
+      "n_estimators": 279,
+      "max_depth": 6,
+      "learning_rate": 0.2928322593378336,
+      "subsample": 0.7984165248678856,
+      "colsample_bytree": 0.9028503248702485,
       "min_child_weight": 15,
-      "reg_lambda": 14.882354171844526,
-      "reg_alpha": 1.6265764883441571,
-      "gamma": 0.7468549118985964
+      "reg_lambda": 14.028468262220123,
+      "reg_alpha": 1.7922281170405028,
+      "gamma": 0.66899156229727
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -56,6 +56,10 @@
     "1": 0.5,
     "2": 0.5
   },
-  "threshold_calibration": null,
+  "threshold_calibration": {
+    "0": 0.33,
+    "1": 0.38,
+    "2": 0.28
+  },
   "very_low_confidence": false
 }

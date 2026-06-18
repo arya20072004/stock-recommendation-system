@@ -1,51 +1,51 @@
 {
   "ticker": "SHRIRAMFIN.NS",
-  "f1_macro": 0.3006036109484385,
+  "f1_macro": 0.2984530005334481,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.3076923076923077,
-      "recall": 0.3076923076923077,
-      "f1": 0.3076923076923077,
-      "support": 65
+      "precision": 0.21428571428571427,
+      "recall": 0.09375,
+      "f1": 0.13043478260869565,
+      "support": 64
     },
     "HOLD": {
-      "precision": 0.14285714285714285,
-      "recall": 0.06779661016949153,
-      "f1": 0.09195402298850575,
-      "support": 59
+      "precision": 0.22448979591836735,
+      "recall": 0.19298245614035087,
+      "f1": 0.20754716981132076,
+      "support": 57
     },
     "BUY": {
-      "precision": 0.44274809160305345,
-      "recall": 0.58,
-      "f1": 0.5021645021645021,
+      "precision": 0.4722222222222222,
+      "recall": 0.68,
+      "f1": 0.5573770491803278,
       "support": 100
     }
   },
-  "train_size": 894,
-  "test_size": 224,
-  "total_rows_after_features": 1118,
+  "train_size": 884,
+  "test_size": 221,
+  "total_rows_after_features": 1105,
   "label_distribution": {
-    "0": 315,
+    "0": 302,
     "1": 339,
     "2": 464
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5562903881072998,
-    "mean_top2_margin": 0.26116228103637695,
-    "f1_macro": 0.3006036109484385
+    "mean_max_proba": 0.5906800031661987,
+    "mean_top2_margin": 0.304484486579895,
+    "f1_macro": 0.2984530005334481
   },
   "optuna": {
-    "best_value": 0.2972211363063526,
+    "best_value": 0.32700404656377147,
     "best_params": {
-      "n_estimators": 272,
-      "max_depth": 4,
-      "learning_rate": 0.07902759625709409,
-      "subsample": 0.6966219731921359,
-      "colsample_bytree": 0.8023418725693384,
-      "min_child_weight": 7,
-      "reg_lambda": 9.098652693102368,
-      "reg_alpha": 3.9261165374354974,
-      "gamma": 0.6372532442138449
+      "n_estimators": 197,
+      "max_depth": 7,
+      "learning_rate": 0.2163735877586157,
+      "subsample": 0.7392829063996065,
+      "colsample_bytree": 0.8698725891993897,
+      "min_child_weight": 14,
+      "reg_lambda": 3.2837608837287395,
+      "reg_alpha": 2.4860806343379385,
+      "gamma": 0.8956951715960636
     },
     "n_trials": 30,
     "cv_splits": 5,
@@ -56,10 +56,6 @@
     "1": 0.45,
     "2": 0.5
   },
-  "threshold_calibration": {
-    "0": 0.22,
-    "1": 0.38,
-    "2": 0.38
-  },
+  "threshold_calibration": null,
   "very_low_confidence": true
 }
