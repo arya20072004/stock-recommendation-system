@@ -1,53 +1,53 @@
 {
   "ticker": "ASIANPAINT.NS",
-  "f1_macro": 0.31974043715846995,
+  "f1_macro": 0.3297420691853977,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.21052631578947367,
+      "precision": 0.2,
       "recall": 0.18461538461538463,
-      "f1": 0.19672131147540983,
+      "f1": 0.192,
       "support": 65
     },
     "HOLD": {
-      "precision": 0.36363636363636365,
-      "recall": 0.4444444444444444,
-      "f1": 0.4,
+      "precision": 0.4074074074074074,
+      "recall": 0.4583333333333333,
+      "f1": 0.43137254901960786,
       "support": 72
     },
     "BUY": {
-      "precision": 0.3815789473684211,
-      "recall": 0.34523809523809523,
-      "f1": 0.3625,
+      "precision": 0.375,
+      "recall": 0.35714285714285715,
+      "f1": 0.36585365853658536,
       "support": 84
     }
   },
-  "train_size": 884,
+  "train_size": 882,
   "test_size": 221,
-  "total_rows_after_features": 1105,
+  "total_rows_after_features": 1103,
   "label_distribution": {
     "0": 332,
-    "1": 406,
+    "1": 404,
     "2": 367
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5846604704856873,
-    "mean_top2_margin": 0.30576908588409424,
-    "f1_macro": 0.31974043715846995
+    "mean_max_proba": 0.6322309374809265,
+    "mean_top2_margin": 0.37017524242401123,
+    "f1_macro": 0.3297420691853977
   },
   "optuna": {
-    "best_value": 0.3246630720218501,
+    "best_value": 0.32823367597539027,
     "best_params": {
-      "n_estimators": 144,
+      "n_estimators": 681,
       "max_depth": 6,
-      "learning_rate": 0.23886786821496206,
-      "subsample": 0.8149829030200989,
-      "colsample_bytree": 0.8653670933226423,
-      "min_child_weight": 10,
-      "reg_lambda": 2.9160738494331198,
-      "reg_alpha": 1.6677730336159473,
-      "gamma": 0.30418722810369453
+      "learning_rate": 0.2550205669623977,
+      "subsample": 0.904093180089808,
+      "colsample_bytree": 0.8560191441870574,
+      "min_child_weight": 15,
+      "reg_lambda": 8.901730450905623,
+      "reg_alpha": 1.6265764883441574,
+      "gamma": 0.12251792009704437
     },
-    "n_trials": 75,
+    "n_trials": 30,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
   },
@@ -57,5 +57,5 @@
     "2": 0.5
   },
   "threshold_calibration": null,
-  "very_low_confidence": false
+  "very_low_confidence": true
 }

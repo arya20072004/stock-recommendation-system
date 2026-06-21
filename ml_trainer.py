@@ -565,6 +565,21 @@ def create_dataset(ticker, client):
         (df["close"] - vwap_20) / vwap_20.replace(0, pd.NA)
     ).shift(1)
 
+    # Relative volume — today's volume vs. 20-day rolling average volume.
+    # Spikes (>1) suggest unusual participation; troughs (<1) suggest quiet consolidation.
+    vol_sma_20 = df["volume"].rolling(window=20).mean()
+    df["relative_volume"] = (
+        df["volume"] / vol_sma_20.replace(0, pd.NA)
+    ).shift(1)
+
+    # HL compression — today's high-low range vs. 20-day average range.
+    # Values well below 1.0 indicate volatility contraction (common pre-breakout pattern).
+    daily_range = df["high"] - df["low"]
+    avg_range_20 = daily_range.rolling(window=20).mean()
+    df["hl_compression"] = (
+        daily_range / avg_range_20.replace(0, pd.NA)
+    ).shift(1)
+
     # --- SECTOR MOMENTUM ---
     sector_return = _prepare_sector_data(ticker, client)
     if not sector_return.empty:
@@ -621,6 +636,8 @@ def create_dataset(ticker, client):
         "market_regime",
         "obv_deviation",
         "vwap_deviation",
+        "relative_volume",
+        "hl_compression",
         "sector_momentum",
         "adx",
         "target",
@@ -668,6 +685,8 @@ def _make_feature_list(df):
         "market_regime",
         "obv_deviation",
         "vwap_deviation",
+        "relative_volume",
+        "hl_compression",
         "sector_momentum",
         "sector_momentum_5d",
         "adx",
@@ -783,7 +802,7 @@ SMOTE_FLOORS: dict[int, float] = {0: 0.50, 1: 0.50, 2: 0.50}
 TICKER_SMOTE_FLOOR_OVERRIDES: dict[str, dict[int, float]] = {
     "NESTLEIND.NS":  {0: 0.50, 1: 0.40, 2: 0.65},  # BUY f1=0.000 for 3 consecutive runs
     "BAJFINANCE.NS": {0: 0.50, 1: 0.50, 2: 0.65},  # BUY f1≈0.05 two consecutive runs
-    "SBIN.NS":       {0: 0.55, 1: 0.50, 2: 0.80},
+    "SBIN.NS":       {0: 0.60, 1: 0.55, 2: 0.65},
     "BAJAJFINSV.NS":  {0: 0.65, 1: 0.45, 2: 0.65},
     "TRENT.NS": {0: 0.75, 1: 0.40, 2: 0.50},  # force massive SELL oversampling
     "SHRIRAMFIN.NS": {0: 0.70, 1: 0.45, 2: 0.50},
@@ -814,7 +833,8 @@ TICKER_CLASS_THRESHOLDS = {
     "TATACONSUM.NS": {0: 0.28, 1: 0.38, 2: 0.28},  # NEW — penalise HOLD
     "MAXHEALTH.NS":  {0: 0.28, 1: 0.38, 2: 0.28},  # NEW — penalise HOLD
     "ONGC.NS": {0: 0.28, 1: 0.33, 2: 0.33},  # NEW — SELL was 0.25 in Run3
-    "KOTAKBANK.NS": {0: 0.33, 1: 0.38, 2: 0.28}
+    "KOTAKBANK.NS": {0: 0.33, 1: 0.38, 2: 0.28},
+    "BRITANNIA.NS": {0: 0.30, 1: 0.35, 2: 0.20},  # NEW — penalise HOLD
 }
 
 TICKER_MIN_CHILD_WEIGHT_FLOOR: dict[str, int] = {
@@ -849,16 +869,16 @@ VERY_LOW_CONFIDENCE_TICKERS = {
     #"NTPC.NS",      # 6+ threshold/SMOTE iterations, no structural convergence
     "BAJAJ-AUTO.NS",  # 3 consecutive sub-0.33 runs, declining CV scores
     "LT.NS",        # train/test disconnect confirmed, HOLD structural failure
-    "ASIANPAINT.NS"  # 3 consecutive sub-0.30 runs, no recoverable pattern
-    "JIOFIN.NS"  # 3 consecutive sub-0.30 runs, no recoverable pattern
-    'BRITANIA.NS'  # 3 consecutive sub-0.30 runs, no recoverable pattern
-    'SBIN.NS'  # 3 consecutive sub-0.30 runs, no recoverable pattern
-    'INFY.NS'  # 3 consecutive sub-0.30 runs, no recoverable pattern
-    'TATACONSUM.NS'  # 3 consecutive sub-0.30 runs, no recoverable pattern
-    'COALINDIA.NS'  # 3 consecutive sub-0.30 runs, no recoverable pattern
-    "HCLTECH.NS"  # 3 consecutive sub-0.30 runs, no recoverable pattern
-    "BRITANNIA.NS"  # 3 consecutive sub-0.30 runs, no recoverable pattern
-    "TCS.NS"  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    "ASIANPAINT.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    "JIOFIN.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    'BRITANIA.NS',  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    'SBIN.NS',  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    'INFY.NS',  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    'TATACONSUM.NS',  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    'COALINDIA.NS',  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    "HCLTECH.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    "BRITANNIA.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    "TCS.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
 }
 
 TICKER_HORIZON_OVERRIDE: dict[str, int] = {

@@ -1,23 +1,23 @@
 {
   "ticker": "JIOFIN.NS",
-  "f1_macro": 0.21883646780129337,
+  "f1_macro": 0.2607885304659498,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.25,
-      "recall": 0.01818181818181818,
-      "f1": 0.03389830508474576,
+      "precision": 0.5714285714285714,
+      "recall": 0.07272727272727272,
+      "f1": 0.12903225806451613,
       "support": 55
     },
     "HOLD": {
-      "precision": 0.2727272727272727,
-      "recall": 0.32608695652173914,
-      "f1": 0.297029702970297,
+      "precision": 0.2962962962962963,
+      "recall": 0.34782608695652173,
+      "f1": 0.32,
       "support": 46
     },
     "BUY": {
-      "precision": 0.21875,
+      "precision": 0.22580645161290322,
       "recall": 0.6363636363636364,
-      "f1": 0.32558139534883723,
+      "f1": 0.3333333333333333,
       "support": 22
     }
   },
@@ -30,24 +30,24 @@
     "2": 197
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6345704793930054,
-    "mean_top2_margin": 0.3821406662464142,
-    "f1_macro": 0.21883646780129337
+    "mean_max_proba": 0.6389009356498718,
+    "mean_top2_margin": 0.3877790868282318,
+    "f1_macro": 0.2607885304659498
   },
   "optuna": {
-    "best_value": 0.23817834930670492,
+    "best_value": 0.2310055884597546,
     "best_params": {
-      "n_estimators": 555,
-      "max_depth": 3,
-      "learning_rate": 0.25253830842574526,
-      "subsample": 0.7028567197774488,
-      "colsample_bytree": 0.9615287188831917,
-      "min_child_weight": 15,
-      "reg_lambda": 5.960057413910969,
-      "reg_alpha": 1.001503853861849,
-      "gamma": 0.9935624650673572
+      "n_estimators": 682,
+      "max_depth": 6,
+      "learning_rate": 0.24420460844911424,
+      "subsample": 0.9579309401710595,
+      "colsample_bytree": 0.8391599915244341,
+      "min_child_weight": 14,
+      "reg_lambda": 3.1504025266749536,
+      "reg_alpha": 1.3819228808861534,
+      "gamma": 0.23115913784056039
     },
-    "n_trials": 75,
+    "n_trials": 30,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
   },
@@ -57,5 +57,5 @@
     "2": 0.5
   },
   "threshold_calibration": null,
-  "very_low_confidence": false
+  "very_low_confidence": true
 }
