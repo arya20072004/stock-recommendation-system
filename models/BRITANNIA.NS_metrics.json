@@ -1,51 +1,51 @@
 {
   "ticker": "BRITANNIA.NS",
-  "f1_macro": 0.27833579407334497,
+  "f1_macro": 0.34977636929623884,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.17857142857142858,
-      "recall": 0.17857142857142858,
-      "f1": 0.17857142857142858,
+      "precision": 0.3333333333333333,
+      "recall": 0.21428571428571427,
+      "f1": 0.2608695652173913,
       "support": 56
     },
     "HOLD": {
-      "precision": 0.5151515151515151,
-      "recall": 0.4766355140186916,
-      "f1": 0.49514563106796117,
-      "support": 107
+      "precision": 0.5428571428571428,
+      "recall": 0.5377358490566038,
+      "f1": 0.5402843601895735,
+      "support": 106
     },
     "BUY": {
-      "precision": 0.15151515151515152,
-      "recall": 0.1724137931034483,
-      "f1": 0.16129032258064516,
+      "precision": 0.21518987341772153,
+      "recall": 0.29310344827586204,
+      "f1": 0.24817518248175183,
       "support": 58
     }
   },
-  "train_size": 882,
-  "test_size": 221,
-  "total_rows_after_features": 1103,
+  "train_size": 880,
+  "test_size": 220,
+  "total_rows_after_features": 1100,
   "label_distribution": {
     "0": 275,
     "1": 489,
-    "2": 339
+    "2": 336
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6715428829193115,
-    "mean_top2_margin": 0.4394468069076538,
-    "f1_macro": 0.27833579407334497
+    "mean_max_proba": 0.576392650604248,
+    "mean_top2_margin": 0.29521116614341736,
+    "f1_macro": 0.34977636929623884
   },
   "optuna": {
-    "best_value": 0.32714031642239605,
+    "best_value": 0.3693441239519402,
     "best_params": {
-      "n_estimators": 681,
-      "max_depth": 5,
-      "learning_rate": 0.2550205669623977,
-      "subsample": 0.9012742604284323,
-      "colsample_bytree": 0.8124215766602674,
+      "n_estimators": 405,
+      "max_depth": 6,
+      "learning_rate": 0.01668153093712218,
+      "subsample": 0.8668283096086663,
+      "colsample_bytree": 0.9256689679353394,
       "min_child_weight": 15,
-      "reg_lambda": 2.099714621704641,
-      "reg_alpha": 1.7539972867190416,
-      "gamma": 0.11370893626054251
+      "reg_lambda": 8.615280607024959,
+      "reg_alpha": 1.3481523020632646,
+      "gamma": 0.6810001138789483
     },
     "n_trials": 30,
     "cv_splits": 5,

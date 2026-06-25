@@ -243,6 +243,81 @@ def _prepare_macro_data(start_date, end_date):
         macro["nasdaq_ret_5d"]  = 0.0
         macro["nasdaq_ret_20d"] = 0.0
 
+    try:
+        crude = yf.download(
+            "BZ=F", start=start_date,
+            end=end_date + timedelta(days=1),
+            progress=False, auto_adjust=True,
+        )
+        if not crude.empty:
+            if isinstance(crude.columns, pd.MultiIndex):
+                crude.columns = crude.columns.get_level_values(0)
+            c = crude["Close"]
+            crude_ret_1d = c.pct_change(1)
+            macro["crude_ret_1d"]  = crude_ret_1d
+            macro["crude_ret_5d"]  = c.pct_change(5)
+            macro["crude_vol_10d"] = crude_ret_1d.rolling(10).std()
+        else:
+            logger.warning("macro: Crude returned empty data — zeroing crude features")
+            macro["crude_ret_1d"]  = 0.0
+            macro["crude_ret_5d"]  = 0.0
+            macro["crude_vol_10d"] = 0.0
+    except Exception as ex:
+        logger.warning("macro: Crude download failed — %s", ex)
+        macro["crude_ret_1d"]  = 0.0
+        macro["crude_ret_5d"]  = 0.0
+        macro["crude_vol_10d"] = 0.0
+
+    try:
+        gold = yf.download(
+            "GC=F", start=start_date,
+            end=end_date + timedelta(days=1),
+            progress=False, auto_adjust=True,
+        )
+        if not gold.empty:
+            if isinstance(gold.columns, pd.MultiIndex):
+                gold.columns = gold.columns.get_level_values(0)
+            c = gold["Close"]
+            gold_ret_1d = c.pct_change(1)
+            macro["gold_ret_1d"]  = gold_ret_1d
+            macro["gold_ret_5d"]  = c.pct_change(5)
+            macro["gold_vol_10d"] = gold_ret_1d.rolling(10).std()
+        else:
+            logger.warning("macro: Gold returned empty data — zeroing gold features")
+            macro["gold_ret_1d"]  = 0.0
+            macro["gold_ret_5d"]  = 0.0
+            macro["gold_vol_10d"] = 0.0
+    except Exception as ex:
+        logger.warning("macro: Gold download failed — %s", ex)
+        macro["gold_ret_1d"]  = 0.0
+        macro["gold_ret_5d"]  = 0.0
+        macro["gold_vol_10d"] = 0.0
+
+    try:
+        copper = yf.download(
+            "HG=F", start=start_date,
+            end=end_date + timedelta(days=1),
+            progress=False, auto_adjust=True,
+        )
+        if not copper.empty:
+            if isinstance(copper.columns, pd.MultiIndex):
+                copper.columns = copper.columns.get_level_values(0)
+            c = copper["Close"]
+            copper_ret_1d = c.pct_change(1)
+            macro["copper_ret_1d"]  = copper_ret_1d
+            macro["copper_ret_5d"]  = c.pct_change(5)
+            macro["copper_vol_10d"] = copper_ret_1d.rolling(10).std()
+        else:
+            logger.warning("macro: Copper returned empty data — zeroing copper features")
+            macro["copper_ret_1d"]  = 0.0
+            macro["copper_ret_5d"]  = 0.0
+            macro["copper_vol_10d"] = 0.0
+    except Exception as ex:
+        logger.warning("macro: Copper download failed — %s", ex)
+        macro["copper_ret_1d"]  = 0.0
+        macro["copper_ret_5d"]  = 0.0
+        macro["copper_vol_10d"] = 0.0
+
     if macro.empty:
         return pd.DataFrame()
 
@@ -399,6 +474,9 @@ def create_dataset(ticker, client):
         "nifty_ret_1d", "nifty_ret_5d", "nifty_ret_10d", "nifty_ret_20d",
         "nifty_vol_10d", "usdinr_ret_1d", "usdinr_ret_5d", "usdinr_vol_10d",
         "nasdaq_ret_5d", "nasdaq_ret_20d",
+        "crude_ret_1d", "crude_ret_5d", "crude_vol_10d",
+        "gold_ret_1d", "gold_ret_5d", "gold_vol_10d",
+        "copper_ret_1d", "copper_ret_5d", "copper_vol_10d",
     ]
 
     db = client["stock_market_db"]
@@ -651,6 +729,15 @@ def create_dataset(ticker, client):
         "usdinr_vol_10d",
         "nasdaq_ret_5d",
         "nasdaq_ret_20d",
+        "crude_ret_1d",
+        "crude_ret_5d",
+        "crude_vol_10d",
+        "gold_ret_1d",
+        "gold_ret_5d",
+        "gold_vol_10d",
+        "copper_ret_1d",
+        "copper_ret_5d",
+        "copper_vol_10d",
     ]
 
     # Verify all required columns exist before dropna to give a clear error
@@ -701,6 +788,15 @@ def _make_feature_list(df):
         "usdinr_vol_10d",
         "nasdaq_ret_5d",
         "nasdaq_ret_20d",
+        "crude_ret_1d",
+        "crude_ret_5d",
+        "crude_vol_10d",
+        "gold_ret_1d",
+        "gold_ret_5d",
+        "gold_vol_10d",
+        "copper_ret_1d",
+        "copper_ret_5d",
+        "copper_vol_10d",
     ]
     return [feature for feature in candidate_features if feature in df.columns]
 

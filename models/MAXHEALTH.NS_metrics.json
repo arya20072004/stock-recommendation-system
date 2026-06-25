@@ -1,51 +1,51 @@
 {
   "ticker": "MAXHEALTH.NS",
-  "f1_macro": 0.34957993554714867,
+  "f1_macro": 0.36329813976872805,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.3617021276595745,
-      "recall": 0.22666666666666666,
-      "f1": 0.2786885245901639,
+      "precision": 0.41818181818181815,
+      "recall": 0.30666666666666664,
+      "f1": 0.35384615384615387,
       "support": 75
     },
     "HOLD": {
-      "precision": 0.46534653465346537,
-      "recall": 0.5,
-      "f1": 0.48205128205128206,
-      "support": 94
+      "precision": 0.41739130434782606,
+      "recall": 0.5161290322580645,
+      "f1": 0.46153846153846156,
+      "support": 93
     },
     "BUY": {
-      "precision": 0.2465753424657534,
-      "recall": 0.34615384615384615,
-      "f1": 0.288,
+      "precision": 0.28,
+      "recall": 0.2692307692307692,
+      "f1": 0.27450980392156865,
       "support": 52
     }
   },
-  "train_size": 882,
-  "test_size": 221,
-  "total_rows_after_features": 1103,
+  "train_size": 880,
+  "test_size": 220,
+  "total_rows_after_features": 1100,
   "label_distribution": {
     "0": 257,
     "1": 491,
-    "2": 355
+    "2": 352
   },
   "confidence_stats": {
-    "mean_max_proba": 0.4800560176372528,
-    "mean_top2_margin": 0.14554551243782043,
-    "f1_macro": 0.34957993554714867
+    "mean_max_proba": 0.5651994347572327,
+    "mean_top2_margin": 0.2811264395713806,
+    "f1_macro": 0.36329813976872805
   },
   "optuna": {
-    "best_value": 0.3937110665497138,
+    "best_value": 0.3972529248305654,
     "best_params": {
-      "n_estimators": 452,
-      "max_depth": 4,
-      "learning_rate": 0.0582376318110375,
-      "subsample": 0.8838191386946925,
-      "colsample_bytree": 0.9935584941681304,
-      "min_child_weight": 14,
-      "reg_lambda": 14.477019697290457,
-      "reg_alpha": 1.7432870879999833,
-      "gamma": 2.8567832824350448
+      "n_estimators": 529,
+      "max_depth": 6,
+      "learning_rate": 0.29867164464923346,
+      "subsample": 0.6913114575470205,
+      "colsample_bytree": 0.6018960478612357,
+      "min_child_weight": 3,
+      "reg_lambda": 6.683527181433565,
+      "reg_alpha": 2.033252016552188,
+      "gamma": 1.0511574322585404
     },
     "n_trials": 30,
     "cv_splits": 5,

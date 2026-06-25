@@ -1,51 +1,51 @@
 {
   "ticker": "SHRIRAMFIN.NS",
-  "f1_macro": 0.2795872276788786,
+  "f1_macro": 0.3325163101143347,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.13043478260869565,
-      "recall": 0.046875,
-      "f1": 0.06896551724137931,
-      "support": 64
+      "precision": 0.3793103448275862,
+      "recall": 0.1746031746031746,
+      "f1": 0.2391304347826087,
+      "support": 63
     },
     "HOLD": {
-      "precision": 0.22448979591836735,
-      "recall": 0.19298245614035087,
-      "f1": 0.20754716981132076,
+      "precision": 0.24324324324324326,
+      "recall": 0.15789473684210525,
+      "f1": 0.19148936170212766,
       "support": 57
     },
     "BUY": {
-      "precision": 0.4697986577181208,
-      "recall": 0.7,
-      "f1": 0.5622489959839357,
+      "precision": 0.4675324675324675,
+      "recall": 0.72,
+      "f1": 0.5669291338582677,
       "support": 100
     }
   },
-  "train_size": 882,
-  "test_size": 221,
-  "total_rows_after_features": 1103,
+  "train_size": 880,
+  "test_size": 220,
+  "total_rows_after_features": 1100,
   "label_distribution": {
-    "0": 300,
-    "1": 339,
+    "0": 298,
+    "1": 338,
     "2": 464
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5640024542808533,
-    "mean_top2_margin": 0.2684246301651001,
-    "f1_macro": 0.2795872276788786
+    "mean_max_proba": 0.5647246837615967,
+    "mean_top2_margin": 0.2802780568599701,
+    "f1_macro": 0.3325163101143347
   },
   "optuna": {
-    "best_value": 0.32330851993196436,
+    "best_value": 0.33123662049138475,
     "best_params": {
-      "n_estimators": 260,
-      "max_depth": 6,
-      "learning_rate": 0.2967114714593739,
-      "subsample": 0.8818990665771858,
-      "colsample_bytree": 0.9069599384374333,
+      "n_estimators": 536,
+      "max_depth": 4,
+      "learning_rate": 0.0793735764484053,
+      "subsample": 0.9092055552071199,
+      "colsample_bytree": 0.9028503248702485,
       "min_child_weight": 15,
-      "reg_lambda": 9.219956055644525,
+      "reg_lambda": 10.389947439314529,
       "reg_alpha": 2.042596797198424,
-      "gamma": 0.807237386504348
+      "gamma": 0.9234381376352294
     },
     "n_trials": 30,
     "cv_splits": 5,
