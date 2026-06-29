@@ -1,51 +1,51 @@
 {
   "ticker": "SUNPHARMA.NS",
-  "f1_macro": 0.3157741729170301,
+  "f1_macro": 0.303648089779761,
   "per_class_metrics": {
     "SELL": {
       "precision": 0.25,
-      "recall": 0.29850746268656714,
-      "f1": 0.272108843537415,
+      "recall": 0.31343283582089554,
+      "f1": 0.2781456953642384,
       "support": 67
     },
     "HOLD": {
-      "precision": 0.44680851063829785,
-      "recall": 0.4421052631578947,
-      "f1": 0.4444444444444444,
+      "precision": 0.42391304347826086,
+      "recall": 0.4105263157894737,
+      "f1": 0.41711229946524064,
       "support": 95
     },
     "BUY": {
-      "precision": 0.2608695652173913,
-      "recall": 0.20689655172413793,
-      "f1": 0.23076923076923078,
+      "precision": 0.25,
+      "recall": 0.1896551724137931,
+      "f1": 0.21568627450980393,
       "support": 58
     }
   },
-  "train_size": 880,
+  "train_size": 878,
   "test_size": 220,
-  "total_rows_after_features": 1100,
+  "total_rows_after_features": 1098,
   "label_distribution": {
-    "0": 283,
+    "0": 281,
     "1": 401,
     "2": 416
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5106366872787476,
-    "mean_top2_margin": 0.20531761646270752,
-    "f1_macro": 0.3157741729170301
+    "mean_max_proba": 0.5085138082504272,
+    "mean_top2_margin": 0.2041286677122116,
+    "f1_macro": 0.303648089779761
   },
   "optuna": {
-    "best_value": 0.4070353252642005,
+    "best_value": 0.3999642365028174,
     "best_params": {
-      "n_estimators": 219,
-      "max_depth": 5,
-      "learning_rate": 0.016661247544201226,
-      "subsample": 0.691758000200946,
-      "colsample_bytree": 0.6757318737737991,
-      "min_child_weight": 9,
-      "reg_lambda": 9.728470616623358,
-      "reg_alpha": 2.131222548101192,
-      "gamma": 1.8787008270875156
+      "n_estimators": 264,
+      "max_depth": 4,
+      "learning_rate": 0.011743317183475226,
+      "subsample": 0.6904433902970405,
+      "colsample_bytree": 0.7581761851505834,
+      "min_child_weight": 11,
+      "reg_lambda": 7.463011717919613,
+      "reg_alpha": 1.9853508441336762,
+      "gamma": 1.9246852486495922
     },
     "n_trials": 75,
     "cv_splits": 5,

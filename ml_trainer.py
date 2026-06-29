@@ -510,8 +510,6 @@ def create_dataset(ticker, client):
     macro_df = _prepare_macro_data(start_date, end_date)
     if not macro_df.empty:
         df = df.join(macro_df, how="left")
-        # Safety net: zero-fill any macro column that failed to download
-        # (e.g. Nasdaq timeout mid-run while Nifty/USDINR succeeded)
         for col in ALL_MACRO_COLS:
             if col not in df.columns:
                 logger.warning(
@@ -520,13 +518,17 @@ def create_dataset(ticker, client):
                 )
                 df[col] = 0.0
         logger.info(
-            "%s: macro features joined — nifty multi-tf, usdinr, nasdaq (%d cols)",
+            "%s: macro features joined — nifty multi-tf, usdinr, nasdaq, crude/gold/copper (%d cols)",
             ticker, macro_df.shape[1],
         )
     else:
         logger.warning("%s: macro data empty — macro features will be zeroed", ticker)
         for col in ALL_MACRO_COLS:
             df[col] = 0.0
+
+    if ticker in IT_MACRO_DISABLED_TICKERS:
+        df[ALL_MACRO_COLS] = 0.0
+        logger.info("%s: macro features zeroed post-join — IT sector macro-disabled", ticker)
 
     df["return"] = df["close"].pct_change()
     df["outperformance"] = df["return"].shift(1) - df["nifty_return"].shift(1)
