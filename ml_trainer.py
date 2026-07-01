@@ -9,7 +9,6 @@ import pandas as pd
 import numpy as np
 import pandas_ta as ta
 import yfinance as yf
-import pandas_datareader.data as pdr_web
 from dotenv import load_dotenv
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline
@@ -319,39 +318,6 @@ def _prepare_macro_data(start_date, end_date):
         macro["copper_ret_5d"]  = 0.0
         macro["copper_vol_10d"] = 0.0
 
-    try:
-        us10y = pdr_web.DataReader(
-            "DGS10", "fred",
-            start=start_date,
-            end=end_date + timedelta(days=1),
-        )
-        if not us10y.empty:
-            c = us10y["DGS10"].astype(float)
-            # FRED DGS10 has gaps on weekends/holidays — forward-fill to align with trading days
-            c = c.reindex(
-                pd.date_range(start=c.index.min(), end=c.index.max(), freq="B")
-            ).ffill()
-            c.index = c.index.tz_localize(None)
-            us10y_chg_1d = c.diff(1)
-            macro["us10y_level"]   = c
-            macro["us10y_chg_1d"]  = us10y_chg_1d
-            macro["us10y_chg_5d"]  = c.diff(5)
-            macro["us10y_vol_10d"] = us10y_chg_1d.rolling(10).std()
-            logger.info("macro: US 10Y yield loaded from FRED (%d rows)", len(c))
-        else:
-            logger.warning("macro: US 10Y FRED returned empty — zeroing us10y features")
-            macro["us10y_level"]   = 0.0
-            macro["us10y_chg_1d"]  = 0.0
-            macro["us10y_chg_5d"]  = 0.0
-            macro["us10y_vol_10d"] = 0.0
-    except Exception as ex:
-        logger.warning("macro: US 10Y FRED download failed — %s", ex)
-        macro["us10y_level"]   = 0.0
-        macro["us10y_chg_1d"]  = 0.0
-        macro["us10y_chg_5d"]  = 0.0
-        macro["us10y_vol_10d"] = 0.0
-
-
     if macro.empty:
         return pd.DataFrame()
 
@@ -511,7 +477,6 @@ def create_dataset(ticker, client):
         "crude_ret_1d", "crude_ret_5d", "crude_vol_10d",
         "gold_ret_1d", "gold_ret_5d", "gold_vol_10d",
         "copper_ret_1d", "copper_ret_5d", "copper_vol_10d",
-        "us10y_level", "us10y_chg_1d", "us10y_chg_5d", "us10y_vol_10d",
     ]
 
     db = client["stock_market_db"]
@@ -706,6 +671,67 @@ def create_dataset(ticker, client):
         df["sector_momentum_5d"] = 0.0
 
     # --- TARGET LABEL ---
+    month = df.index.month
+    df["month_sin"] = np.sin(2 * np.pi * month / 12)
+    df["month_cos"] = np.cos(2 * np.pi * month / 12)
+
+    # Month-end: last 3 trading days of each calendar month
+    df["is_month_end"] = (
+        df.index.to_series()
+        .groupby(df.index.to_period("M"))
+        .transform(lambda x: x.rank(ascending=False) <= 3)
+        .astype(int)
+        .values
+    )
+
+    # Month-start: first 3 trading days of each calendar month
+    df["is_month_start"] = (
+        df.index.to_series()
+        .groupby(df.index.to_period("M"))
+        .transform(lambda x: x.rank(ascending=True) <= 3)
+        .astype(int)
+        .values
+    )
+
+    # Quarter-end: last 5 trading days of March/June/September/December
+    quarter_end_months = {3, 6, 9, 12}
+    df["quarter_end"] = (
+        df.index.to_series()
+        .groupby(df.index.to_period("M"))
+        .transform(lambda x: x.rank(ascending=False) <= 5)
+        .astype(int)
+        .values
+    ) * df.index.month.isin(quarter_end_months).astype(int).values
+
+    # NSE F&O expiry week: week containing last Thursday of the month
+    def _is_expiry_week(idx):
+        result = np.zeros(len(idx), dtype=int)
+        for i, dt in enumerate(idx):
+            # Find last Thursday of this month
+            import calendar
+            last_day = calendar.monthrange(dt.year, dt.month)[1]
+            last_thu = max(
+                d for d in range(1, last_day + 1)
+                if pd.Timestamp(dt.year, dt.month, d).weekday() == 3
+            )
+            expiry = pd.Timestamp(dt.year, dt.month, last_thu)
+            week_start = expiry - pd.Timedelta(days=4)
+            if week_start <= dt <= expiry:
+                result[i] = 1
+        return result
+
+    df["is_expiry_week"] = _is_expiry_week(df.index)
+
+    # Earnings season: Q4=Apr-May, Q1=Jul-Aug, Q2=Oct-Nov, Q3=Jan-Feb
+    earnings_months = {1, 2, 4, 5, 7, 8, 10, 11}
+    df["in_earnings_season"] = df.index.month.isin(earnings_months).astype(int)
+
+    logger.info(
+        "%s: calendar features added — month_sin/cos, is_month_end, is_month_start, "
+        "quarter_end, is_expiry_week, in_earnings_season",
+        ticker,
+    )
+    
     horizon = TICKER_HORIZON_OVERRIDE.get(ticker, 10)
     df["future_return"] = df["close"].shift(-horizon) / df["close"] - 1
     atr_scale = TICKER_ATR_THRESHOLD_SCALE.get(ticker, 1.0)
@@ -771,10 +797,6 @@ def create_dataset(ticker, client):
         "copper_ret_1d",
         "copper_ret_5d",
         "copper_vol_10d",
-        "us10y_level",
-        "us10y_chg_1d",
-        "us10y_chg_5d",
-        "us10y_vol_10d",
     ]
 
     # Verify all required columns exist before dropna to give a clear error
@@ -834,10 +856,6 @@ def _make_feature_list(df):
         "copper_ret_1d",
         "copper_ret_5d",
         "copper_vol_10d",
-        "us10y_level",
-        "us10y_chg_1d",
-        "us10y_chg_5d",
-        "us10y_vol_10d",
     ]
     return [feature for feature in candidate_features if feature in df.columns]
 
