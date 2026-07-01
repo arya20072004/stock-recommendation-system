@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import pandas_ta as ta
 import yfinance as yf
+import pandas_datareader.data as pdr_web
 from dotenv import load_dotenv
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline
@@ -318,6 +319,39 @@ def _prepare_macro_data(start_date, end_date):
         macro["copper_ret_5d"]  = 0.0
         macro["copper_vol_10d"] = 0.0
 
+    try:
+        us10y = pdr_web.DataReader(
+            "DGS10", "fred",
+            start=start_date,
+            end=end_date + timedelta(days=1),
+        )
+        if not us10y.empty:
+            c = us10y["DGS10"].astype(float)
+            # FRED DGS10 has gaps on weekends/holidays — forward-fill to align with trading days
+            c = c.reindex(
+                pd.date_range(start=c.index.min(), end=c.index.max(), freq="B")
+            ).ffill()
+            c.index = c.index.tz_localize(None)
+            us10y_chg_1d = c.diff(1)
+            macro["us10y_level"]   = c
+            macro["us10y_chg_1d"]  = us10y_chg_1d
+            macro["us10y_chg_5d"]  = c.diff(5)
+            macro["us10y_vol_10d"] = us10y_chg_1d.rolling(10).std()
+            logger.info("macro: US 10Y yield loaded from FRED (%d rows)", len(c))
+        else:
+            logger.warning("macro: US 10Y FRED returned empty — zeroing us10y features")
+            macro["us10y_level"]   = 0.0
+            macro["us10y_chg_1d"]  = 0.0
+            macro["us10y_chg_5d"]  = 0.0
+            macro["us10y_vol_10d"] = 0.0
+    except Exception as ex:
+        logger.warning("macro: US 10Y FRED download failed — %s", ex)
+        macro["us10y_level"]   = 0.0
+        macro["us10y_chg_1d"]  = 0.0
+        macro["us10y_chg_5d"]  = 0.0
+        macro["us10y_vol_10d"] = 0.0
+
+
     if macro.empty:
         return pd.DataFrame()
 
@@ -477,6 +511,7 @@ def create_dataset(ticker, client):
         "crude_ret_1d", "crude_ret_5d", "crude_vol_10d",
         "gold_ret_1d", "gold_ret_5d", "gold_vol_10d",
         "copper_ret_1d", "copper_ret_5d", "copper_vol_10d",
+        "us10y_level", "us10y_chg_1d", "us10y_chg_5d", "us10y_vol_10d",
     ]
 
     db = client["stock_market_db"]
@@ -525,10 +560,6 @@ def create_dataset(ticker, client):
         logger.warning("%s: macro data empty — macro features will be zeroed", ticker)
         for col in ALL_MACRO_COLS:
             df[col] = 0.0
-
-    if ticker in IT_MACRO_DISABLED_TICKERS:
-        df[ALL_MACRO_COLS] = 0.0
-        logger.info("%s: macro features zeroed post-join — IT sector macro-disabled", ticker)
 
     df["return"] = df["close"].pct_change()
     df["outperformance"] = df["return"].shift(1) - df["nifty_return"].shift(1)
@@ -740,6 +771,10 @@ def create_dataset(ticker, client):
         "copper_ret_1d",
         "copper_ret_5d",
         "copper_vol_10d",
+        "us10y_level",
+        "us10y_chg_1d",
+        "us10y_chg_5d",
+        "us10y_vol_10d",
     ]
 
     # Verify all required columns exist before dropna to give a clear error
@@ -799,6 +834,10 @@ def _make_feature_list(df):
         "copper_ret_1d",
         "copper_ret_5d",
         "copper_vol_10d",
+        "us10y_level",
+        "us10y_chg_1d",
+        "us10y_chg_5d",
+        "us10y_vol_10d",
     ]
     return [feature for feature in candidate_features if feature in df.columns]
 
@@ -903,7 +942,7 @@ TICKER_SMOTE_FLOOR_OVERRIDES: dict[str, dict[int, float]] = {
     "SBIN.NS":       {0: 0.60, 1: 0.55, 2: 0.65},
     "BAJAJFINSV.NS":  {0: 0.65, 1: 0.45, 2: 0.65},
     "TRENT.NS": {0: 0.75, 1: 0.40, 2: 0.50},  # force massive SELL oversampling
-    "SHRIRAMFIN.NS": {0: 0.70, 1: 0.45, 2: 0.50},
+    #"SHRIRAMFIN.NS": {0: 0.70, 1: 0.45, 2: 0.50},
     "TATACONSUM.NS": {0: 0.65, 1: 0.45, 2: 0.65},  # NEW — force SELL/BUY
     "MAXHEALTH.NS":  {0: 0.65, 1: 0.45, 2: 0.65},  # NEW — force SELL/BUY
     #"KOTAKBANK.NS": {0: 0.50, 1: 0.50, 2: 0.65},  # NEW — BUY f1=0.00 two consecutive runs
@@ -996,7 +1035,7 @@ def train_model(df, ticker):
     """
     TICKER_SELL_BOOST_OVERRIDE: dict[str, float] = {
         "TRENT.NS":     2.0,   # current cap is 1.5, need more
-        "SHRIRAMFIN.NS":2.0,
+        #"SHRIRAMFIN.NS":2.0,
     }
     logger.info("Training model for %s", ticker)
     os.makedirs(MODELS_DIR, exist_ok=True)

@@ -1,59 +1,59 @@
 {
   "ticker": "SHRIRAMFIN.NS",
-  "f1_macro": 0.26456660342967675,
+  "f1_macro": 0.3007140184917963,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.225,
+      "precision": 0.42857142857142855,
       "recall": 0.14285714285714285,
-      "f1": 0.17475728155339806,
+      "f1": 0.21428571428571427,
       "support": 63
     },
     "HOLD": {
       "precision": 0.16666666666666666,
-      "recall": 0.08771929824561403,
-      "f1": 0.11494252873563218,
+      "recall": 0.07017543859649122,
+      "f1": 0.09876543209876543,
       "support": 57
     },
     "BUY": {
-      "precision": 0.42,
-      "recall": 0.63,
-      "f1": 0.504,
+      "precision": 0.46285714285714286,
+      "recall": 0.81,
+      "f1": 0.5890909090909091,
       "support": 100
     }
   },
-  "train_size": 878,
+  "train_size": 876,
   "test_size": 220,
-  "total_rows_after_features": 1098,
+  "total_rows_after_features": 1096,
   "label_distribution": {
     "0": 296,
-    "1": 338,
+    "1": 336,
     "2": 464
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5556781888008118,
-    "mean_top2_margin": 0.26396334171295166,
-    "f1_macro": 0.26456660342967675
+    "mean_max_proba": 0.5841805338859558,
+    "mean_top2_margin": 0.32364463806152344,
+    "f1_macro": 0.3007140184917963
   },
   "optuna": {
-    "best_value": 0.3544313472141364,
+    "best_value": 0.3338916039502321,
     "best_params": {
-      "n_estimators": 495,
+      "n_estimators": 412,
       "max_depth": 4,
-      "learning_rate": 0.09432331966394185,
-      "subsample": 0.9970547146563725,
-      "colsample_bytree": 0.9480622716580481,
-      "min_child_weight": 13,
-      "reg_lambda": 9.93899024066319,
-      "reg_alpha": 1.0038257498204863,
-      "gamma": 0.9526683934243623
+      "learning_rate": 0.06689802001564371,
+      "subsample": 0.8756623291939448,
+      "colsample_bytree": 0.9281889012746767,
+      "min_child_weight": 15,
+      "reg_lambda": 8.861552318513501,
+      "reg_alpha": 1.875709954341941,
+      "gamma": 0.8917760113282586
     },
     "n_trials": 30,
     "cv_splits": 5,
     "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
   },
   "smote_floors_used": {
-    "0": 0.7,
-    "1": 0.45,
+    "0": 0.5,
+    "1": 0.5,
     "2": 0.5
   },
   "threshold_calibration": null,

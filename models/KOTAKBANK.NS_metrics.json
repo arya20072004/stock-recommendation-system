@@ -1,51 +1,51 @@
 {
   "ticker": "KOTAKBANK.NS",
-  "f1_macro": 0.3097449315834658,
+  "f1_macro": 0.30103741804034995,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.22413793103448276,
-      "recall": 0.21666666666666667,
-      "f1": 0.22033898305084745,
+      "precision": 0.19444444444444445,
+      "recall": 0.11666666666666667,
+      "f1": 0.14583333333333334,
       "support": 60
     },
     "HOLD": {
-      "precision": 0.5128205128205128,
-      "recall": 0.6185567010309279,
-      "f1": 0.5607476635514018,
+      "precision": 0.48484848484848486,
+      "recall": 0.32989690721649484,
+      "f1": 0.39263803680981596,
       "support": 97
     },
     "BUY": {
-      "precision": 0.17777777777777778,
-      "recall": 0.12698412698412698,
-      "f1": 0.14814814814814814,
+      "precision": 0.2796610169491525,
+      "recall": 0.5238095238095238,
+      "f1": 0.36464088397790057,
       "support": 63
     }
   },
-  "train_size": 878,
+  "train_size": 876,
   "test_size": 220,
-  "total_rows_after_features": 1098,
+  "total_rows_after_features": 1096,
   "label_distribution": {
-    "0": 303,
+    "0": 301,
     "1": 444,
     "2": 351
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6166581511497498,
-    "mean_top2_margin": 0.35277047753334045,
-    "f1_macro": 0.3097449315834658
+    "mean_max_proba": 0.5961101651191711,
+    "mean_top2_margin": 0.31875181198120117,
+    "f1_macro": 0.30103741804034995
   },
   "optuna": {
-    "best_value": 0.3241405540132058,
+    "best_value": 0.31726575817274694,
     "best_params": {
-      "n_estimators": 146,
-      "max_depth": 7,
-      "learning_rate": 0.29994016068487284,
-      "subsample": 0.9858433623455785,
-      "colsample_bytree": 0.7990937669017668,
-      "min_child_weight": 10,
-      "reg_lambda": 3.5572014828771246,
-      "reg_alpha": 1.0252365454937185,
-      "gamma": 0.17827283850435266
+      "n_estimators": 619,
+      "max_depth": 4,
+      "learning_rate": 0.09515311266610953,
+      "subsample": 0.8642851894247535,
+      "colsample_bytree": 0.86532527835205,
+      "min_child_weight": 14,
+      "reg_lambda": 6.644552321694684,
+      "reg_alpha": 2.1196633468764357,
+      "gamma": 0.19782631653595878
     },
     "n_trials": 75,
     "cv_splits": 5,

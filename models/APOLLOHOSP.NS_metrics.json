@@ -1,51 +1,51 @@
 {
   "ticker": "APOLLOHOSP.NS",
-  "f1_macro": 0.3723502304147465,
+  "f1_macro": 0.3197228970851276,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.41304347826086957,
-      "recall": 0.27941176470588236,
-      "f1": 0.3333333333333333,
+      "precision": 0.4,
+      "recall": 0.14705882352941177,
+      "f1": 0.21505376344086022,
       "support": 68
     },
     "HOLD": {
-      "precision": 0.40594059405940597,
-      "recall": 0.4823529411764706,
-      "f1": 0.44086021505376344,
+      "precision": 0.3684210526315789,
+      "recall": 0.5764705882352941,
+      "f1": 0.44954128440366975,
       "support": 85
     },
     "BUY": {
-      "precision": 0.3287671232876712,
-      "recall": 0.3582089552238806,
-      "f1": 0.34285714285714286,
+      "precision": 0.3064516129032258,
+      "recall": 0.2835820895522388,
+      "f1": 0.29457364341085274,
       "support": 67
     }
   },
-  "train_size": 878,
+  "train_size": 876,
   "test_size": 220,
-  "total_rows_after_features": 1098,
+  "total_rows_after_features": 1096,
   "label_distribution": {
     "0": 268,
     "1": 457,
-    "2": 373
+    "2": 371
   },
   "confidence_stats": {
-    "mean_max_proba": 0.511396586894989,
-    "mean_top2_margin": 0.19134269654750824,
-    "f1_macro": 0.3723502304147465
+    "mean_max_proba": 0.6458284258842468,
+    "mean_top2_margin": 0.37826693058013916,
+    "f1_macro": 0.3197228970851276
   },
   "optuna": {
-    "best_value": 0.34953794702202645,
+    "best_value": 0.31195588115178136,
     "best_params": {
-      "n_estimators": 674,
-      "max_depth": 3,
-      "learning_rate": 0.268321918588788,
-      "subsample": 0.8048631026689343,
-      "colsample_bytree": 0.625621105277992,
-      "min_child_weight": 7,
-      "reg_lambda": 2.0061341341079495,
-      "reg_alpha": 2.3305898871458686,
-      "gamma": 2.5115421512596865
+      "n_estimators": 518,
+      "max_depth": 7,
+      "learning_rate": 0.16594868117395722,
+      "subsample": 0.6105735417235982,
+      "colsample_bytree": 0.7736051933286926,
+      "min_child_weight": 9,
+      "reg_lambda": 4.318842067428621,
+      "reg_alpha": 1.0808870421034895,
+      "gamma": 0.2977138274298764
     },
     "n_trials": 75,
     "cv_splits": 5,

@@ -1,51 +1,51 @@
 {
   "ticker": "COALINDIA.NS",
-  "f1_macro": 0.2771836550088149,
+  "f1_macro": 0.3276680025493877,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2571428571428571,
-      "recall": 0.28125,
-      "f1": 0.26865671641791045,
+      "precision": 0.31,
+      "recall": 0.484375,
+      "f1": 0.3780487804878049,
       "support": 64
     },
     "HOLD": {
-      "precision": 0.325,
-      "recall": 0.18571428571428572,
-      "f1": 0.23636363636363636,
+      "precision": 0.41025641025641024,
+      "recall": 0.22857142857142856,
+      "f1": 0.29357798165137616,
       "support": 70
     },
     "BUY": {
-      "precision": 0.2909090909090909,
-      "recall": 0.37209302325581395,
-      "f1": 0.32653061224489793,
+      "precision": 0.32098765432098764,
+      "recall": 0.3023255813953488,
+      "f1": 0.31137724550898205,
       "support": 86
     }
   },
-  "train_size": 878,
+  "train_size": 876,
   "test_size": 220,
-  "total_rows_after_features": 1098,
+  "total_rows_after_features": 1096,
   "label_distribution": {
-    "0": 298,
+    "0": 296,
     "1": 299,
     "2": 501
   },
   "confidence_stats": {
-    "mean_max_proba": 0.48189201951026917,
-    "mean_top2_margin": 0.1701793372631073,
-    "f1_macro": 0.2771836550088149
+    "mean_max_proba": 0.5391583442687988,
+    "mean_top2_margin": 0.23862582445144653,
+    "f1_macro": 0.3276680025493877
   },
   "optuna": {
-    "best_value": 0.31812263170301863,
+    "best_value": 0.319990905065234,
     "best_params": {
-      "n_estimators": 244,
+      "n_estimators": 210,
       "max_depth": 5,
-      "learning_rate": 0.05403577076122545,
-      "subsample": 0.8422055321174889,
-      "colsample_bytree": 0.9003176097000789,
-      "min_child_weight": 4,
-      "reg_lambda": 11.740487190930297,
-      "reg_alpha": 3.26331909600536,
-      "gamma": 0.8363029686950355
+      "learning_rate": 0.07578854864284991,
+      "subsample": 0.8562950519589575,
+      "colsample_bytree": 0.9586229109175456,
+      "min_child_weight": 8,
+      "reg_lambda": 9.230475790737433,
+      "reg_alpha": 1.8261748114081906,
+      "gamma": 0.7259245180673682
     },
     "n_trials": 30,
     "cv_splits": 5,
