@@ -1,51 +1,51 @@
 {
   "ticker": "MARUTI.NS",
-  "f1_macro": 0.3461704731130797,
+  "f1_macro": 0.31310689489577487,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.22857142857142856,
+      "precision": 0.2222222222222222,
       "recall": 0.25,
-      "f1": 0.23880597014925373,
+      "f1": 0.23529411764705882,
       "support": 32
     },
     "HOLD": {
-      "precision": 0.35294117647058826,
-      "recall": 0.391304347826087,
-      "f1": 0.3711340206185567,
+      "precision": 0.2962962962962963,
+      "recall": 0.17391304347826086,
+      "f1": 0.2191780821917808,
       "support": 46
     },
     "BUY": {
-      "precision": 0.47368421052631576,
-      "recall": 0.391304347826087,
-      "f1": 0.42857142857142855,
-      "support": 46
+      "precision": 0.42105263157894735,
+      "recall": 0.5714285714285714,
+      "f1": 0.48484848484848486,
+      "support": 42
     }
   },
-  "train_size": 492,
-  "test_size": 124,
-  "total_rows_after_features": 616,
+  "train_size": 479,
+  "test_size": 120,
+  "total_rows_after_features": 599,
   "label_distribution": {
-    "0": 142,
-    "1": 252,
-    "2": 222
+    "0": 138,
+    "1": 246,
+    "2": 215
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5746604800224304,
-    "mean_top2_margin": 0.3041347861289978,
-    "f1_macro": 0.3461704731130797
+    "mean_max_proba": 0.5989587306976318,
+    "mean_top2_margin": 0.3436572253704071,
+    "f1_macro": 0.31310689489577487
   },
   "optuna": {
-    "best_value": 0.30857298065963407,
+    "best_value": 0.3287469883368119,
     "best_params": {
-      "n_estimators": 171,
+      "n_estimators": 682,
       "max_depth": 6,
-      "learning_rate": 0.13297554090738672,
-      "subsample": 0.8245108790277985,
-      "colsample_bytree": 0.9083868719818244,
-      "min_child_weight": 9,
-      "reg_lambda": 8.795526781965922,
-      "reg_alpha": 2.423934582613473,
-      "gamma": 0.17371546755787604
+      "learning_rate": 0.24420460844911424,
+      "subsample": 0.9579309401710595,
+      "colsample_bytree": 0.8391599915244341,
+      "min_child_weight": 14,
+      "reg_lambda": 3.1504025266749536,
+      "reg_alpha": 1.3819228808861534,
+      "gamma": 0.23115913784056039
     },
     "n_trials": 30,
     "cv_splits": 5,
