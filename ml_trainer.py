@@ -318,32 +318,6 @@ def _prepare_macro_data(start_date, end_date):
         macro["copper_ret_5d"]  = 0.0
         macro["copper_vol_10d"] = 0.0
 
-    try:
-        gsec10y = pd.read_csv(
-            "10yiny_b_d.csv",
-            parse_dates=["Date"],
-        )
-        if not gsec10y.empty:
-            gsec10y = gsec10y.set_index("Date").sort_index()
-            gsec10y = gsec10y.loc[start_date:end_date]
-            c = gsec10y["Close"]
-            macro["gsec10y_level"]   = c
-            macro["gsec10y_ret_1d"]  = c.pct_change(1)
-            macro["gsec10y_chg_5d"]  = c.diff(5)
-            macro["gsec10y_vol_10d"] = c.diff(1).rolling(10).std()
-        else:
-            logger.warning("macro: India 10Y yield returned empty data — zeroing gsec10y features")
-            macro["gsec10y_level"]   = 0.0
-            macro["gsec10y_ret_1d"]  = 0.0
-            macro["gsec10y_chg_5d"]  = 0.0
-            macro["gsec10y_vol_10d"] = 0.0
-    except Exception as ex:
-        logger.warning("macro: India 10Y yield download failed — %s", ex)
-        macro["gsec10y_level"]   = 0.0
-        macro["gsec10y_ret_1d"]  = 0.0
-        macro["gsec10y_chg_5d"]  = 0.0
-        macro["gsec10y_vol_10d"] = 0.0
-
     if macro.empty:
         return pd.DataFrame()
 
@@ -503,7 +477,6 @@ def create_dataset(ticker, client):
         "crude_ret_1d", "crude_ret_5d", "crude_vol_10d",
         "gold_ret_1d", "gold_ret_5d", "gold_vol_10d",
         "copper_ret_1d", "copper_ret_5d", "copper_vol_10d",
-        "gsec10y_level", "gsec10y_ret_1d", "gsec10y_chg_5d", "gsec10y_vol_10d",
     ]
 
     db = client["stock_market_db"]
@@ -826,10 +799,6 @@ def create_dataset(ticker, client):
         "copper_ret_1d",
         "copper_ret_5d",
         "copper_vol_10d",
-        "gsec10y_level",
-        "gsec10y_ret_1d",
-        "gsec10y_chg_5d",
-        "gsec10y_vol_10d",
     ]
 
     # Verify all required columns exist before dropna to give a clear error
@@ -889,10 +858,6 @@ def _make_feature_list(df):
         "copper_ret_1d",
         "copper_ret_5d",
         "copper_vol_10d",
-        "gsec10y_level",
-        "gsec10y_ret_1d",
-        "gsec10y_chg_5d",
-        "gsec10y_vol_10d",
         "month_sin",
         "month_cos",
         "is_month_end",

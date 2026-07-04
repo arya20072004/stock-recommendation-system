@@ -1,51 +1,51 @@
 {
   "ticker": "AXISBANK.NS",
-  "f1_macro": 0.4038563478616218,
+  "f1_macro": 0.4410828055680424,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.36764705882352944,
-      "recall": 0.3787878787878788,
-      "f1": 0.373134328358209,
+      "precision": 0.38235294117647056,
+      "recall": 0.3939393939393939,
+      "f1": 0.3880597014925373,
       "support": 66
     },
     "HOLD": {
-      "precision": 0.42857142857142855,
-      "recall": 0.24324324324324326,
-      "f1": 0.3103448275862069,
+      "precision": 0.4791666666666667,
+      "recall": 0.3108108108108108,
+      "f1": 0.3770491803278688,
       "support": 74
     },
     "BUY": {
-      "precision": 0.4519230769230769,
-      "recall": 0.6351351351351351,
-      "f1": 0.5280898876404494,
+      "precision": 0.4897959183673469,
+      "recall": 0.6486486486486487,
+      "f1": 0.5581395348837209,
       "support": 74
     }
   },
-  "train_size": 855,
+  "train_size": 853,
   "test_size": 214,
-  "total_rows_after_features": 1069,
+  "total_rows_after_features": 1067,
   "label_distribution": {
     "0": 293,
-    "1": 385,
-    "2": 391
+    "1": 384,
+    "2": 390
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6175154447555542,
-    "mean_top2_margin": 0.3586309552192688,
-    "f1_macro": 0.4038563478616218
+    "mean_max_proba": 0.5492331385612488,
+    "mean_top2_margin": 0.266696035861969,
+    "f1_macro": 0.4410828055680424
   },
   "optuna": {
-    "best_value": 0.33893138441266346,
+    "best_value": 0.337221329752143,
     "best_params": {
-      "n_estimators": 205,
-      "max_depth": 5,
-      "learning_rate": 0.271076639725357,
-      "subsample": 0.6639869694634831,
-      "colsample_bytree": 0.7365596008925963,
-      "min_child_weight": 12,
-      "reg_lambda": 7.844539227098186,
-      "reg_alpha": 0.6017383469811225,
-      "gamma": 1.0133461694907564
+      "n_estimators": 681,
+      "max_depth": 6,
+      "learning_rate": 0.23974004628037804,
+      "subsample": 0.9976391626618665,
+      "colsample_bytree": 0.8117645695920711,
+      "min_child_weight": 13,
+      "reg_lambda": 2.485428754574418,
+      "reg_alpha": 0.6950757971434816,
+      "gamma": 1.1873156781209548
     },
     "n_trials": 75,
     "cv_splits": 5,
