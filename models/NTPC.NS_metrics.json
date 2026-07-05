@@ -1,51 +1,51 @@
 {
   "ticker": "NTPC.NS",
-  "f1_macro": 0.29697302039921036,
+  "f1_macro": 0.300134070722306,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2441860465116279,
-      "recall": 0.3888888888888889,
-      "f1": 0.3,
-      "support": 54
+      "precision": 0.2,
+      "recall": 0.15789473684210525,
+      "f1": 0.17647058823529413,
+      "support": 57
     },
     "HOLD": {
-      "precision": 0.5108695652173914,
-      "recall": 0.46078431372549017,
-      "f1": 0.4845360824742268,
-      "support": 102
+      "precision": 0.44155844155844154,
+      "recall": 0.3300970873786408,
+      "f1": 0.37777777777777777,
+      "support": 103
     },
     "BUY": {
-      "precision": 0.1388888888888889,
-      "recall": 0.08620689655172414,
-      "f1": 0.10638297872340426,
-      "support": 58
+      "precision": 0.27835051546391754,
+      "recall": 0.4576271186440678,
+      "f1": 0.34615384615384615,
+      "support": 59
     }
   },
-  "train_size": 853,
-  "test_size": 214,
-  "total_rows_after_features": 1067,
+  "train_size": 874,
+  "test_size": 219,
+  "total_rows_after_features": 1093,
   "label_distribution": {
-    "0": 244,
-    "1": 440,
-    "2": 383
+    "0": 258,
+    "1": 446,
+    "2": 389
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5945485234260559,
-    "mean_top2_margin": 0.32435256242752075,
-    "f1_macro": 0.29697302039921036
+    "mean_max_proba": 0.5653114318847656,
+    "mean_top2_margin": 0.2899934649467468,
+    "f1_macro": 0.300134070722306
   },
   "optuna": {
-    "best_value": 0.29678973027485017,
+    "best_value": 0.2961370143898583,
     "best_params": {
-      "n_estimators": 636,
-      "max_depth": 3,
-      "learning_rate": 0.27637189952325153,
-      "subsample": 0.7365364619865665,
-      "colsample_bytree": 0.994993012715458,
-      "min_child_weight": 14,
-      "reg_lambda": 6.0788983443799935,
-      "reg_alpha": 2.546905384477452,
-      "gamma": 0.5979509312683439
+      "n_estimators": 333,
+      "max_depth": 4,
+      "learning_rate": 0.16755052359850303,
+      "subsample": 0.7427013306774357,
+      "colsample_bytree": 0.7123738038749523,
+      "min_child_weight": 10,
+      "reg_lambda": 3.832014924671914,
+      "reg_alpha": 4.109886413393179,
+      "gamma": 0.3161968666713354
     },
     "n_trials": 75,
     "cv_splits": 5,

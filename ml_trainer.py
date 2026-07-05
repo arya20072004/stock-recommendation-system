@@ -318,6 +318,34 @@ def _prepare_macro_data(start_date, end_date):
         macro["copper_ret_5d"]  = 0.0
         macro["copper_vol_10d"] = 0.0
 
+    try:
+        india_vix = yf.download(
+            "^INDIAVIX", start=start_date,
+            end=end_date + timedelta(days=1),
+            progress=False, auto_adjust=True,
+        )
+        if not india_vix.empty:
+            if isinstance(india_vix.columns, pd.MultiIndex):
+                india_vix.columns = india_vix.columns.get_level_values(0)
+            c = india_vix["Close"]
+            vix_ret_1d = c.pct_change(1)
+            macro["vix_level"]   = c
+            macro["vix_ret_1d"]  = vix_ret_1d
+            macro["vix_chg_5d"]  = c.diff(5)
+            macro["vix_vol_10d"] = vix_ret_1d.rolling(10).std()
+        else:
+            logger.warning("macro: India VIX returned empty data — zeroing vix features")
+            macro["vix_level"]   = 0.0
+            macro["vix_ret_1d"]  = 0.0
+            macro["vix_chg_5d"]  = 0.0
+            macro["vix_vol_10d"] = 0.0
+    except Exception as ex:
+        logger.warning("macro: India VIX download failed — %s", ex)
+        macro["vix_level"]   = 0.0
+        macro["vix_ret_1d"]  = 0.0
+        macro["vix_chg_5d"]  = 0.0
+        macro["vix_vol_10d"] = 0.0
+
     if macro.empty:
         return pd.DataFrame()
 
@@ -477,6 +505,7 @@ def create_dataset(ticker, client):
         "crude_ret_1d", "crude_ret_5d", "crude_vol_10d",
         "gold_ret_1d", "gold_ret_5d", "gold_vol_10d",
         "copper_ret_1d", "copper_ret_5d", "copper_vol_10d",
+        "vix_level", "vix_ret_1d", "vix_chg_5d", "vix_vol_10d",
     ]
 
     db = client["stock_market_db"]
@@ -799,6 +828,10 @@ def create_dataset(ticker, client):
         "copper_ret_1d",
         "copper_ret_5d",
         "copper_vol_10d",
+        "vix_level",
+        "vix_ret_1d",
+        "vix_chg_5d",
+        "vix_vol_10d",
     ]
 
     # Verify all required columns exist before dropna to give a clear error
@@ -858,6 +891,10 @@ def _make_feature_list(df):
         "copper_ret_1d",
         "copper_ret_5d",
         "copper_vol_10d",
+        "vix_level",
+        "vix_ret_1d",
+        "vix_chg_5d",
+        "vix_vol_10d",
         "month_sin",
         "month_cos",
         "is_month_end",

@@ -1,51 +1,51 @@
 {
   "ticker": "SHRIRAMFIN.NS",
-  "f1_macro": 0.26331291447570515,
+  "f1_macro": 0.29562850288001086,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.21739130434782608,
-      "recall": 0.07936507936507936,
-      "f1": 0.11627906976744186,
-      "support": 63
+      "precision": 0.25,
+      "recall": 0.08064516129032258,
+      "f1": 0.12195121951219512,
+      "support": 62
     },
     "HOLD": {
-      "precision": 0.20833333333333334,
-      "recall": 0.09259259259259259,
-      "f1": 0.1282051282051282,
-      "support": 54
+      "precision": 0.2549019607843137,
+      "recall": 0.22807017543859648,
+      "f1": 0.24074074074074073,
+      "support": 57
     },
     "BUY": {
-      "precision": 0.4311377245508982,
-      "recall": 0.7422680412371134,
-      "f1": 0.5454545454545454,
-      "support": 97
+      "precision": 0.4391891891891892,
+      "recall": 0.65,
+      "f1": 0.5241935483870968,
+      "support": 100
     }
   },
-  "train_size": 853,
-  "test_size": 214,
-  "total_rows_after_features": 1067,
+  "train_size": 874,
+  "test_size": 219,
+  "total_rows_after_features": 1093,
   "label_distribution": {
-    "0": 289,
-    "1": 327,
-    "2": 451
+    "0": 296,
+    "1": 334,
+    "2": 463
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6068461537361145,
-    "mean_top2_margin": 0.34608766436576843,
-    "f1_macro": 0.26331291447570515
+    "mean_max_proba": 0.6302952766418457,
+    "mean_top2_margin": 0.37247607111930847,
+    "f1_macro": 0.29562850288001086
   },
   "optuna": {
-    "best_value": 0.3346069131740615,
+    "best_value": 0.34131245117023884,
     "best_params": {
-      "n_estimators": 301,
-      "max_depth": 4,
-      "learning_rate": 0.10071303878926546,
-      "subsample": 0.7666405181330285,
-      "colsample_bytree": 0.8992768734179942,
-      "min_child_weight": 10,
-      "reg_lambda": 8.901730450905623,
-      "reg_alpha": 4.896815931933695,
-      "gamma": 0.12261671707670721
+      "n_estimators": 190,
+      "max_depth": 7,
+      "learning_rate": 0.2117955279800071,
+      "subsample": 0.7174611555581063,
+      "colsample_bytree": 0.7653518721928222,
+      "min_child_weight": 15,
+      "reg_lambda": 3.4725613011415994,
+      "reg_alpha": 1.3058759904958839,
+      "gamma": 0.42370924978138164
     },
     "n_trials": 30,
     "cv_splits": 5,
