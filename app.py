@@ -1,9 +1,10 @@
+import logging
 from flask import Flask, jsonify, render_template, g
 from flask_caching import Cache
 from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
 import pandas as pd
-import pandas_ta as ta
+import numpy as np
 import yfinance as yf
 import joblib
 import json
@@ -14,6 +15,9 @@ from dotenv import load_dotenv
 from xgboost import XGBClassifier
 from nifty50 import TICKERS
 from confidence import compute_confidence_tier, get_display_signal
+from feature_engineering import build_feature_row
+
+logger = logging.getLogger(__name__)
 
 # --- SETUP ---
 load_dotenv()
@@ -66,68 +70,53 @@ print("--- Model Loading Complete ---")
 # --- PREDICTION FUNCTION ---
 def get_latest_prediction(ticker):
     """
-    Efficiently fetches recent data to calculate the latest features and generate a prediction.
+    Builds the full feature DataFrame via the shared feature_engineering
+    module (identical pipeline to ml_trainer.py's create_dataset minus
+    target labels), then generates a prediction using the loaded model.
+
     Returns a dict with recommendation, confidence, and timestamp.
     """
-    prices_df = pd.DataFrame(list(db.historical_data.find({'ticker': ticker}).sort('date', -1).limit(90)))
-    if prices_df.empty:
-        raise FileNotFoundError("No historical data found for this ticker.")
-    
-    prices_df.set_index('date', inplace=True)
-    prices_df.sort_index(inplace=True)
-    
-    nifty_df = yf.download('^NSEI', start=prices_df.index.min(), end=prices_df.index.max(), progress=False, auto_adjust=True)
-    if isinstance(nifty_df.columns, pd.MultiIndex):
-        nifty_df.columns = nifty_df.columns.get_level_values(0)
-    
-    prices_df['return'] = prices_df['close'].pct_change()
-    nifty_df['nifty_return'] = nifty_df['Close'].pct_change()
-    df = prices_df.join(nifty_df['nifty_return'], how='left')
-    
-    df['outperformance'] = df['return'] - df['nifty_return']
-    
-    news_df = pd.DataFrame(list(db.news_articles.find({
-        'ticker': ticker, 
-        'published_at': {'$gte': prices_df.index.min().to_pydatetime()}
-    })))
-    if not news_df.empty:
-        news_df['date'] = pd.to_datetime(news_df['published_at'].dt.date)
-        if 'sentiment' in news_df.columns:
-            sentiment_df = news_df.groupby('date')['sentiment'].apply(lambda x: x.str['score'].mean()).to_frame()
-            df = df.join(sentiment_df, how='left')
-        else:
-            df['sentiment'] = 0.0
-    else:
-        df['sentiment'] = 0.0
-        
-    df.fillna(0, inplace=True)
-    
-    # Technical indicators with proper lagging to prevent data leakage
-    df.ta.rsi(length=14, append=True)
-    df.ta.macd(append=True)
-    df.ta.bbands(append=True)
-    df.ta.atr(append=True)
-    
-    # Shift technical indicator columns to use only past data
-    for col in df.columns:
-        if 'RSI' in col or 'MACD' in col or 'BBL' in col or 'BBM' in col or 'BBU' in col or 'ATR' in col:
-            df[col] = df[col].shift(1)
-    
-    df['sentiment_7d_avg'] = df['sentiment'].shift(1).rolling(window=7).mean()
-    df['price_change_1d'] = df['close'].shift(1).pct_change(1)
-    df['price_change_5d'] = df['close'].shift(1).pct_change(5)
-    df['market_correlation'] = df['return'].shift(1).rolling(window=30).corr(df['nifty_return'])
-    df.dropna(inplace=True)
+    # Build the full feature DataFrame using the shared pipeline.
+    # build_feature_row fetches HISTORY_YEARS of data (or overridden
+    # amount for tickers in TICKER_HISTORY_OVERRIDE) — enough to
+    # satisfy all rolling windows (200-day Nifty SMA, 30-day
+    # correlation, 20-day OBV/VWAP, 5-day sector momentum).
+    computed_df = build_feature_row(ticker, client, db)
 
-    if df.empty:
-        raise ValueError("Not enough data to make a prediction after feature engineering.")
+    if computed_df.empty:
+        raise ValueError(f"Feature engineering returned empty DataFrame for {ticker}")
 
     model = models[ticker]
     feature_names = feature_lists[ticker]
-    
-    latest_features = df[feature_names].iloc[-1].values.reshape(1, -1)
-    
-    # Use predict_proba for confidence score
+
+    # --- Safety check: detect feature columns missing from computed DataFrame ---
+    missing_cols = set(feature_names) - set(computed_df.columns)
+    if missing_cols:
+        logger.error(
+            "%s: %d feature columns required by model are missing from "
+            "computed DataFrame: %s. Available columns: %s",
+            ticker, len(missing_cols), sorted(missing_cols),
+            sorted(computed_df.columns.tolist()),
+        )
+        raise ValueError(
+            f"{ticker}: model expects features {sorted(missing_cols)} "
+            f"which are missing from the computed feature DataFrame. "
+            f"This indicates a training/inference pipeline mismatch."
+        )
+
+    # Drop rows where any required feature is NaN, then take the last row
+    valid_df = computed_df[feature_names].dropna()
+    if valid_df.empty:
+        raise ValueError(
+            f"Not enough data for {ticker} after feature engineering "
+            f"— all rows have NaN in required feature columns."
+        )
+
+    latest_features = valid_df.iloc[-1].values.reshape(1, -1)
+
+    # NOTE: KNOWN GAP — TICKER_CLASS_THRESHOLDS calibration from training
+    # is NOT applied here. Inference uses predict_proba + argmax directly.
+    # Threshold calibration is out of scope unless requested separately.
     proba = model.predict_proba(latest_features)[0]
     predicted_class = ["SELL", "HOLD", "BUY"][int(proba.argmax())]
 
@@ -155,6 +144,7 @@ def get_latest_prediction(ticker):
         "confidence_detail": confidence,
         "predicted_at": datetime.now().strftime("%d %b %Y, %I:%M %p"),
     }
+
 
 # --- API Endpoints ---
 

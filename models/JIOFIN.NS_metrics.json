@@ -1,51 +1,51 @@
 {
   "ticker": "JIOFIN.NS",
-  "f1_macro": 0.36680537702346455,
+  "f1_macro": 0.3221129747445537,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.6666666666666666,
-      "recall": 0.2909090909090909,
-      "f1": 0.4050632911392405,
-      "support": 55
+      "precision": 0.47058823529411764,
+      "recall": 0.6,
+      "f1": 0.5274725274725275,
+      "support": 40
     },
     "HOLD": {
-      "precision": 0.3157894736842105,
-      "recall": 0.2608695652173913,
-      "f1": 0.2857142857142857,
-      "support": 46
+      "precision": 0.3076923076923077,
+      "recall": 0.07692307692307693,
+      "f1": 0.12307692307692308,
+      "support": 52
     },
     "BUY": {
-      "precision": 0.2786885245901639,
-      "recall": 0.7727272727272727,
-      "f1": 0.40963855421686746,
-      "support": 22
+      "precision": 0.23076923076923078,
+      "recall": 0.5,
+      "f1": 0.3157894736842105,
+      "support": 24
     }
   },
-  "train_size": 490,
-  "test_size": 123,
-  "total_rows_after_features": 613,
+  "train_size": 462,
+  "test_size": 116,
+  "total_rows_after_features": 578,
   "label_distribution": {
-    "0": 183,
-    "1": 233,
-    "2": 197
+    "0": 164,
+    "1": 221,
+    "2": 193
   },
   "confidence_stats": {
-    "mean_max_proba": 0.4772741496562958,
-    "mean_top2_margin": 0.17823386192321777,
-    "f1_macro": 0.36680537702346455
+    "mean_max_proba": 0.5875316262245178,
+    "mean_top2_margin": 0.32550621032714844,
+    "f1_macro": 0.3221129747445537
   },
   "optuna": {
-    "best_value": 0.3145308165961299,
+    "best_value": 0.34743134825632277,
     "best_params": {
-      "n_estimators": 347,
-      "max_depth": 5,
-      "learning_rate": 0.014760622246512263,
-      "subsample": 0.9971352345524387,
-      "colsample_bytree": 0.7996037522585401,
-      "min_child_weight": 9,
-      "reg_lambda": 4.977302081353855,
-      "reg_alpha": 3.9142455654962474,
-      "gamma": 1.1269471145499745
+      "n_estimators": 387,
+      "max_depth": 4,
+      "learning_rate": 0.020635617195962505,
+      "subsample": 0.9255951871644537,
+      "colsample_bytree": 0.8891592373744757,
+      "min_child_weight": 5,
+      "reg_lambda": 3.019475015839924,
+      "reg_alpha": 1.1322938034861645,
+      "gamma": 0.9635884167958383
     },
     "n_trials": 30,
     "cv_splits": 5,

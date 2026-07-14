@@ -214,6 +214,13 @@
         .skeleton-line { height: 14px; margin-bottom: 10px; border-radius: 4px; }
         .skeleton-block { height: 40px; margin-bottom: 12px; border-radius: 6px; }
 
+        /* ── Chart Legend ─────────────────────────────── */
+        .legend-item { display: flex; gap: 4px; align-items: baseline; }
+        .legend-label { color: rgba(136,146,164,0.7); }
+        .legend-val { color: var(--text); font-weight: 500; }
+        .legend-val.up { color: var(--green); }
+        .legend-val.down { color: var(--red); }
+
         /* ── Fade-in ──────────────────────────────────── */
         .fade-in { animation: fadeIn 0.4s ease forwards; }
         @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
@@ -289,7 +296,10 @@
             <h2 id="chartTicker">—</h2>
             <span>5 Year Price History</span>
         </div>
-        <div class="chart-wrap">
+        <div class="chart-wrap" style="position: relative;">
+            <div id="ohlcvLegend" style="position: absolute; top: 12px; left: 16px; z-index: 10; font-family: var(--font-mono); font-size: 0.75rem; pointer-events: none; display: flex; gap: 14px; flex-wrap: wrap;">
+                <!-- Legend injected by JS -->
+            </div>
             <div id="priceChart"></div>
             <div class="chart-divider"></div>
             <div id="volumeChart"></div>
@@ -308,7 +318,9 @@
     const API = '';
     const sel = document.getElementById('stockSelector');
     const rightPanel = document.getElementById('rightPanel');
+    const legendEl = document.getElementById('ohlcvLegend');
     let priceChart, volumeChart, candleSeries, volSeries;
+    let currentChartData = [];
 
     /* ── Feature Label Cleaning ─────────────────────────── */
     function cleanFeatureName(raw){
@@ -395,6 +407,55 @@
             volumeChart.applyOptions({width:vc.clientWidth});
         });
         ro.observe(pc);
+
+        /* Crosshair Legend Setup */
+        function setLegend(data) {
+            if (!data) {
+                legendEl.innerHTML = '';
+                return;
+            }
+            const chg = data.close - data.open;
+            const chgPct = data.open !== 0 ? (chg / data.open) * 100 : 0;
+            const valClass = chg >= 0 ? 'up' : 'down';
+            const sign = chg >= 0 ? '+' : '';
+            
+            const formatVol = (v) => {
+                if (v >= 1e7) return (v / 1e7).toFixed(2) + 'Cr';
+                if (v >= 1e5) return (v / 1e5).toFixed(2) + 'L';
+                if (v >= 1e3) return (v / 1e3).toFixed(2) + 'K';
+                return v.toString();
+            };
+
+            legendEl.innerHTML = `
+                <div class="legend-item"><span class="legend-label">O</span><span class="legend-val">${data.open.toFixed(2)}</span></div>
+                <div class="legend-item"><span class="legend-label">H</span><span class="legend-val">${data.high.toFixed(2)}</span></div>
+                <div class="legend-item"><span class="legend-label">L</span><span class="legend-val">${data.low.toFixed(2)}</span></div>
+                <div class="legend-item"><span class="legend-label">C</span><span class="legend-val ${valClass}">${data.close.toFixed(2)}</span></div>
+                <div class="legend-item"><span class="legend-label">Vol</span><span class="legend-val">${formatVol(data.volume)}</span></div>
+                <div class="legend-item"><span class="legend-val ${valClass}">${sign}${chg.toFixed(2)} (${sign}${chgPct.toFixed(2)}%)</span></div>
+            `;
+        }
+
+        priceChart.subscribeCrosshairMove(param => {
+            if (param.time && param.seriesData.get(candleSeries)) {
+                const priceData = param.seriesData.get(candleSeries);
+                const volData = param.seriesData.get(volSeries) || { value: 0 };
+                setLegend({
+                    open: priceData.open,
+                    high: priceData.high,
+                    low: priceData.low,
+                    close: priceData.close,
+                    volume: volData.value
+                });
+            } else if (currentChartData.length > 0) {
+                setLegend(currentChartData[currentChartData.length - 1]);
+            } else {
+                setLegend(null);
+            }
+        });
+        
+        // Export setLegend to be used in updateChart
+        window.setLegend = setLegend;
     }
     initCharts();
 
@@ -505,6 +566,11 @@
                     : 'rgba(255, 51, 102, 0.5)'
             }));
         volSeries.setData(volumeData);
+
+        currentChartData = formattedData;
+        if (currentChartData.length > 0) {
+            window.setLegend(currentChartData[currentChartData.length - 1]);
+        }
 
         priceChart.timeScale().fitContent();
         volumeChart.timeScale().fitContent();
