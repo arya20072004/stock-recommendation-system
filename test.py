@@ -1,16 +1,37 @@
-import os
-from dotenv import load_dotenv
-from datetime import datetime, timedelta
+"""
+train_single_ticker.py
+Run this to train (or re-train) a single ticker using the existing
+ml_trainer.py pipeline — useful for resuming after an interrupted batch run.
+
+Usage:
+    python train_single_ticker.py
+"""
+
+import logging
 from pymongo import MongoClient
 
-load_dotenv()
+from ml_trainer import create_dataset, train_model, MONGO_URI
 
-client = MongoClient(os.getenv("MONGO_URI"))
-db = client["stock_market_db"]
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s",
+)
+logger = logging.getLogger(__name__)
 
-cutoff = datetime.utcnow() - timedelta(days=365 * 5 + 10)
-count = db.sector_indices.count_documents({
-    "sector": "OilGasAndConsumableFuels",
-    "date": {"$gte": cutoff}
-})
-print(count)  # Should be ~1255
+TICKER = "HDFCLIFE.NS"
+
+def run_single(ticker):
+    client = MongoClient(MONGO_URI)
+    try:
+        logger.info("Processing %s", ticker)
+        dataset = create_dataset(ticker, client)
+        if dataset.empty:
+            logger.warning("%s: dataset creation failed or returned empty; aborting", ticker)
+            return
+        train_model(dataset, ticker)
+    finally:
+        client.close()
+        logger.info("Single-ticker training run complete for %s", ticker)
+
+if __name__ == "__main__":
+    run_single(TICKER)

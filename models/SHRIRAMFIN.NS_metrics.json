@@ -1,51 +1,51 @@
 {
   "ticker": "SHRIRAMFIN.NS",
-  "f1_macro": 0.2875513258375226,
+  "f1_macro": 0.2899310061479909,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.21052631578947367,
-      "recall": 0.06557377049180328,
-      "f1": 0.1,
-      "support": 61
+      "precision": 0.45454545454545453,
+      "recall": 0.08333333333333333,
+      "f1": 0.14084507042253522,
+      "support": 60
     },
     "HOLD": {
-      "precision": 0.2608695652173913,
-      "recall": 0.21052631578947367,
-      "f1": 0.23300970873786409,
+      "precision": 0.22448979591836735,
+      "recall": 0.19298245614035087,
+      "f1": 0.20754716981132076,
       "support": 57
     },
     "BUY": {
-      "precision": 0.43790849673202614,
+      "precision": 0.4267515923566879,
       "recall": 0.67,
-      "f1": 0.5296442687747036,
+      "f1": 0.5214007782101168,
       "support": 100
     }
   },
-  "train_size": 869,
-  "test_size": 218,
-  "total_rows_after_features": 1087,
+  "train_size": 865,
+  "test_size": 217,
+  "total_rows_after_features": 1082,
   "label_distribution": {
     "0": 296,
-    "1": 334,
-    "2": 457
+    "1": 332,
+    "2": 454
   },
   "confidence_stats": {
-    "mean_max_proba": 0.588833212852478,
-    "mean_top2_margin": 0.31760936975479126,
-    "f1_macro": 0.2875513258375226
+    "mean_max_proba": 0.6377439498901367,
+    "mean_top2_margin": 0.3765588700771332,
+    "f1_macro": 0.2899310061479909
   },
   "optuna": {
-    "best_value": 0.35849698178797285,
+    "best_value": 0.3215559177709846,
     "best_params": {
-      "n_estimators": 260,
+      "n_estimators": 682,
       "max_depth": 6,
-      "learning_rate": 0.2967114714593739,
-      "subsample": 0.8818990665771858,
-      "colsample_bytree": 0.9069599384374333,
-      "min_child_weight": 15,
-      "reg_lambda": 9.219956055644525,
-      "reg_alpha": 2.042596797198424,
-      "gamma": 0.807237386504348
+      "learning_rate": 0.24420460844911424,
+      "subsample": 0.9579309401710595,
+      "colsample_bytree": 0.8391599915244341,
+      "min_child_weight": 14,
+      "reg_lambda": 3.1504025266749536,
+      "reg_alpha": 1.3819228808861534,
+      "gamma": 0.23115913784056039
     },
     "n_trials": 30,
     "cv_splits": 5,

@@ -444,12 +444,12 @@ VERY_LOW_CONFIDENCE_TICKERS = {
     "TECHM.NS",      # BUY structurally broken across 4+ runs, all interventions failed
     "MARUTI.NS",     # 3yr lookback — thin test set (134 rows), BUY recall persistently near 0
     "NESTLEIND.NS",  # BUY f1=0.00 across 6 consecutive runs — unfixable with current features
-    "BAJFINANCE.NS", # BUY structural collapse; SMOTE BUY floor override applied
+    #"BAJFINANCE.NS", # BUY structural collapse; SMOTE BUY floor override applied
     "ETERNAL.NS",    # All three classes weak across runs; no recoverable signal at 10d
     "ITC.NS",        # SELL recall=10%, model non-functional for SELL/BUY signals
     "SBILIFE.NS",    # BUY near-zero two consecutive runs; reverted after Run 3 recovery
     "BAJAJFINSV.NS", # Recovered to 0.2988 with reduced trials — monitoring
-    "HDFCLIFE.NS",   # BUY near-zero two consecutive runs, structurally weak
+    #"HDFCLIFE.NS",   # BUY near-zero two consecutive runs, structurally weak
     "HINDALCO.NS",   # SELL f1=0.08 two consecutive runs; near-random on SELL
     "JSWSTEEL.NS",   # Sub-0.27 two consecutive runs; no recoverable pattern
     "SHRIRAMFIN.NS", # Sub-0.26 three consecutive runs; all classes weak
@@ -462,12 +462,11 @@ VERY_LOW_CONFIDENCE_TICKERS = {
     "INDIGO.NS",      # BUY precision=0.50 recall=0.07 across 3 consecutive runs — forcing BUY samples with SMOTE override, monitoring for improvement
     #"NTPC.NS",      # 6+ threshold/SMOTE iterations, no structural convergence
     "BAJAJ-AUTO.NS",  # 3 consecutive sub-0.33 runs, declining CV scores
-    "LT.NS",        # train/test disconnect confirmed, HOLD structural failure
+    #"LT.NS",        # train/test disconnect confirmed, HOLD structural failure
     "ASIANPAINT.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
     "JIOFIN.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
-    'BRITANIA.NS',  # 3 consecutive sub-0.30 runs, no recoverable pattern
     'SBIN.NS',  # 3 consecutive sub-0.30 runs, no recoverable pattern
-    'INFY.NS',  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    #'INFY.NS',  # 3 consecutive sub-0.30 runs, no recoverable pattern
     'TATACONSUM.NS',  # 3 consecutive sub-0.30 runs, no recoverable pattern
     'COALINDIA.NS',  # 3 consecutive sub-0.30 runs, no recoverable pattern
     "HCLTECH.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern

@@ -786,7 +786,7 @@ def build_feature_row(ticker, client, db):
     df = prices_df.join(nifty_df[["nifty_return", "market_regime"]], how="left")
 
     # --- 2. Macro join (zero-fill on failure, matching ALL_MACRO_COLS) ---
-    macro_df = _prepare_macro_data(start_date, end_date)
+    macro_df = _prepare_macro_data(start_date, end_date, client)
     if not macro_df.empty:
         df = df.join(macro_df, how="left")
         for col in ALL_MACRO_COLS:

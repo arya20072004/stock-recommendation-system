@@ -1,51 +1,51 @@
 {
   "ticker": "BRITANNIA.NS",
-  "f1_macro": 0.31541582150101416,
+  "f1_macro": 0.3315771406756035,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.25,
-      "recall": 0.05357142857142857,
-      "f1": 0.08823529411764706,
+      "precision": 0.2222222222222222,
+      "recall": 0.10714285714285714,
+      "f1": 0.14457831325301204,
       "support": 56
     },
     "HOLD": {
-      "precision": 0.484375,
-      "recall": 0.5961538461538461,
-      "f1": 0.5344827586206896,
-      "support": 104
+      "precision": 0.52,
+      "recall": 0.5048543689320388,
+      "f1": 0.5123152709359606,
+      "support": 103
     },
     "BUY": {
-      "precision": 0.28205128205128205,
-      "recall": 0.3793103448275862,
-      "f1": 0.3235294117647059,
+      "precision": 0.2777777777777778,
+      "recall": 0.43103448275862066,
+      "f1": 0.33783783783783783,
       "support": 58
     }
   },
-  "train_size": 869,
-  "test_size": 218,
-  "total_rows_after_features": 1087,
+  "train_size": 865,
+  "test_size": 217,
+  "total_rows_after_features": 1082,
   "label_distribution": {
     "0": 275,
     "1": 489,
-    "2": 323
+    "2": 318
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5886659026145935,
-    "mean_top2_margin": 0.3292374312877655,
-    "f1_macro": 0.31541582150101416
+    "mean_max_proba": 0.6557160019874573,
+    "mean_top2_margin": 0.4170517325401306,
+    "f1_macro": 0.3315771406756035
   },
   "optuna": {
-    "best_value": 0.3273966174863922,
+    "best_value": 0.33407593357810345,
     "best_params": {
-      "n_estimators": 269,
-      "max_depth": 7,
-      "learning_rate": 0.1955365590981143,
-      "subsample": 0.9536169328260063,
-      "colsample_bytree": 0.8733511282885456,
-      "min_child_weight": 14,
-      "reg_lambda": 4.49524259247353,
-      "reg_alpha": 1.1183138028119572,
-      "gamma": 2.230856285033573
+      "n_estimators": 312,
+      "max_depth": 4,
+      "learning_rate": 0.16814474502005525,
+      "subsample": 0.7833469424554519,
+      "colsample_bytree": 0.87338720277801,
+      "min_child_weight": 11,
+      "reg_lambda": 3.552329429068968,
+      "reg_alpha": 1.6706016616540484,
+      "gamma": 0.4060955337908371
     },
     "n_trials": 30,
     "cv_splits": 5,

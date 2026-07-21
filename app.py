@@ -1,4 +1,5 @@
 import logging
+# pyrefly: ignore [missing-import]
 from flask import Flask, jsonify, render_template, g
 from flask_caching import Cache
 from pymongo import MongoClient
@@ -184,12 +185,17 @@ def get_stock_data(ticker):
         
         chart_df = pd.DataFrame(list(db.historical_data.find({'ticker': ticker}).sort('date', 1)))
         
+        # Drop rows with missing crucial price data so frontend doesn't calculate with nulls
+        chart_df = chart_df.dropna(subset=['close', 'open'])
+        
         chart_data_list = [
             {
                 'time': row['date'].strftime('%Y-%m-%d'),
-                'open': row['open'], 'high': row['high'],
-                'low': row['low'], 'close': row['close'],
-                'volume': row.get('volume', 0)
+                'open': row['open'], 
+                'high': row.get('high') if pd.notna(row.get('high')) else row['open'],
+                'low': row.get('low') if pd.notna(row.get('low')) else row['open'],
+                'close': row['close'],
+                'volume': row.get('volume', 0) if pd.notna(row.get('volume', 0)) else 0
             } for _, row in chart_df.iterrows()
         ]
         
@@ -229,8 +235,10 @@ def get_portfolio():
         try:
             prediction = get_latest_prediction(ticker)
 
-            # Get latest two data points for price stats
-            latest_docs = list(db.historical_data.find({'ticker': ticker}).sort('date', -1).limit(2))
+            # Get latest valid data points for price stats
+            latest_docs = list(db.historical_data.find({'ticker': ticker}).sort('date', -1).limit(5))
+            latest_docs = [d for d in latest_docs if pd.notna(d.get('close')) and pd.notna(d.get('open'))]
+            
             if len(latest_docs) >= 1:
                 last_close = latest_docs[0].get('close', 0)
                 last_open = latest_docs[0].get('open', last_close)
