@@ -47,7 +47,7 @@
 #     client.close()
 from pymongo import MongoClient
 import pandas as pd
-from pcr_builder import MONGO_URI
+from src.data.pcr_builder import MONGO_URI
 
 client = MongoClient(MONGO_URI)
 db = client["stock_market_db"]

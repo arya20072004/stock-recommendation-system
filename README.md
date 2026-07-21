@@ -76,27 +76,27 @@ Run the complete data collection and model training pipeline. Before training, y
 
 1. **Collect historical stock data for Nifty 50 stocks**
    ```bash
-   python data_collector.py
+   python -m src.data.collector
    ```
 
 2. **Build Sector Indices (Nifty 500)**
    ```bash
-   python sector_index_builder.py
+   python -m src.data.sector_index_builder
    ```
 
 3. **Build Options Put-Call Ratio (PCR) History**
    ```bash
-   python pcr_builder.py
+   python -m src.data.pcr_builder
    ```
 
 4. **Run the Main Pipeline (News, Sentiment, Training)**
    ```bash
-   python run_pipeline.py
+   python scripts/run_pipeline.py
    ```
 
 This will perform sentiment analysis on news, train ML models for each stock, and save models (`.ubj`/`.joblib`) and feature lists.
 
-**Note**: The pipeline processes 10 stocks by default to avoid API rate limits. Modify `STOCKS_TO_PROCESS` in `run_pipeline.py` to process all 50 stocks.
+**Note**: The pipeline processes 10 stocks by default to avoid API rate limits. Modify `STOCKS_TO_PROCESS` in `scripts/run_pipeline.py` to process all 50 stocks.
 
 ## 🌐 Running the Web Application
 
@@ -117,26 +117,24 @@ This will perform sentiment analysis on news, train ML models for each stock, an
 ```text
 stock-recommendations/
 ├── app.py                     # Main Flask application with portfolio and stock routes
-├── run_pipeline.py            # Main data collection and training pipeline
-├── data_collector.py          # Historical stock data collection
-├── news_collector.py          # News article collection
-├── sentiment_analyzer.py      # News sentiment analysis
-├── pcr_builder.py             # Options Put-Call Ratio data builder
-├── sector_index_builder.py    # Nifty 500 Sector indices builder
-├── feature_engineering.py     # Centralized feature calculation pipeline
-├── confidence.py              # ML prediction confidence tiering logic
-├── ml_trainer.py              # Machine learning model training
-├── backtester.py              # Strategy backtesting
-├── analysis.py                # Data analysis utilities
-├── config.py                  # API keys and configuration
-├── nifty50.py                 # Nifty 50 stock list
-├── db.py                      # Database utilities
-├── requirements.txt           # Python dependencies
-├── models/                    # Trained ML models (.ubj or .joblib)
-├── features/                  # Feature lists for each stock (.json files)
-├── templates/
+├── src/                       # Core python packages
+│   ├── config/                # DB and config utilities
+│   ├── data/                  # Data collection, indexing, and Nifty50 list
+│   ├── features/              # Feature engineering and importance
+│   ├── ml/                    # ML training, backtesting, confidence, and sentiment
+│   └── analysis/              # Data analysis utilities
+├── scripts/                   # Executable scripts
+│   ├── run_pipeline.py        # Main data collection and training pipeline
+│   └── migrate_models.py      # Model migration utilities
+├── tests/                     # Unit and integration tests
+├── data/raw/                  # Raw CSV data files
+├── saved_models/              # Trained ML models (.ubj or .joblib)
+├── saved_features/            # Feature lists for each stock (.json files)
+├── reports/                   # Generated reports (e.g., MLStrategy.html)
+├── templates/                 # HTML templates
 │   ├── index.html             # Web dashboard template
 │   └── portfolio.html         # Portfolio overview template
+├── requirements.txt           # Python dependencies
 └── .env                       # Environment variables
 ```
 
@@ -163,14 +161,14 @@ Models are trained using an extensive feature set:
 - News sentiment scores
 - Price momentum features
 
-Models output a base prediction which is then filtered through `confidence.py` to ensure only actionable predictions (MEDIUM confidence and above) are shown as BUY/SELL, otherwise defaulting to HOLD.
+Models output a base prediction which is then filtered through `src.ml.confidence` to ensure only actionable predictions (MEDIUM confidence and above) are shown as BUY/SELL, otherwise defaulting to HOLD.
 
 ## 📈 Backtesting
 
 Test your strategies with historical data:
 
 ```python
-from backtester import Backtester
+from src.ml.backtester import Backtester
 
 # Initialize backtester
 bt = Backtester()

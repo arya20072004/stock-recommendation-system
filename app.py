@@ -14,9 +14,9 @@ import warnings
 from datetime import datetime
 from dotenv import load_dotenv
 from xgboost import XGBClassifier
-from nifty50 import TICKERS
-from confidence import compute_confidence_tier, get_display_signal
-from feature_engineering import build_feature_row
+from src.data.nifty50 import TICKERS
+from src.ml.confidence import compute_confidence_tier, get_display_signal
+from src.features.engineering import build_feature_row
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +35,8 @@ models = {}
 feature_lists = {}
 
 print("--- Loading ML Models on Startup ---")
-MODELS_DIR = "models"
-FEATURES_DIR = "features"
+MODELS_DIR = "saved_models"
+FEATURES_DIR = "saved_features"
 
 for ticker in TICKERS:
     try:

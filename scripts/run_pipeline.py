@@ -1,8 +1,8 @@
-import data_collector
-import news_collector
-import sentiment_analyzer
-import ml_trainer
-from nifty50 import TICKERS
+from src.data import collector as data_collector
+from src.data import news_collector as news_collector
+from src.ml import sentiment as sentiment_analyzer
+from src.ml import trainer as ml_trainer
+from src.data.nifty50 import TICKERS
 import os
 
 # --- CONFIGURATION ---

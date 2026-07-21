@@ -8,7 +8,7 @@ import os
 import joblib
 from xgboost import XGBClassifier
 
-MODELS_DIR = "models"
+MODELS_DIR = "saved_models"
 
 def migrate_models():
     """Loop through all .joblib files and migrate to .ubj format."""

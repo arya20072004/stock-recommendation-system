@@ -3,10 +3,10 @@
 from backtesting import Backtest, Strategy
 import pandas as pd
 import joblib
-import json # <-- Add this import
+import json
 
 # We need the create_dataset function from your trainer to prepare the data
-from ml_trainer import create_dataset
+from src.ml.trainer import create_dataset
 
 class MLStrategy(Strategy):
     def init(self):

@@ -10,7 +10,7 @@ Usage:
 import logging
 from pymongo import MongoClient
 
-from ml_trainer import create_dataset, train_model, MONGO_URI
+from src.ml.trainer import create_dataset, train_model, MONGO_URI
 
 logging.basicConfig(
     level=logging.INFO,

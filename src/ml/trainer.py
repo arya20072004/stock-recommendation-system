@@ -21,7 +21,7 @@ from sklearn.metrics import (
 from sklearn.model_selection import TimeSeriesSplit
 from xgboost import XGBClassifier
 
-from feature_engineering import (
+from src.features.engineering import (
     HISTORY_YEARS,
     SECTOR_MAP,
     SECTOR_INDEX_NAME_MAP,
@@ -47,8 +47,8 @@ from feature_engineering import (
 # --- SETUP ---
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
-MODELS_DIR = "models"
-FEATURES_DIR = "features"
+MODELS_DIR = "saved_models"
+FEATURES_DIR = "saved_features"
 RANDOM_STATE = 42
 MIN_ROWS_AFTER_FEATURES = 200
 N_SPLITS = 5
@@ -740,7 +740,7 @@ def run(tickers_to_process):
 
 
 if __name__ == "__main__":
-    from nifty50 import TICKERS
+    from src.data.nifty50 import TICKERS
 
     run(TICKERS)
 

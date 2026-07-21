@@ -16,7 +16,7 @@ from __future__ import annotations
 import json
 import os
 
-MODELS_DIR = "models"
+MODELS_DIR = "saved_models"
 
 # F1-based stock quality thresholds (gate 1 — historical model quality)
 F1_TIERS = [

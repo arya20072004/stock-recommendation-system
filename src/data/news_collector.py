@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 import time
 
-from nifty50 import NIFTY50_TICKER_MAP
+from src.data.nifty50 import NIFTY50_TICKER_MAP
 
 # --- RSS SETUP ---
 load_dotenv()

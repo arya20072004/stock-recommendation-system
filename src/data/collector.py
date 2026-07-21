@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from pymongo import UpdateOne
 import os
 from dotenv import load_dotenv
-from nifty50 import TICKERS
+from src.data.nifty50 import TICKERS
 
 def run():
     """

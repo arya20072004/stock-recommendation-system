@@ -1,7 +1,7 @@
 import json
 import joblib
 
-from ml_trainer import create_dataset, MONGO_URI
+from src.ml.trainer import create_dataset, MONGO_URI
 from pymongo import MongoClient
 
 client = MongoClient(MONGO_URI)
