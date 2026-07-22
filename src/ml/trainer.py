@@ -259,6 +259,7 @@ def _make_feature_list(df):
         "market_regime",
         "obv_deviation",
         "vwap_deviation",
+        "relative_volume",
         "sector_momentum",
         "sector_momentum_5d",
         "adx",
@@ -441,27 +442,27 @@ TICKER_MIN_CHILD_WEIGHT_FLOOR: dict[str, int] = {
 # Add near TICKER_HISTORY_OVERRIDE at module level:
 VERY_LOW_CONFIDENCE_TICKERS = {
     "TITAN.NS",      # HOLD structurally broken, gold/wedding cycle unlearnable at 10d horizon
-    "TECHM.NS",      # BUY structurally broken across 4+ runs, all interventions failed
+    #"TECHM.NS",      # BUY structurally broken across 4+ runs, all interventions failed
     "MARUTI.NS",     # 3yr lookback — thin test set (134 rows), BUY recall persistently near 0
     "NESTLEIND.NS",  # BUY f1=0.00 across 6 consecutive runs — unfixable with current features
     #"BAJFINANCE.NS", # BUY structural collapse; SMOTE BUY floor override applied
     "ETERNAL.NS",    # All three classes weak across runs; no recoverable signal at 10d
     "ITC.NS",        # SELL recall=10%, model non-functional for SELL/BUY signals
     "SBILIFE.NS",    # BUY near-zero two consecutive runs; reverted after Run 3 recovery
-    "BAJAJFINSV.NS", # Recovered to 0.2988 with reduced trials — monitoring
+    #"BAJAJFINSV.NS", # Recovered to 0.2988 with reduced trials — monitoring
     #"HDFCLIFE.NS",   # BUY near-zero two consecutive runs, structurally weak
     "HINDALCO.NS",   # SELL f1=0.08 two consecutive runs; near-random on SELL
     "JSWSTEEL.NS",   # Sub-0.27 two consecutive runs; no recoverable pattern
     "SHRIRAMFIN.NS", # Sub-0.26 three consecutive runs; all classes weak
     "BEL.NS",        # HOLD/BUY seesawing across 4 consecutive runs — no stable configuration
-    "ADANIENT.NS",    # BUY f1=0.00 across 3 consecutive runs — unfixable with current features
+    #"ADANIENT.NS",    # BUY f1=0.00 across 3 consecutive runs — unfixable with current features
     "RELIANCE.NS",    # HOLD/BUY persistently weak across 4+ runs, no recoverable pattern
     "TRENT.NS",       # SELL f1=0.12 across 3 consecutive runs; all classes weak
     #"POWERGRID.NS",    # SELL refusal + BUY inflation across 4+ runs; SMOTE override applied, monitoring for improvement
-    "MAXHEALTH.NS",   # HOLD/BUY persistently weak across 4+ runs, no recoverable pattern
+    #"MAXHEALTH.NS",   # HOLD/BUY persistently weak across 4+ runs, no recoverable pattern
     "INDIGO.NS",      # BUY precision=0.50 recall=0.07 across 3 consecutive runs — forcing BUY samples with SMOTE override, monitoring for improvement
     #"NTPC.NS",      # 6+ threshold/SMOTE iterations, no structural convergence
-    "BAJAJ-AUTO.NS",  # 3 consecutive sub-0.33 runs, declining CV scores
+    #"BAJAJ-AUTO.NS",  # 3 consecutive sub-0.33 runs, declining CV scores
     #"LT.NS",        # train/test disconnect confirmed, HOLD structural failure
     "ASIANPAINT.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
     "JIOFIN.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
