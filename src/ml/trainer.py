@@ -225,6 +225,8 @@ def create_dataset(ticker, client):
         "vix_vol_10d",
         "nifty_pcr_oi",
         "nifty_pcr_chg_5d",
+        "banknifty_pcr_oi",
+        "banknifty_pcr_chg_5d",
     ]
 
     # Verify all required columns exist before dropna to give a clear error
@@ -296,6 +298,8 @@ def _make_feature_list(df):
         "in_earnings_season",
         "nifty_pcr_oi",
         "nifty_pcr_chg_5d",
+        "banknifty_pcr_oi",
+        "banknifty_pcr_chg_5d",
     ]
     return [feature for feature in candidate_features if feature in df.columns]
 

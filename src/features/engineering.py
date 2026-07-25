@@ -161,6 +161,7 @@ ALL_MACRO_COLS = [
     "copper_ret_1d", "copper_ret_5d", "copper_vol_10d",
     "vix_level", "vix_ret_1d", "vix_chg_5d", "vix_vol_10d",
     "nifty_pcr_oi", "nifty_pcr_chg_5d",
+    "banknifty_pcr_oi", "banknifty_pcr_chg_5d",
 ]
 
 
@@ -377,6 +378,28 @@ def _prepare_macro_data(start_date, end_date, client):
         logger.warning("macro: PCR fetch failed — %s", ex)
         macro["nifty_pcr_oi"] = 0.0
         macro["nifty_pcr_chg_5d"] = 0.0
+
+    try:
+        db = client["stock_market_db"]
+        banknifty_pcr_docs = list(db.pcr_data.find(
+            {"underlying": "BANKNIFTY", "date": {"$gte": start_date, "$lte": end_date}},
+            {"date": 1, "pcr_oi": 1, "_id": 0}
+        ))
+        if banknifty_pcr_docs:
+            bn_pcr_df = pd.DataFrame(banknifty_pcr_docs)
+            bn_pcr_df["date"] = pd.to_datetime(bn_pcr_df["date"]).dt.tz_localize(None)
+            bn_pcr_df.set_index("date", inplace=True)
+            bn_pcr_df.sort_index(inplace=True)
+            macro["banknifty_pcr_oi"] = bn_pcr_df["pcr_oi"]
+            macro["banknifty_pcr_chg_5d"] = bn_pcr_df["pcr_oi"].diff(5)
+        else:
+            logger.warning("macro: no BANKNIFTY PCR data found in range — zeroing features")
+            macro["banknifty_pcr_oi"] = 0.0
+            macro["banknifty_pcr_chg_5d"] = 0.0
+    except Exception as ex:
+        logger.warning("macro: BANKNIFTY PCR fetch failed — %s", ex)
+        macro["banknifty_pcr_oi"] = 0.0
+        macro["banknifty_pcr_chg_5d"] = 0.0
 
     if macro.empty:
         return pd.DataFrame()

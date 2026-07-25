@@ -1,51 +1,51 @@
 {
   "ticker": "JSWSTEEL.NS",
-  "f1_macro": 0.33738035746594836,
+  "f1_macro": 0.3043142695623862,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.16071428571428573,
-      "recall": 0.24324324324324326,
-      "f1": 0.1935483870967742,
-      "support": 37
+      "precision": 0.11764705882352941,
+      "recall": 0.16666666666666666,
+      "f1": 0.13793103448275862,
+      "support": 36
     },
     "HOLD": {
-      "precision": 0.5,
-      "recall": 0.45918367346938777,
-      "f1": 0.4787234042553192,
+      "precision": 0.4625,
+      "recall": 0.37755102040816324,
+      "f1": 0.4157303370786517,
       "support": 98
     },
     "BUY": {
-      "precision": 0.36619718309859156,
-      "recall": 0.3170731707317073,
-      "f1": 0.33986928104575165,
+      "precision": 0.35294117647058826,
+      "recall": 0.36585365853658536,
+      "f1": 0.3592814371257485,
       "support": 82
     }
   },
-  "train_size": 864,
-  "test_size": 217,
-  "total_rows_after_features": 1081,
+  "train_size": 862,
+  "test_size": 216,
+  "total_rows_after_features": 1078,
   "label_distribution": {
-    "0": 247,
-    "1": 455,
+    "0": 246,
+    "1": 453,
     "2": 379
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5862096548080444,
-    "mean_top2_margin": 0.3178168833255768,
-    "f1_macro": 0.33738035746594836
+    "mean_max_proba": 0.496686726808548,
+    "mean_top2_margin": 0.19404739141464233,
+    "f1_macro": 0.3043142695623862
   },
   "optuna": {
-    "best_value": 0.37824225979947446,
+    "best_value": 0.4030172312056768,
     "best_params": {
-      "n_estimators": 171,
-      "max_depth": 6,
-      "learning_rate": 0.13297554090738672,
-      "subsample": 0.8245108790277985,
-      "colsample_bytree": 0.9083868719818244,
+      "n_estimators": 591,
+      "max_depth": 4,
+      "learning_rate": 0.034000431380307325,
+      "subsample": 0.9326260583026783,
+      "colsample_bytree": 0.9169236232760459,
       "min_child_weight": 9,
-      "reg_lambda": 8.795526781965922,
-      "reg_alpha": 2.423934582613473,
-      "gamma": 0.17371546755787604
+      "reg_lambda": 10.935705221782504,
+      "reg_alpha": 0.7784954190837011,
+      "gamma": 1.9922968226668791
     },
     "n_trials": 30,
     "cv_splits": 5,

@@ -1,12 +1,12 @@
 {
   "ticker": "BAJAJ-AUTO.NS",
-  "f1_macro": 0.3231024996318606,
+  "f1_macro": 0.33057081381823655,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2542372881355932,
-      "recall": 0.29411764705882354,
-      "f1": 0.2727272727272727,
-      "support": 51
+      "precision": 0.26229508196721313,
+      "recall": 0.32,
+      "f1": 0.2882882882882883,
+      "support": 50
     },
     "HOLD": {
       "precision": 0.5,
@@ -15,37 +15,37 @@
       "support": 79
     },
     "BUY": {
-      "precision": 0.4142857142857143,
+      "precision": 0.4233576642335766,
       "recall": 0.6666666666666666,
-      "f1": 0.5110132158590308,
+      "f1": 0.5178571428571429,
       "support": 87
     }
   },
-  "train_size": 864,
-  "test_size": 217,
-  "total_rows_after_features": 1081,
+  "train_size": 862,
+  "test_size": 216,
+  "total_rows_after_features": 1078,
   "label_distribution": {
     "0": 261,
-    "1": 383,
-    "2": 437
+    "1": 381,
+    "2": 436
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6861256957054138,
-    "mean_top2_margin": 0.45453280210494995,
-    "f1_macro": 0.3231024996318606
+    "mean_max_proba": 0.5767070651054382,
+    "mean_top2_margin": 0.30758652091026306,
+    "f1_macro": 0.33057081381823655
   },
   "optuna": {
-    "best_value": 0.23800203127688674,
+    "best_value": 0.22770214928637497,
     "best_params": {
-      "n_estimators": 523,
+      "n_estimators": 375,
       "max_depth": 6,
-      "learning_rate": 0.23927201635938297,
-      "subsample": 0.723528113344868,
-      "colsample_bytree": 0.9827369381555817,
+      "learning_rate": 0.17672230825971033,
+      "subsample": 0.791983141123162,
+      "colsample_bytree": 0.873931726840396,
       "min_child_weight": 12,
-      "reg_lambda": 8.537106372631195,
-      "reg_alpha": 0.9020911450296278,
-      "gamma": 0.1115681029925163
+      "reg_lambda": 7.862368255736179,
+      "reg_alpha": 2.857484649049244,
+      "gamma": 0.8025550675208676
     },
     "n_trials": 75,
     "cv_splits": 5,
