@@ -226,3 +226,31 @@ If you encounter any issues or have questions:
 ---
 
 **Remember**: Always invest responsibly and never risk more than you can afford to lose.
+
+---
+
+## 🖥️ React Frontend
+
+The default frontend for this application has been migrated to a React/Vite Single Page Application. It uses a modern trading terminal aesthetic with dark and light mode themes.
+
+### Running the React app locally
+
+1. Ensure your Flask backend is running on port 5000:
+   ```bash
+   python app.py
+   ```
+
+2. Open a new terminal and start the Vite dev server:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+3. The React app will run on `http://localhost:5173` and automatically proxy `/api` requests to the Flask backend.
+
+### Assumptions
+
+- The Flask app runs on `http://localhost:5000` (the Vite proxy targets this).
+- The API responses conform strictly to the specified contract.
+- The React application is intended to run as a separate dev server during development. (For production deployment, the Vite app should be built with `npm run build` and either hosted independently or integrated into Flask's static folders).
