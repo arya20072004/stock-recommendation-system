@@ -94,8 +94,8 @@ export const PortfolioTable = ({ data }) => {
               <th onClick={() => handleSort('day_change_pct')} style={{ padding: '1rem 1.5rem', cursor: 'pointer', fontWeight: 500, fontSize: '0.875rem', color: 'var(--text-secondary)', textAlign: 'right' }}>
                 <div className="flex items-center justify-end gap-2">Change % <SortIcon columnKey="day_change_pct" /></div>
               </th>
-              <th onClick={() => handleSort('recommendation')} style={{ padding: '1rem 1.5rem', cursor: 'pointer', fontWeight: 500, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                <div className="flex items-center gap-2">Signal <SortIcon columnKey="recommendation" /></div>
+              <th onClick={() => handleSort('recommendation')} style={{ padding: '1rem 1.5rem', cursor: 'pointer', fontWeight: 500, fontSize: '0.875rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
+                <div className="flex items-center justify-center gap-2">Signal <SortIcon columnKey="recommendation" /></div>
               </th>
               <th onClick={() => handleSort('confidence')} style={{ padding: '1rem 1.5rem', cursor: 'pointer', fontWeight: 500, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                 <div className="flex items-center gap-2">Confidence <SortIcon columnKey="confidence" /></div>
@@ -116,7 +116,7 @@ export const PortfolioTable = ({ data }) => {
                 <td className="mono" style={{ padding: '1rem 1.5rem', textAlign: 'right', color: getDayChangeColor(row.day_change_pct) }}>
                   {row.day_change_pct > 0 ? '+' : ''}{row.day_change_pct.toFixed(2)}%
                 </td>
-                <td style={{ padding: '1rem 1.5rem' }}>
+                <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
                   <RecommendationBadge recommendation={row.recommendation} />
                 </td>
                 <td style={{ padding: '1rem 1.5rem', minWidth: '200px' }}>

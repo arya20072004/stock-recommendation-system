@@ -9,62 +9,70 @@ export const SignalPanel = ({ ticker, data }) => {
   if (!data) return null;
 
   return (
-    <div className="card flex flex-col gap-6" style={{ height: '100%' }}>
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 style={{ margin: 0 }}>{ticker}</h2>
-          <div className="caption flex items-center gap-2 mt-4" style={{ marginTop: '0.25rem' }}>
-            <Clock size={12} />
+    <div className="terminal-pane signal-dock" style={{ display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+      <div style={{ padding: '1.5rem' }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem', color: 'var(--text-primary)' }}>Signal</h2>
+        
+        <div style={{ marginBottom: '2rem' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Recommendation
+          </div>
+          <div style={{ display: 'inline-block' }}>
+            <RecommendationBadge recommendation={data.recommendation} />
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '2rem' }}>
+          <div className="flex justify-between items-center mb-2">
+            <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-primary)' }}>Model Confidence</span>
+          </div>
+          <ConfidenceBar confidence={data.confidence} recommendation={data.recommendation} />
+        </div>
+
+        {data.predicted_at && (
+          <div className="flex items-center gap-2 mb-6" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+            <Clock size={14} />
             <span>Predicted: {data.predicted_at}</span>
           </div>
-        </div>
-        <RecommendationBadge recommendation={data.recommendation} />
-      </div>
+        )}
 
-      <div>
-        <div className="flex justify-between mb-4" style={{ marginBottom: '0.5rem' }}>
-          <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Model Confidence</span>
-        </div>
-        <ConfidenceBar confidence={data.confidence} recommendation={data.recommendation} />
-      </div>
-
-      <div style={{ marginTop: 'auto' }}>
-        <button 
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className="flex justify-between items-center"
-          style={{ 
-            width: '100%', 
-            padding: '0.75rem 0', 
-            borderTop: '1px solid var(--border-color)',
-            fontSize: '0.875rem',
-            fontWeight: 500,
-            color: 'var(--text-secondary)'
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <Zap size={16} />
-            <span>Why this signal?</span>
-          </div>
-          {showAdvanced ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
-        
-        {showAdvanced && data.top_features && (
-          <div style={{ paddingTop: '0.75rem' }}>
-            <div className="caption mb-4" style={{ marginBottom: '0.75rem' }}>
-              Top signal drivers and feature contributions:
+        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
+          <button 
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between', 
+              width: '100%', 
+              color: 'var(--text-primary)',
+              padding: '0.5rem 0',
+              fontWeight: 500,
+              fontSize: '0.875rem'
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <Zap size={16} style={{ color: 'var(--accent-blue)' }} />
+              Why this signal?
             </div>
-            <div className="flex flex-col gap-2">
+            {showAdvanced ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
+
+          {showAdvanced && data.top_features && data.top_features.length > 0 && (
+            <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
+                Key drivers for this recommendation based on the ML model:
+              </div>
               {data.top_features.map((feature, idx) => (
                 <div key={idx} className="flex justify-between items-center" style={{ fontSize: '0.875rem' }}>
-                  <span className="mono" style={{ color: 'var(--text-primary)' }}>{feature.feature}</span>
-                  <span className="mono" style={{ color: 'var(--text-secondary)' }}>
-                    {(feature.importance * 100).toFixed(2)}%
+                  <span style={{ color: 'var(--text-secondary)' }}>{feature.feature}</span>
+                  <span className="mono" style={{ color: 'var(--text-primary)' }}>
+                    {(feature.importance * 100).toFixed(1)}%
                   </span>
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

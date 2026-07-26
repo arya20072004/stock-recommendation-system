@@ -45,19 +45,9 @@ const NavLink = ({ to, icon, label }) => {
 
 const Layout = ({ children }) => {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <header style={{ 
-        borderBottom: '1px solid var(--border-color)', 
-        backgroundColor: 'var(--bg-card)',
-        padding: '1rem 0'
-      }}>
-        <div className="container" style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          paddingTop: 0,
-          paddingBottom: 0
-        }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+      <header style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-card)' }}>
+        <div className="flex items-center justify-between" style={{ padding: '0.75rem 1.5rem' }}>
           <div className="flex items-center gap-6">
             <Link to="/" style={{ textDecoration: 'none', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <div style={{ 
@@ -74,20 +64,15 @@ const Layout = ({ children }) => {
               </div>
               <span style={{ fontWeight: 700, fontSize: '1.25rem', letterSpacing: '-0.025em' }}>QuantSignal</span>
             </Link>
-            
             <nav className="flex items-center gap-2" style={{ marginLeft: '2rem' }}>
               <NavLink to="/" icon={<Activity size={18} />} label="Terminal" />
               <NavLink to="/portfolio" icon={<LayoutDashboard size={18} />} label="Portfolio" />
             </nav>
           </div>
-          
-          <div>
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
         </div>
       </header>
-      
-      <main style={{ flex: 1, padding: '2rem 0' }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {children}
       </main>
     </div>
