@@ -111,7 +111,10 @@ export const PortfolioTable = ({ data }) => {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-hover)'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
-                <td style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>{row.ticker}</td>
+                <td style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>
+                  {row.ticker}
+                  {row.threshold_calibration_applied && <sup style={{ marginLeft: '2px', opacity: 0.8 }} title="Threshold-calibrated model">†</sup>}
+                </td>
                 <td className="mono" style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>{row.last_close.toFixed(2)}</td>
                 <td className="mono" style={{ padding: '1rem 1.5rem', textAlign: 'right', color: getDayChangeColor(row.day_change_pct) }}>
                   {row.day_change_pct > 0 ? '+' : ''}{row.day_change_pct.toFixed(2)}%
@@ -133,6 +136,9 @@ export const PortfolioTable = ({ data }) => {
             )}
           </tbody>
         </table>
+        <div style={{ padding: '0.75rem 1.5rem', fontSize: '0.75rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-color)' }}>
+          † Threshold-calibrated model
+        </div>
       </div>
     </div>
   );

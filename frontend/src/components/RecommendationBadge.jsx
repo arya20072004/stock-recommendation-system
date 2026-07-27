@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const RecommendationBadge = ({ recommendation }) => {
+export const RecommendationBadge = ({ recommendation, isCalibrated, calibrationChanged, rawPrediction }) => {
   const normalized = recommendation ? recommendation.toUpperCase() : 'UNCERTAIN';
   
   // Base classes for the badge
@@ -32,9 +32,23 @@ export const RecommendationBadge = ({ recommendation }) => {
 
   const colors = getColors(normalized);
 
-  return (
-    <span style={{ ...baseStyle, ...colors }}>
+  const badge = (
+    <span style={{ ...baseStyle, ...colors }} title={isCalibrated ? "Threshold-calibrated" : ""}>
       {normalized}
+      {isCalibrated && <sup style={{ marginLeft: '3px', fontSize: '0.75em' }}>†</sup>}
     </span>
   );
+
+  if (calibrationChanged) {
+    return (
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+        {badge}
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+          (Raw: {rawPrediction} → Calibrated: {normalized})
+        </span>
+      </div>
+    );
+  }
+
+  return badge;
 };

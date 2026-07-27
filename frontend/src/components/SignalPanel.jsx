@@ -18,7 +18,12 @@ export const SignalPanel = ({ ticker, data }) => {
             Recommendation
           </div>
           <div style={{ display: 'inline-block' }}>
-            <RecommendationBadge recommendation={data.recommendation} />
+            <RecommendationBadge 
+              recommendation={data.recommendation}
+              isCalibrated={data.threshold_calibration_applied}
+              calibrationChanged={data.calibration_changed_prediction}
+              rawPrediction={data.raw_argmax_prediction}
+            />
           </div>
         </div>
 
