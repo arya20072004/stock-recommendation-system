@@ -41,6 +41,8 @@ from src.features.engineering import (
     add_technical_indicators,
     add_derived_features,
     add_calendar_features,
+    TICKER_CLASS_THRESHOLDS,
+    apply_threshold_calibration,
 )
 
 
@@ -414,27 +416,7 @@ TICKER_HOLD_WEIGHT_OVERRIDE: dict[str, float] = {
     #
 }
 
-TICKER_CLASS_THRESHOLDS = {
-    "ADANIPORTS.NS": {0: 0.33, 1: 0.33, 2: 0.20},  # keep, VLC
-    "TATASTEEL.NS":  {0: 0.33, 1: 0.33, 2: 0.20},  # locked
-    "SBIN.NS":       {0: 0.33, 1: 0.33, 2: 0.25},  # hold
-    "CIPLA.NS":      {0: 0.28, 1: 0.33, 2: 0.33},  # locked
-    "COALINDIA.NS":  {0: 0.30, 1: 0.30, 2: 0.30},  # hold
-    "EICHERMOT.NS":  {0: 0.20, 1: 0.33, 2: 0.33},  # hold
-    "INDIGO.NS":     {0: 0.25, 1: 0.33, 2: 0.33},  # keep, VLC
-    "HEROMOTOCO.NS": {0: 0.33, 1: 0.33, 2: 0.27},  # locked
-    "GRASIM.NS":     {0: 0.25, 1: 0.33, 2: 0.33},  # hold
-    "M&M.NS":        {0: 0.33, 1: 0.28, 2: 0.33},  # confirmed
-    #"ICICIBANK.NS":  {0: 0.33, 1: 0.28, 2: 0.33},  # new
-    "APOLLOHOSP.NS": {0: 0.25, 1: 0.33, 2: 0.33},  # Run 15 — SELL needs boost
-    "BAJAJFINSV.NS": {0: 0.30, 1: 0.30, 2: 0.30},
-    "DRREDDY.NS": {0: 0.33, 1: 0.25, 2: 0.33},  # NEW — lower HOLD threshold
-    "TATACONSUM.NS": {0: 0.28, 1: 0.38, 2: 0.28},  # NEW — penalise HOLD
-    "MAXHEALTH.NS":  {0: 0.28, 1: 0.38, 2: 0.28},  # NEW — penalise HOLD
-    "ONGC.NS": {0: 0.28, 1: 0.33, 2: 0.33},  # NEW — SELL was 0.25 in Run3
-    "KOTAKBANK.NS": {0: 0.33, 1: 0.38, 2: 0.28},
-    "BRITANNIA.NS": {0: 0.30, 1: 0.35, 2: 0.20},  # NEW — penalise HOLD
-}
+
 
 TICKER_MIN_CHILD_WEIGHT_FLOOR: dict[str, int] = {
     "TRENT.NS":      8,   # SELL at 0.12, all classes weak — same pathology
@@ -640,19 +622,13 @@ def train_model(df, ticker):
 
     # Apply per-class threshold calibration if configured for this ticker
     _thresholds = TICKER_CLASS_THRESHOLDS.get(ticker)
+    _y_proba = best_model.predict_proba(X_test)
+    y_pred = np.array([
+        apply_threshold_calibration(_y_proba[i], _thresholds)
+        for i in range(len(_y_proba))
+    ])
     if _thresholds:
-        _y_proba = best_model.predict_proba(X_test)
-        y_pred = np.array([
-            max(_thresholds.keys(),
-                key=lambda c, i=i: _y_proba[i, c] / _thresholds[c])
-            for i in range(len(_y_proba))
-        ])
-        logger.info(
-            "%s: threshold calibration applied %s",
-            ticker, _thresholds,
-        )
-    else:
-        y_pred = best_model.predict(X_test)
+        logger.info("%s: threshold calibration applied %s", ticker, _thresholds)
 
     f1_macro = f1_score(y_test, y_pred, average="macro", zero_division=0)
 

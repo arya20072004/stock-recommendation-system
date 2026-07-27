@@ -164,6 +164,42 @@ ALL_MACRO_COLS = [
     "banknifty_pcr_oi", "banknifty_pcr_chg_5d",
 ]
 
+TICKER_CLASS_THRESHOLDS = {
+    "ADANIPORTS.NS": {0: 0.33, 1: 0.33, 2: 0.20},
+    "TATASTEEL.NS":  {0: 0.33, 1: 0.33, 2: 0.20},
+    "SBIN.NS":       {0: 0.33, 1: 0.33, 2: 0.25},
+    "CIPLA.NS":      {0: 0.28, 1: 0.33, 2: 0.33},
+    "COALINDIA.NS":  {0: 0.30, 1: 0.30, 2: 0.30},
+    "EICHERMOT.NS":  {0: 0.20, 1: 0.33, 2: 0.33},
+    "INDIGO.NS":     {0: 0.25, 1: 0.33, 2: 0.33},
+    "HEROMOTOCO.NS": {0: 0.33, 1: 0.33, 2: 0.27},
+    "GRASIM.NS":     {0: 0.25, 1: 0.33, 2: 0.33},
+    "M&M.NS":        {0: 0.33, 1: 0.28, 2: 0.33},
+    "APOLLOHOSP.NS": {0: 0.25, 1: 0.33, 2: 0.33},
+    "BAJAJFINSV.NS": {0: 0.30, 1: 0.30, 2: 0.30},
+    "DRREDDY.NS":    {0: 0.33, 1: 0.25, 2: 0.33},
+    "TATACONSUM.NS": {0: 0.28, 1: 0.38, 2: 0.28},
+    "MAXHEALTH.NS":  {0: 0.28, 1: 0.38, 2: 0.28},
+    "ONGC.NS":       {0: 0.28, 1: 0.33, 2: 0.33},
+    "KOTAKBANK.NS":  {0: 0.33, 1: 0.38, 2: 0.28},
+    "BRITANNIA.NS":  {0: 0.30, 1: 0.35, 2: 0.20},
+}
+
+def apply_threshold_calibration(proba, thresholds):
+    """
+    Apply per-class probability threshold calibration.
+    proba: 1D array of shape (3,) — [SELL, HOLD, BUY] probabilities for one sample.
+    thresholds: dict {class_idx: threshold} or None.
+    Returns predicted class index (int).
+    If thresholds is None, falls back to plain argmax.
+    """
+    if not thresholds:
+        return int(np.argmax(proba))
+    return max(
+        thresholds.keys(),
+        key=lambda c: proba[c] / thresholds[c]
+    )
+
 
 # ---------------------------------------------------------------------------
 # Data preparation functions (moved verbatim from ml_trainer.py)

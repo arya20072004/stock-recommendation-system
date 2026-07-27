@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 from xgboost import XGBClassifier
 from src.data.nifty50 import TICKERS
 from src.ml.confidence import compute_confidence_tier, get_display_signal
-from src.features.engineering import build_feature_row
+from src.features.engineering import build_feature_row, TICKER_CLASS_THRESHOLDS, apply_threshold_calibration
 
 logger = logging.getLogger(__name__)
 
@@ -115,11 +115,12 @@ def get_latest_prediction(ticker):
 
     latest_features = valid_df.iloc[-1].values.reshape(1, -1)
 
-    # NOTE: KNOWN GAP — TICKER_CLASS_THRESHOLDS calibration from training
-    # is NOT applied here. Inference uses predict_proba + argmax directly.
-    # Threshold calibration is out of scope unless requested separately.
     proba = model.predict_proba(latest_features)[0]
-    predicted_class = ["SELL", "HOLD", "BUY"][int(proba.argmax())]
+    thresholds = TICKER_CLASS_THRESHOLDS.get(ticker)
+    predicted_class_idx = apply_threshold_calibration(proba, thresholds)
+    predicted_class = ["SELL", "HOLD", "BUY"][predicted_class_idx]
+    raw_argmax_class = ["SELL", "HOLD", "BUY"][int(proba.argmax())]
+    calibration_changed_prediction = (predicted_class != raw_argmax_class)
 
     max_proba   = float(proba.max())
     sorted_p    = sorted(proba, reverse=True)
@@ -135,6 +136,9 @@ def get_latest_prediction(ticker):
     return {
         "recommendation":  display_signal,
         "raw_prediction":  predicted_class,
+        "raw_argmax_prediction": raw_argmax_class,
+        "threshold_calibration_applied": thresholds is not None,
+        "calibration_changed_prediction": calibration_changed_prediction,
         "confidence_tier": confidence["tier"],
         "confidence":      round(max_proba * 100, 1),
         "probabilities": {
@@ -204,7 +208,10 @@ def get_stock_data(ticker):
             'recommendation': prediction_data['recommendation'],
             'confidence': prediction_data['confidence'],
             'predicted_at': prediction_data['predicted_at'],
-            'top_features': top_features
+            'top_features': top_features,
+            'threshold_calibration_applied': prediction_data.get('threshold_calibration_applied', False),
+            'calibration_changed_prediction': prediction_data.get('calibration_changed_prediction', False),
+            'raw_argmax_prediction': prediction_data.get('raw_argmax_prediction', '')
         })
 
     except ServerSelectionTimeoutError as e:
@@ -252,7 +259,9 @@ def get_portfolio():
                 'recommendation': prediction['recommendation'],
                 'confidence': prediction['confidence'],
                 'last_close': round(last_close, 2),
-                'day_change_pct': day_change_pct
+                'day_change_pct': day_change_pct,
+                'threshold_calibration_applied': prediction.get('threshold_calibration_applied', False),
+                'calibration_changed_prediction': prediction.get('calibration_changed_prediction', False)
             })
         except Exception as e:
             print(f"Portfolio: skipping {ticker} — {e}")
