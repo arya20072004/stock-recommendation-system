@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createChart, CandlestickSeries, HistogramSeries } from 'lightweight-charts';
 import { useTheme } from '../theme/ThemeContext';
 
-export const Chart = ({ data, ticker }) => {
+export const Chart = ({ data, ticker, activeTool }) => {
   const chartContainerRef = useRef();
   const chartRef = useRef();
   const seriesRef = useRef();
@@ -10,6 +10,11 @@ export const Chart = ({ data, ticker }) => {
   const { theme } = useTheme();
   
   const [crosshairData, setCrosshairData] = useState(null);
+  const activeToolRef = useRef(activeTool);
+  const linesRef = useRef([]);
+  
+  const [textLabels, setTextLabels] = useState([]);
+  const [, setChartViewChanged] = useState(0);
   
   // Theme colors
   const colors = {
@@ -101,6 +106,44 @@ export const Chart = ({ data, ticker }) => {
         }
       });
 
+      chart.subscribeClick((param) => {
+        if (!param.point || !seriesRef.current) return;
+        
+        const price = seriesRef.current.coordinateToPrice(param.point.y);
+        
+        if (activeToolRef.current === 'line' && price !== null) {
+          // Check if clicking near an existing line to remove it
+          const y = param.point.y;
+          const lineToRemoveIndex = linesRef.current.findIndex(l => {
+             const lineY = seriesRef.current.priceToCoordinate(l.options().price);
+             return lineY !== null && Math.abs(lineY - y) < 10;
+          });
+          
+          if (lineToRemoveIndex !== -1) {
+             seriesRef.current.removePriceLine(linesRef.current[lineToRemoveIndex]);
+             linesRef.current.splice(lineToRemoveIndex, 1);
+          } else {
+             // Create new line
+             const newLine = seriesRef.current.createPriceLine({
+                 price: price,
+                 color: '#3b82f6',
+                 lineWidth: 2,
+                 lineStyle: 0,
+                 axisLabelVisible: true,
+             });
+             linesRef.current.push(newLine);
+          }
+        } else if (activeToolRef.current === 'text' && param.time && price !== null) {
+           const newLabel = {
+               id: Date.now(),
+               time: param.time,
+               price: price,
+               text: 'Text',
+           };
+           setTextLabels(prev => [...prev, newLabel]);
+        }
+      });
+
       const resizeObserver = new ResizeObserver((entries) => {
         if (entries.length === 0 || entries[0].target !== chartContainerRef.current) {
           return;
@@ -111,6 +154,9 @@ export const Chart = ({ data, ticker }) => {
 
       resizeObserver.observe(chartContainerRef.current);
 
+      chart.timeScale().subscribeVisibleLogicalRangeChange(() => setChartViewChanged(c => c + 1));
+      chart.timeScale().subscribeSizeChange(() => setChartViewChanged(c => c + 1));
+
       // Clean up on unmount
       return () => {
         resizeObserver.disconnect();
@@ -119,6 +165,24 @@ export const Chart = ({ data, ticker }) => {
       };
     }
   }, []); // Run once to create chart
+
+  useEffect(() => {
+    activeToolRef.current = activeTool;
+    if (chartRef.current) {
+      const isCrosshair = activeTool === 'crosshair';
+      chartRef.current.applyOptions({
+        crosshair: {
+          horzLine: { visible: isCrosshair, labelVisible: isCrosshair },
+          vertLine: { visible: isCrosshair, labelVisible: isCrosshair },
+        }
+      });
+      
+      // Update chart cursor style
+      if (chartContainerRef.current) {
+         chartContainerRef.current.style.cursor = activeTool === 'crosshair' ? 'crosshair' : 'default';
+      }
+    }
+  }, [activeTool]);
 
   // Update theme dynamically
   useEffect(() => {
@@ -206,8 +270,54 @@ export const Chart = ({ data, ticker }) => {
       {/* Chart Container */}
       <div 
         ref={chartContainerRef} 
-        style={{ width: '100%', height: '100%', minHeight: '400px' }} 
+        style={{ width: '100%', height: '100%', minHeight: '400px', outline: 'none' }} 
       />
+      
+      {/* Text Labels Overlay */}
+      {textLabels.map(label => {
+        if (!chartRef.current || !seriesRef.current) return null;
+        
+        // Convert logical time to coordinate
+        const x = chartRef.current.timeScale().timeToCoordinate(label.time);
+        const y = seriesRef.current.priceToCoordinate(label.price);
+        
+        if (x === null || y === null) return null;
+        
+        return (
+          <input 
+            key={label.id}
+            style={{ 
+              position: 'absolute', 
+              left: x, 
+              top: y, 
+              zIndex: 20,
+              background: 'transparent',
+              border: '1px dashed #ccc',
+              color: 'var(--text-primary)',
+              outline: 'none',
+              transform: 'translate(-50%, -50%)',
+              padding: '2px 4px',
+              borderRadius: '4px',
+              minWidth: '50px',
+              textAlign: 'center'
+            }}
+            defaultValue={label.text}
+            autoFocus
+            onBlur={(e) => {
+              if (!e.target.value.trim()) {
+                setTextLabels(prev => prev.filter(l => l.id !== label.id));
+              } else {
+                setTextLabels(prev => prev.map(l => l.id === label.id ? {...l, text: e.target.value} : l));
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.target.blur();
+              }
+            }}
+          />
+        );
+      })}
     </div>
   );
 };

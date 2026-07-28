@@ -1,23 +1,23 @@
 {
   "ticker": "SHRIRAMFIN.NS",
-  "f1_macro": 0.26266526266526263,
+  "f1_macro": 0.3371465629053178,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2,
-      "recall": 0.05084745762711865,
-      "f1": 0.08108108108108109,
+      "precision": 0.5625,
+      "recall": 0.15254237288135594,
+      "f1": 0.24,
       "support": 59
     },
     "HOLD": {
-      "precision": 0.21428571428571427,
+      "precision": 0.20930232558139536,
       "recall": 0.15789473684210525,
-      "f1": 0.18181818181818182,
+      "f1": 0.18,
       "support": 57
     },
     "BUY": {
-      "precision": 0.4276729559748428,
-      "recall": 0.68,
-      "f1": 0.525096525096525,
+      "precision": 0.4840764331210191,
+      "recall": 0.76,
+      "f1": 0.5914396887159533,
       "support": 100
     }
   },
@@ -30,22 +30,22 @@
     "2": 453
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6026799082756042,
-    "mean_top2_margin": 0.34065380692481995,
-    "f1_macro": 0.26266526266526263
+    "mean_max_proba": 0.6385558843612671,
+    "mean_top2_margin": 0.397382527589798,
+    "f1_macro": 0.3371465629053178
   },
   "optuna": {
-    "best_value": 0.32664774671652447,
+    "best_value": 0.3428924929523573,
     "best_params": {
-      "n_estimators": 409,
-      "max_depth": 6,
-      "learning_rate": 0.15265216548324909,
-      "subsample": 0.6048770294918643,
-      "colsample_bytree": 0.8108198786132831,
-      "min_child_weight": 14,
-      "reg_lambda": 9.831837687461285,
-      "reg_alpha": 1.1873167604589758,
-      "gamma": 1.4365679571239096
+      "n_estimators": 333,
+      "max_depth": 4,
+      "learning_rate": 0.16755052359850303,
+      "subsample": 0.7427013306774357,
+      "colsample_bytree": 0.7123738038749523,
+      "min_child_weight": 10,
+      "reg_lambda": 3.832014924671914,
+      "reg_alpha": 4.109886413393179,
+      "gamma": 0.3161968666713354
     },
     "n_trials": 30,
     "cv_splits": 5,

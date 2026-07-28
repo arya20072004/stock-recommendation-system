@@ -1,51 +1,51 @@
 {
   "ticker": "HDFCBANK.NS",
-  "f1_macro": 0.44464536869600163,
+  "f1_macro": 0.37171439240580967,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.4411764705882353,
-      "recall": 0.3333333333333333,
-      "f1": 0.379746835443038,
-      "support": 45
+      "precision": 0.3793103448275862,
+      "recall": 0.25,
+      "f1": 0.3013698630136986,
+      "support": 44
     },
     "HOLD": {
-      "precision": 0.5365853658536586,
-      "recall": 0.5116279069767442,
-      "f1": 0.5238095238095238,
+      "precision": 0.42857142857142855,
+      "recall": 0.4186046511627907,
+      "f1": 0.4235294117647059,
       "support": 43
     },
     "BUY": {
-      "precision": 0.3695652173913043,
-      "recall": 0.5151515151515151,
-      "f1": 0.43037974683544306,
+      "precision": 0.32653061224489793,
+      "recall": 0.48484848484848486,
+      "f1": 0.3902439024390244,
       "support": 33
     }
   },
-  "train_size": 480,
-  "test_size": 121,
-  "total_rows_after_features": 601,
+  "train_size": 479,
+  "test_size": 120,
+  "total_rows_after_features": 599,
   "label_distribution": {
-    "0": 169,
+    "0": 168,
     "1": 223,
-    "2": 209
+    "2": 208
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6346812844276428,
-    "mean_top2_margin": 0.3688720166683197,
-    "f1_macro": 0.44464536869600163
+    "mean_max_proba": 0.6629089117050171,
+    "mean_top2_margin": 0.40381044149398804,
+    "f1_macro": 0.37171439240580967
   },
   "optuna": {
-    "best_value": 0.3871912356819644,
+    "best_value": 0.38075543996415884,
     "best_params": {
-      "n_estimators": 682,
-      "max_depth": 6,
-      "learning_rate": 0.24420460844911424,
-      "subsample": 0.9579309401710595,
-      "colsample_bytree": 0.8391599915244341,
-      "min_child_weight": 14,
-      "reg_lambda": 3.1504025266749536,
-      "reg_alpha": 1.3819228808861534,
-      "gamma": 0.23115913784056039
+      "n_estimators": 605,
+      "max_depth": 7,
+      "learning_rate": 0.25837511792213397,
+      "subsample": 0.619204981197128,
+      "colsample_bytree": 0.7564224168754204,
+      "min_child_weight": 15,
+      "reg_lambda": 9.8572255712562,
+      "reg_alpha": 0.9844991116710751,
+      "gamma": 0.24774803454260413
     },
     "n_trials": 75,
     "cv_splits": 5,
