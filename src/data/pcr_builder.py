@@ -78,6 +78,8 @@ def _normalize(df: pd.DataFrame, dt: datetime) -> pd.DataFrame:
     if dt >= CUTOVER_DATE:
         # UDiFF schema
         keep = df.rename(columns={
+            "XpryDt": "EXPIRY_DT",
+            "ClsPric": "CLOSE",
             "TckrSymb": "SYMBOL",
             "FinInstrmTp": "INSTRUMENT",
             "OptnTp": "OPTION_TYP",
@@ -88,6 +90,9 @@ def _normalize(df: pd.DataFrame, dt: datetime) -> pd.DataFrame:
 
     keep["SYMBOL"] = keep["SYMBOL"].astype(str).str.strip().str.upper()
     keep["OPTION_TYP"] = keep["OPTION_TYP"].astype(str).str.strip().str.upper()
+    if "INSTRUMENT" not in keep.columns and "FinInstrmTp" in df.columns:
+        keep["INSTRUMENT"] = df["FinInstrmTp"]
+    keep["INSTRUMENT"] = keep["INSTRUMENT"].astype(str).str.strip().str.upper()
     return keep
 
 
@@ -112,14 +117,32 @@ def _compute_daily_pcr(dt: datetime) -> list[dict]:
         if call_oi <= 0:
             continue
 
-        records.append({
+        record = {
             "underlying": underlying,
             "date": dt,
             "call_oi": float(call_oi),
             "put_oi": float(put_oi),
             "pcr_oi": float(put_oi / call_oi),
             "updated_at": datetime.now(timezone.utc),
-        })
+        }
+
+        if underlying == "NIFTY":
+            fut_rows = df[
+                (df["SYMBOL"] == "NIFTY")
+                & (df["INSTRUMENT"].isin(["FUTIDX", "IDF"]))
+            ]
+            if not fut_rows.empty and "EXPIRY_DT" in fut_rows.columns:
+                fut_rows = fut_rows.copy()
+                fut_rows["EXPIRY_DT"] = pd.to_datetime(fut_rows["EXPIRY_DT"], errors="coerce")
+                live_fut_rows = fut_rows[fut_rows["EXPIRY_DT"] > pd.Timestamp(dt)]
+                if not live_fut_rows.empty:
+                    near_month = live_fut_rows.sort_values("EXPIRY_DT").iloc[0]
+                    fut_close = pd.to_numeric(near_month.get("CLOSE"), errors="coerce")
+                    if pd.notna(fut_close) and fut_close > 0:
+                        record["nifty_fut_close"] = float(fut_close)
+                        record["nifty_fut_expiry"] = near_month["EXPIRY_DT"].to_pydatetime()
+
+        records.append(record)
     return records
 
 

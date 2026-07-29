@@ -1,51 +1,51 @@
 {
   "ticker": "HCLTECH.NS",
-  "f1_macro": 0.3057462338565625,
+  "f1_macro": 0.29810822791987546,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.3157894736842105,
-      "recall": 0.13333333333333333,
-      "f1": 0.1875,
+      "precision": 0.16,
+      "recall": 0.08888888888888889,
+      "f1": 0.11428571428571428,
       "support": 45
     },
     "HOLD": {
-      "precision": 0.5813953488372093,
-      "recall": 0.8,
-      "f1": 0.6734006734006734,
-      "support": 125
+      "precision": 0.5574712643678161,
+      "recall": 0.782258064516129,
+      "f1": 0.6510067114093959,
+      "support": 124
     },
     "BUY": {
-      "precision": 0.08,
-      "recall": 0.043478260869565216,
-      "f1": 0.056338028169014086,
+      "precision": 0.25,
+      "recall": 0.08695652173913043,
+      "f1": 0.12903225806451613,
       "support": 46
     }
   },
-  "train_size": 862,
-  "test_size": 216,
-  "total_rows_after_features": 1078,
+  "train_size": 859,
+  "test_size": 215,
+  "total_rows_after_features": 1074,
   "label_distribution": {
     "0": 227,
-    "1": 561,
-    "2": 290
+    "1": 560,
+    "2": 287
   },
   "confidence_stats": {
-    "mean_max_proba": 0.557712972164154,
-    "mean_top2_margin": 0.2815057337284088,
-    "f1_macro": 0.3057462338565625
+    "mean_max_proba": 0.5518466830253601,
+    "mean_top2_margin": 0.28127720952033997,
+    "f1_macro": 0.29810822791987546
   },
   "optuna": {
-    "best_value": 0.32222798769350436,
+    "best_value": 0.3320812457437062,
     "best_params": {
-      "n_estimators": 202,
-      "max_depth": 6,
-      "learning_rate": 0.13088098020968517,
-      "subsample": 0.7907135029212635,
-      "colsample_bytree": 0.7582821649492293,
-      "min_child_weight": 11,
-      "reg_lambda": 6.989503620541547,
-      "reg_alpha": 4.181593651781385,
-      "gamma": 1.0555632126858487
+      "n_estimators": 279,
+      "max_depth": 4,
+      "learning_rate": 0.07052331424913079,
+      "subsample": 0.7516250701411217,
+      "colsample_bytree": 0.606067272633889,
+      "min_child_weight": 8,
+      "reg_lambda": 14.896480620959661,
+      "reg_alpha": 4.982074392863458,
+      "gamma": 0.8242637076457016
     },
     "n_trials": 30,
     "cv_splits": 5,

@@ -1,51 +1,51 @@
 {
   "ticker": "HINDALCO.NS",
-  "f1_macro": 0.2994484765737281,
+  "f1_macro": 0.339969139350649,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.16176470588235295,
-      "recall": 0.36666666666666664,
-      "f1": 0.22448979591836735,
+      "precision": 0.14516129032258066,
+      "recall": 0.3,
+      "f1": 0.1956521739130435,
       "support": 30
     },
     "HOLD": {
-      "precision": 0.2714285714285714,
-      "recall": 0.2638888888888889,
-      "f1": 0.2676056338028169,
-      "support": 72
+      "precision": 0.35714285714285715,
+      "recall": 0.4225352112676056,
+      "f1": 0.3870967741935484,
+      "support": 71
     },
     "BUY": {
-      "precision": 0.5,
-      "recall": 0.34210526315789475,
-      "f1": 0.40625,
+      "precision": 0.5797101449275363,
+      "recall": 0.3508771929824561,
+      "f1": 0.4371584699453552,
       "support": 114
     }
   },
-  "train_size": 862,
-  "test_size": 216,
-  "total_rows_after_features": 1078,
+  "train_size": 859,
+  "test_size": 215,
+  "total_rows_after_features": 1074,
   "label_distribution": {
-    "0": 276,
-    "1": 356,
-    "2": 446
+    "0": 275,
+    "1": 354,
+    "2": 445
   },
   "confidence_stats": {
-    "mean_max_proba": 0.4196024239063263,
-    "mean_top2_margin": 0.09155641496181488,
-    "f1_macro": 0.2994484765737281
+    "mean_max_proba": 0.5430476665496826,
+    "mean_top2_margin": 0.2455102503299713,
+    "f1_macro": 0.339969139350649
   },
   "optuna": {
-    "best_value": 0.3229851076538636,
+    "best_value": 0.32474637905019493,
     "best_params": {
-      "n_estimators": 173,
-      "max_depth": 5,
-      "learning_rate": 0.011240768803005551,
-      "subsample": 0.9637281608315128,
-      "colsample_bytree": 0.7035119926400067,
-      "min_child_weight": 11,
-      "reg_lambda": 6.052243989162342,
-      "reg_alpha": 2.8403060953001487,
-      "gamma": 1.685459810095511
+      "n_estimators": 216,
+      "max_depth": 4,
+      "learning_rate": 0.2070337772531121,
+      "subsample": 0.6218580531706117,
+      "colsample_bytree": 0.8198586258299208,
+      "min_child_weight": 3,
+      "reg_lambda": 2.3199459516720755,
+      "reg_alpha": 1.9890466940416527,
+      "gamma": 1.0514678397685615
     },
     "n_trials": 30,
     "cv_splits": 5,

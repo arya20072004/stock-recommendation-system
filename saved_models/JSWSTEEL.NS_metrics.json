@@ -1,51 +1,51 @@
 {
   "ticker": "JSWSTEEL.NS",
-  "f1_macro": 0.312948648158229,
+  "f1_macro": 0.30735166793990326,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.140625,
-      "recall": 0.25,
-      "f1": 0.18,
-      "support": 36
+      "precision": 0.075,
+      "recall": 0.08571428571428572,
+      "f1": 0.08,
+      "support": 35
     },
     "HOLD": {
-      "precision": 0.4782608695652174,
-      "recall": 0.336734693877551,
-      "f1": 0.39520958083832336,
+      "precision": 0.47191011235955055,
+      "recall": 0.42857142857142855,
+      "f1": 0.44919786096256686,
       "support": 98
     },
     "BUY": {
-      "precision": 0.3614457831325301,
-      "recall": 0.36585365853658536,
-      "f1": 0.36363636363636365,
+      "precision": 0.38372093023255816,
+      "recall": 0.4024390243902439,
+      "f1": 0.39285714285714285,
       "support": 82
     }
   },
-  "train_size": 862,
-  "test_size": 216,
-  "total_rows_after_features": 1078,
+  "train_size": 859,
+  "test_size": 215,
+  "total_rows_after_features": 1074,
   "label_distribution": {
     "0": 246,
-    "1": 453,
-    "2": 379
+    "1": 451,
+    "2": 377
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5614926218986511,
-    "mean_top2_margin": 0.2844366729259491,
-    "f1_macro": 0.312948648158229
+    "mean_max_proba": 0.4639461636543274,
+    "mean_top2_margin": 0.1514480710029602,
+    "f1_macro": 0.30735166793990326
   },
   "optuna": {
-    "best_value": 0.394851953428421,
+    "best_value": 0.38199685124008426,
     "best_params": {
-      "n_estimators": 650,
-      "max_depth": 3,
-      "learning_rate": 0.11495651472717171,
-      "subsample": 0.7912881852168796,
-      "colsample_bytree": 0.9307911675765945,
-      "min_child_weight": 15,
-      "reg_lambda": 14.020057959694677,
-      "reg_alpha": 1.0897924371781254,
-      "gamma": 1.2521097856096088
+      "n_estimators": 363,
+      "max_depth": 7,
+      "learning_rate": 0.040393429929716534,
+      "subsample": 0.8092423992413108,
+      "colsample_bytree": 0.7988341574443409,
+      "min_child_weight": 3,
+      "reg_lambda": 2.170824104331512,
+      "reg_alpha": 3.9261165374354974,
+      "gamma": 2.1385411964478047
     },
     "n_trials": 30,
     "cv_splits": 5,

@@ -162,6 +162,7 @@ ALL_MACRO_COLS = [
     "vix_level", "vix_ret_1d", "vix_chg_5d", "vix_vol_10d",
     "nifty_pcr_oi", "nifty_pcr_chg_5d",
     "banknifty_pcr_oi", "banknifty_pcr_chg_5d",
+    "nifty_futures_basis", "nifty_futures_basis_chg_5d",
 ]
 
 TICKER_CLASS_THRESHOLDS = {
@@ -436,6 +437,33 @@ def _prepare_macro_data(start_date, end_date, client):
         logger.warning("macro: BANKNIFTY PCR fetch failed — %s", ex)
         macro["banknifty_pcr_oi"] = 0.0
         macro["banknifty_pcr_chg_5d"] = 0.0
+
+    try:
+        db = client["stock_market_db"]
+        fut_docs = list(db.pcr_data.find(
+            {"underlying": "NIFTY", "date": {"$gte": start_date, "$lte": end_date},
+             "nifty_fut_close": {"$exists": True}},
+            {"date": 1, "nifty_fut_close": 1, "_id": 0}
+        ))
+        if fut_docs and "nifty_ret_1d" in macro.columns:
+            fut_df = pd.DataFrame(fut_docs)
+            fut_df["date"] = pd.to_datetime(fut_df["date"]).dt.tz_localize(None)
+            fut_df.set_index("date", inplace=True)
+            fut_df.sort_index(inplace=True)
+            # nifty spot close computed earlier in this function as `c` (from the ^NSEI block)
+            spot_aligned = nifty["Close"].reindex(fut_df.index) if "nifty" in dir() else None
+            basis_df = fut_df.join(nifty["Close"].rename("spot_close"), how="left")
+            basis = (basis_df["nifty_fut_close"] - basis_df["spot_close"]) / basis_df["spot_close"]
+            macro["nifty_futures_basis"] = basis
+            macro["nifty_futures_basis_chg_5d"] = basis.diff(5)
+        else:
+            logger.warning("macro: no NIFTY futures data found in range — zeroing futures basis features")
+            macro["nifty_futures_basis"] = 0.0
+            macro["nifty_futures_basis_chg_5d"] = 0.0
+    except Exception as ex:
+        logger.warning("macro: NIFTY futures basis fetch failed — %s", ex)
+        macro["nifty_futures_basis"] = 0.0
+        macro["nifty_futures_basis_chg_5d"] = 0.0
 
     if macro.empty:
         return pd.DataFrame()
