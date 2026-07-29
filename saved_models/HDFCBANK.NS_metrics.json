@@ -1,5 +1,6 @@
 {
   "ticker": "HDFCBANK.NS",
+<<<<<<< HEAD
   "f1_macro": 0.3247200083346356,
   "per_class_metrics": {
     "SELL": {
@@ -46,6 +47,54 @@
       "reg_lambda": 11.14327229203159,
       "reg_alpha": 1.865508353998511,
       "gamma": 0.6971794795157737
+=======
+  "f1_macro": 0.44464536869600163,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.4411764705882353,
+      "recall": 0.3333333333333333,
+      "f1": 0.379746835443038,
+      "support": 45
+    },
+    "HOLD": {
+      "precision": 0.5365853658536586,
+      "recall": 0.5116279069767442,
+      "f1": 0.5238095238095238,
+      "support": 43
+    },
+    "BUY": {
+      "precision": 0.3695652173913043,
+      "recall": 0.5151515151515151,
+      "f1": 0.43037974683544306,
+      "support": 33
+    }
+  },
+  "train_size": 480,
+  "test_size": 121,
+  "total_rows_after_features": 601,
+  "label_distribution": {
+    "0": 169,
+    "1": 223,
+    "2": 209
+  },
+  "confidence_stats": {
+    "mean_max_proba": 0.6346812844276428,
+    "mean_top2_margin": 0.3688720166683197,
+    "f1_macro": 0.44464536869600163
+  },
+  "optuna": {
+    "best_value": 0.3871912356819644,
+    "best_params": {
+      "n_estimators": 682,
+      "max_depth": 6,
+      "learning_rate": 0.24420460844911424,
+      "subsample": 0.9579309401710595,
+      "colsample_bytree": 0.8391599915244341,
+      "min_child_weight": 14,
+      "reg_lambda": 3.1504025266749536,
+      "reg_alpha": 1.3819228808861534,
+      "gamma": 0.23115913784056039
+>>>>>>> parent of 8123219c (Made the text box cross hair and horizontal line functional)
     },
     "n_trials": 75,
     "cv_splits": 5,

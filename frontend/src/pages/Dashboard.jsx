@@ -11,18 +11,6 @@ export const Dashboard = () => {
   const initialTicker = searchParams.get('ticker') || 'ADANIENT.NS'; // default to something if empty
   const [selectedTicker, setSelectedTicker] = useState(initialTicker);
   const [showMobileRail, setShowMobileRail] = useState(false);
-  const [activeTool, setActiveTool] = useState('crosshair'); // 'crosshair', 'line', 'text'
-  const chartAreaRef = React.useRef(null);
-
-  const handleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      if (chartAreaRef.current) {
-        chartAreaRef.current.requestFullscreen().catch(err => console.warn(err));
-      }
-    } else {
-      document.exitFullscreen();
-    }
-  };
 
   // Update URL when ticker changes
   useEffect(() => {
@@ -54,12 +42,7 @@ export const Dashboard = () => {
     <div className="terminal-workspace" style={{ position: 'relative' }}>
       
       {/* Tool Rail (Desktop only) */}
-      <LeftToolRail 
-        onToggleTickerRail={() => setShowMobileRail(!showMobileRail)}
-        activeTool={activeTool}
-        setActiveTool={setActiveTool}
-        onFullscreen={handleFullscreen}
-      />
+      <LeftToolRail onToggleTickerRail={() => setShowMobileRail(!showMobileRail)} />
 
       {/* Ticker Rail (Desktop/Tablet) or Mobile Overlay */}
       <div 
@@ -90,13 +73,13 @@ export const Dashboard = () => {
       <div className="flex flex-col md:flex-row flex-1" style={{ overflow: 'hidden' }}>
         
         {/* Chart Area */}
-        <div ref={chartAreaRef} className="terminal-pane flex-1" style={{ position: 'relative', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)' }}>
+        <div className="terminal-pane flex-1" style={{ position: 'relative', display: 'flex', flexDirection: 'column' }}>
           {stockDataLoading ? (
             <div className="flex items-center justify-center flex-1" style={{ color: 'var(--text-muted)' }}>
               Loading chart data...
             </div>
           ) : stockData && stockData.chartData ? (
-            <Chart data={stockData.chartData} ticker={selectedTicker} activeTool={activeTool} />
+            <Chart data={stockData.chartData} ticker={selectedTicker} />
           ) : (
             <div className="flex items-center justify-center flex-1" style={{ color: 'var(--text-muted)' }}>
               Select a stock to view its chart
