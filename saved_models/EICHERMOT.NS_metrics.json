@@ -1,91 +1,51 @@
 {
   "ticker": "EICHERMOT.NS",
-<<<<<<< HEAD
-  "f1_macro": 0.2501367351942795,
+  "f1_macro": 0.24603154316096212,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.18269230769230768,
-      "recall": 0.5,
-      "f1": 0.2676056338028169,
+      "precision": 0.17307692307692307,
+      "recall": 0.47368421052631576,
+      "f1": 0.2535211267605634,
       "support": 38
     },
     "HOLD": {
-      "precision": 0.4166666666666667,
-      "recall": 0.3684210526315789,
-      "f1": 0.39106145251396646,
+      "precision": 0.4177215189873418,
+      "recall": 0.3473684210526316,
+      "f1": 0.3793103448275862,
       "support": 95
     },
     "BUY": {
-      "precision": 0.18518518518518517,
-      "recall": 0.06097560975609756,
-      "f1": 0.09174311926605505,
-=======
-  "f1_macro": 0.26574073467557807,
-  "per_class_metrics": {
-    "SELL": {
-      "precision": 0.1724137931034483,
-      "recall": 0.38461538461538464,
-      "f1": 0.23809523809523808,
-      "support": 39
-    },
-    "HOLD": {
-      "precision": 0.42857142857142855,
-      "recall": 0.4421052631578947,
-      "f1": 0.43523316062176165,
-      "support": 95
-    },
-    "BUY": {
-      "precision": 0.22580645161290322,
-      "recall": 0.08536585365853659,
-      "f1": 0.12389380530973451,
->>>>>>> parent of 8123219c (Made the text box cross hair and horizontal line functional)
+      "precision": 0.1875,
+      "recall": 0.07317073170731707,
+      "f1": 0.10526315789473684,
       "support": 82
     }
   },
-  "train_size": 859,
+  "train_size": 857,
   "test_size": 215,
-  "total_rows_after_features": 1074,
+  "total_rows_after_features": 1072,
   "label_distribution": {
     "0": 264,
-    "1": 413,
-    "2": 397
+    "1": 412,
+    "2": 396
   },
   "confidence_stats": {
-<<<<<<< HEAD
-    "mean_max_proba": 0.4952104389667511,
-    "mean_top2_margin": 0.1887809783220291,
-    "f1_macro": 0.2501367351942795
+    "mean_max_proba": 0.4801592528820038,
+    "mean_top2_margin": 0.1648111343383789,
+    "f1_macro": 0.24603154316096212
   },
   "optuna": {
-    "best_value": 0.3633749200954873,
+    "best_value": 0.356617956198848,
     "best_params": {
-      "n_estimators": 626,
+      "n_estimators": 653,
       "max_depth": 7,
-      "learning_rate": 0.014698437100009586,
-      "subsample": 0.9887737660965907,
-      "colsample_bytree": 0.9856375299135707,
+      "learning_rate": 0.021799859071278117,
+      "subsample": 0.9967414506983528,
+      "colsample_bytree": 0.9052730418005681,
       "min_child_weight": 5,
-      "reg_lambda": 6.855820733981756,
-      "reg_alpha": 3.7112228920427506,
-      "gamma": 0.4156282641348432
-=======
-    "mean_max_proba": 0.5098719000816345,
-    "mean_top2_margin": 0.19374646246433258,
-    "f1_macro": 0.26574073467557807
-  },
-  "optuna": {
-    "best_value": 0.3451564359827704,
-    "best_params": {
-      "n_estimators": 221,
-      "max_depth": 7,
-      "learning_rate": 0.05071224653683362,
-      "subsample": 0.9542984635546587,
-      "colsample_bytree": 0.762314179788133,
-      "min_child_weight": 4,
-      "reg_lambda": 14.243237536494327,
-      "reg_alpha": 1.7615030467484145,
-      "gamma": 0.4196858389842654
->>>>>>> parent of 8123219c (Made the text box cross hair and horizontal line functional)
+      "reg_lambda": 2.017389669970469,
+      "reg_alpha": 4.3164274743542475,
+      "gamma": 0.6624622203644593
     },
     "n_trials": 75,
     "cv_splits": 5,

@@ -1,91 +1,51 @@
 {
   "ticker": "KOTAKBANK.NS",
-<<<<<<< HEAD
-  "f1_macro": 0.24553793040226513,
+  "f1_macro": 0.3246804944479363,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.047619047619047616,
-      "recall": 0.03571428571428571,
-      "f1": 0.04081632653061224,
+      "precision": 0.2037037037037037,
+      "recall": 0.19642857142857142,
+      "f1": 0.2,
       "support": 56
     },
     "HOLD": {
-      "precision": 0.4594594594594595,
-      "recall": 0.35051546391752575,
-      "f1": 0.39766081871345027,
+      "precision": 0.5466666666666666,
+      "recall": 0.422680412371134,
+      "f1": 0.47674418604651164,
       "support": 97
     },
     "BUY": {
-      "precision": 0.24242424242424243,
-      "recall": 0.3870967741935484,
-      "f1": 0.2981366459627329,
-=======
-  "f1_macro": 0.35444812575830725,
-  "per_class_metrics": {
-    "SELL": {
-      "precision": 0.23404255319148937,
-      "recall": 0.19298245614035087,
-      "f1": 0.21153846153846154,
-      "support": 57
-    },
-    "HOLD": {
-      "precision": 0.5952380952380952,
-      "recall": 0.5154639175257731,
-      "f1": 0.5524861878453039,
-      "support": 97
-    },
-    "BUY": {
-      "precision": 0.25882352941176473,
+      "precision": 0.2558139534883721,
       "recall": 0.3548387096774194,
-      "f1": 0.29931972789115646,
->>>>>>> parent of 8123219c (Made the text box cross hair and horizontal line functional)
+      "f1": 0.2972972972972973,
       "support": 62
     }
   },
-  "train_size": 859,
+  "train_size": 857,
   "test_size": 215,
-  "total_rows_after_features": 1074,
+  "total_rows_after_features": 1072,
   "label_distribution": {
     "0": 295,
     "1": 443,
-    "2": 336
+    "2": 334
   },
   "confidence_stats": {
-<<<<<<< HEAD
-    "mean_max_proba": 0.4519447982311249,
-    "mean_top2_margin": 0.13386711478233337,
-    "f1_macro": 0.24553793040226513
+    "mean_max_proba": 0.5461599826812744,
+    "mean_top2_margin": 0.24496141076087952,
+    "f1_macro": 0.3246804944479363
   },
   "optuna": {
-    "best_value": 0.3208863427782706,
+    "best_value": 0.33516040561043575,
     "best_params": {
-      "n_estimators": 345,
-      "max_depth": 6,
-      "learning_rate": 0.020521122083646967,
-      "subsample": 0.9991107743119982,
-      "colsample_bytree": 0.9758523249817302,
-      "min_child_weight": 4,
-      "reg_lambda": 7.887075177838211,
-      "reg_alpha": 4.1017794314929885,
-      "gamma": 1.939096483115514
-=======
-    "mean_max_proba": 0.5209205150604248,
-    "mean_top2_margin": 0.21080370247364044,
-    "f1_macro": 0.35444812575830725
-  },
-  "optuna": {
-    "best_value": 0.3296595016453617,
-    "best_params": {
-      "n_estimators": 120,
-      "max_depth": 5,
-      "learning_rate": 0.05707772603669287,
-      "subsample": 0.8945605940959278,
-      "colsample_bytree": 0.9382920028461503,
-      "min_child_weight": 3,
-      "reg_lambda": 9.945627540870767,
-      "reg_alpha": 0.6753486256180117,
-      "gamma": 0.3063031913447659
->>>>>>> parent of 8123219c (Made the text box cross hair and horizontal line functional)
+      "n_estimators": 228,
+      "max_depth": 3,
+      "learning_rate": 0.23232342261518463,
+      "subsample": 0.9132748380495701,
+      "colsample_bytree": 0.8859604537657414,
+      "min_child_weight": 5,
+      "reg_lambda": 4.206417433052021,
+      "reg_alpha": 3.4872448767713946,
+      "gamma": 0.6188101809000701
     },
     "n_trials": 75,
     "cv_splits": 5,

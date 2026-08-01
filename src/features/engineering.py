@@ -163,6 +163,9 @@ ALL_MACRO_COLS = [
     "nifty_pcr_oi", "nifty_pcr_chg_5d",
     "banknifty_pcr_oi", "banknifty_pcr_chg_5d",
     "nifty_futures_basis", "nifty_futures_basis_chg_5d",
+    "fii_net_value", "fii_net_chg_5d",
+    "dii_net_value", "dii_net_chg_5d",
+    "fii_dii_divergence",
 ]
 
 TICKER_CLASS_THRESHOLDS = {
@@ -437,6 +440,57 @@ def _prepare_macro_data(start_date, end_date, client):
         logger.warning("macro: BANKNIFTY PCR fetch failed — %s", ex)
         macro["banknifty_pcr_oi"] = 0.0
         macro["banknifty_pcr_chg_5d"] = 0.0
+
+    try:
+        db = client["stock_market_db"]
+        fii_docs = list(db.fii_dii_data.find(
+            {"investor_type": "FII", "date": {"$gte": start_date, "$lte": end_date}},
+            {"date": 1, "net_value_cr": 1, "_id": 0}
+        ))
+        dii_docs = list(db.fii_dii_data.find(
+            {"investor_type": "DII", "date": {"$gte": start_date, "$lte": end_date}},
+            {"date": 1, "net_value_cr": 1, "_id": 0}
+        ))
+        if fii_docs and dii_docs:
+            fii_df = pd.DataFrame(fii_docs)
+            fii_df["date"] = pd.to_datetime(fii_df["date"]).dt.tz_localize(None)
+            fii_df.set_index("date", inplace=True)
+            fii_df.sort_index(inplace=True)
+
+            dii_df = pd.DataFrame(dii_docs)
+            dii_df["date"] = pd.to_datetime(dii_df["date"]).dt.tz_localize(None)
+            dii_df.set_index("date", inplace=True)
+            dii_df.sort_index(inplace=True)
+
+            macro["fii_net_value"]  = fii_df["net_value_cr"]
+            macro["fii_net_chg_5d"] = fii_df["net_value_cr"].diff(5)
+            macro["dii_net_value"]  = dii_df["net_value_cr"]
+            macro["dii_net_chg_5d"] = dii_df["net_value_cr"].diff(5)
+
+            # Aligned on the union of both indices — divergence undefined
+            # (NaN) on any date missing either side, which is intentional:
+            # dropna() downstream will correctly exclude partial rows
+            # rather than silently comparing a real FII value to a
+            # stale/zero DII value.
+            macro["fii_dii_divergence"] = macro["fii_net_value"] - macro["dii_net_value"]
+        else:
+            logger.warning(
+                "macro: no FII/DII data found in range — zeroing features "
+                "(expected until fii_dii_builder.py has accumulated enough "
+                "daily history; this is not a fetch failure)"
+            )
+            macro["fii_net_value"]       = 0.0
+            macro["fii_net_chg_5d"]      = 0.0
+            macro["dii_net_value"]       = 0.0
+            macro["dii_net_chg_5d"]      = 0.0
+            macro["fii_dii_divergence"]  = 0.0
+    except Exception as ex:
+        logger.warning("macro: FII/DII fetch failed — %s", ex)
+        macro["fii_net_value"]       = 0.0
+        macro["fii_net_chg_5d"]      = 0.0
+        macro["dii_net_value"]       = 0.0
+        macro["dii_net_chg_5d"]      = 0.0
+        macro["fii_dii_divergence"]  = 0.0
 
     try:
         db = client["stock_market_db"]

@@ -1,100 +1,51 @@
 {
   "ticker": "MARUTI.NS",
-<<<<<<< HEAD
-  "f1_macro": 0.254138963882285,
+  "f1_macro": 0.31224186727932607,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.25,
-      "recall": 0.46875,
-      "f1": 0.32608695652173914,
+      "precision": 0.2564102564102564,
+      "recall": 0.3125,
+      "f1": 0.28169014084507044,
       "support": 32
     },
     "HOLD": {
-      "precision": 0.35135135135135137,
-      "recall": 0.2826086956521739,
-      "f1": 0.3132530120481928,
+      "precision": 0.3541666666666667,
+      "recall": 0.3695652173913043,
+      "f1": 0.3617021276595745,
       "support": 46
     },
     "BUY": {
-      "precision": 0.17391304347826086,
-      "recall": 0.09523809523809523,
-      "f1": 0.12307692307692308,
+      "precision": 0.3333333333333333,
+      "recall": 0.2619047619047619,
+      "f1": 0.29333333333333333,
       "support": 42
     }
   },
-  "train_size": 477,
+  "train_size": 476,
   "test_size": 120,
-  "total_rows_after_features": 597,
+  "total_rows_after_features": 596,
   "label_distribution": {
     "0": 142,
     "1": 250,
-    "2": 205
+    "2": 204
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6050781011581421,
-    "mean_top2_margin": 0.35255879163742065,
-    "f1_macro": 0.254138963882285
+    "mean_max_proba": 0.6252201795578003,
+    "mean_top2_margin": 0.3742586076259613,
+    "f1_macro": 0.31224186727932607
   },
   "optuna": {
-    "best_value": 0.33283108794217947,
+    "best_value": 0.3229497396132613,
     "best_params": {
-      "n_estimators": 386,
-      "max_depth": 5,
-      "learning_rate": 0.19744525663481474,
-      "subsample": 0.8056991951289932,
-      "colsample_bytree": 0.8456219306377007,
-      "min_child_weight": 14,
-      "reg_lambda": 3.4674808847296337,
-      "reg_alpha": 2.4834980812003233,
-      "gamma": 0.40436065750512634
-=======
-  "f1_macro": 0.2766994266994267,
-  "per_class_metrics": {
-    "SELL": {
-      "precision": 0.25,
-      "recall": 0.375,
-      "f1": 0.3,
-      "support": 32
-    },
-    "HOLD": {
-      "precision": 0.35714285714285715,
-      "recall": 0.32608695652173914,
-      "f1": 0.3409090909090909,
-      "support": 46
-    },
-    "BUY": {
-      "precision": 0.22580645161290322,
-      "recall": 0.16279069767441862,
-      "f1": 0.1891891891891892,
-      "support": 43
-    }
-  },
-  "train_size": 480,
-  "test_size": 121,
-  "total_rows_after_features": 601,
-  "label_distribution": {
-    "0": 142,
-    "1": 252,
-    "2": 207
-  },
-  "confidence_stats": {
-    "mean_max_proba": 0.5668019652366638,
-    "mean_top2_margin": 0.29187414050102234,
-    "f1_macro": 0.2766994266994267
-  },
-  "optuna": {
-    "best_value": 0.3166753789280919,
-    "best_params": {
-      "n_estimators": 446,
-      "max_depth": 5,
-      "learning_rate": 0.043365620733341555,
-      "subsample": 0.9185903949777849,
-      "colsample_bytree": 0.9751400810160188,
-      "min_child_weight": 10,
-      "reg_lambda": 13.111543470557109,
-      "reg_alpha": 1.939427277614823,
-      "gamma": 0.3324521417061609
->>>>>>> parent of 8123219c (Made the text box cross hair and horizontal line functional)
+      "n_estimators": 700,
+      "max_depth": 6,
+      "learning_rate": 0.27897426248427454,
+      "subsample": 0.9404052868155783,
+      "colsample_bytree": 0.8284664050808377,
+      "min_child_weight": 15,
+      "reg_lambda": 2.3104889953975185,
+      "reg_alpha": 1.5178443374632558,
+      "gamma": 0.18974928209012065
     },
     "n_trials": 30,
     "cv_splits": 5,

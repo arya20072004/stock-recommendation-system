@@ -1,91 +1,51 @@
 {
   "ticker": "SHRIRAMFIN.NS",
-<<<<<<< HEAD
-  "f1_macro": 0.30387149307868827,
+  "f1_macro": 0.3325963718820862,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.23809523809523808,
-      "recall": 0.08620689655172414,
-      "f1": 0.12658227848101267,
+      "precision": 0.4090909090909091,
+      "recall": 0.15517241379310345,
+      "f1": 0.225,
       "support": 58
     },
     "HOLD": {
-      "precision": 0.22807017543859648,
-      "recall": 0.22807017543859648,
-      "f1": 0.22807017543859648,
+      "precision": 0.22916666666666666,
+      "recall": 0.19298245614035087,
+      "f1": 0.20952380952380953,
       "support": 57
     },
     "BUY": {
-      "precision": 0.48175182481751827,
-      "recall": 0.66,
-      "f1": 0.5569620253164557,
-=======
-  "f1_macro": 0.26266526266526263,
-  "per_class_metrics": {
-    "SELL": {
-      "precision": 0.2,
-      "recall": 0.05084745762711865,
-      "f1": 0.08108108108108109,
-      "support": 59
-    },
-    "HOLD": {
-      "precision": 0.21428571428571427,
-      "recall": 0.15789473684210525,
-      "f1": 0.18181818181818182,
-      "support": 57
-    },
-    "BUY": {
-      "precision": 0.4276729559748428,
-      "recall": 0.68,
-      "f1": 0.525096525096525,
->>>>>>> parent of 8123219c (Made the text box cross hair and horizontal line functional)
+      "precision": 0.47586206896551725,
+      "recall": 0.69,
+      "f1": 0.563265306122449,
       "support": 100
     }
   },
-  "train_size": 859,
+  "train_size": 857,
   "test_size": 215,
-  "total_rows_after_features": 1074,
+  "total_rows_after_features": 1072,
   "label_distribution": {
     "0": 295,
-    "1": 328,
+    "1": 326,
     "2": 451
   },
   "confidence_stats": {
-<<<<<<< HEAD
-    "mean_max_proba": 0.594962477684021,
-    "mean_top2_margin": 0.3238871693611145,
-    "f1_macro": 0.30387149307868827
+    "mean_max_proba": 0.5921552181243896,
+    "mean_top2_margin": 0.30498161911964417,
+    "f1_macro": 0.3325963718820862
   },
   "optuna": {
-    "best_value": 0.3168502874673443,
+    "best_value": 0.32968420983752117,
     "best_params": {
-      "n_estimators": 528,
-      "max_depth": 5,
-      "learning_rate": 0.09934613341493478,
-      "subsample": 0.9204309714835684,
-      "colsample_bytree": 0.8767292292082957,
-      "min_child_weight": 14,
-      "reg_lambda": 13.157570795589292,
-      "reg_alpha": 1.3544223665285702,
-      "gamma": 0.40061750912415506
-=======
-    "mean_max_proba": 0.6026799082756042,
-    "mean_top2_margin": 0.34065380692481995,
-    "f1_macro": 0.26266526266526263
-  },
-  "optuna": {
-    "best_value": 0.32664774671652447,
-    "best_params": {
-      "n_estimators": 409,
-      "max_depth": 6,
-      "learning_rate": 0.15265216548324909,
-      "subsample": 0.6048770294918643,
-      "colsample_bytree": 0.8108198786132831,
-      "min_child_weight": 14,
-      "reg_lambda": 9.831837687461285,
-      "reg_alpha": 1.1873167604589758,
-      "gamma": 1.4365679571239096
->>>>>>> parent of 8123219c (Made the text box cross hair and horizontal line functional)
+      "n_estimators": 381,
+      "max_depth": 4,
+      "learning_rate": 0.296173153691593,
+      "subsample": 0.6398836467062221,
+      "colsample_bytree": 0.798846189106161,
+      "min_child_weight": 13,
+      "reg_lambda": 4.946742760745497,
+      "reg_alpha": 1.7508205618084034,
+      "gamma": 1.1063691760330543
     },
     "n_trials": 30,
     "cv_splits": 5,

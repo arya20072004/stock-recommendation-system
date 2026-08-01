@@ -1,91 +1,51 @@
 {
   "ticker": "JSWSTEEL.NS",
-<<<<<<< HEAD
-  "f1_macro": 0.30735166793990326,
+  "f1_macro": 0.28703892629622074,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.075,
-      "recall": 0.08571428571428572,
-      "f1": 0.08,
+      "precision": 0.07692307692307693,
+      "recall": 0.11428571428571428,
+      "f1": 0.09195402298850575,
       "support": 35
     },
     "HOLD": {
-      "precision": 0.47191011235955055,
-      "recall": 0.42857142857142855,
-      "f1": 0.44919786096256686,
+      "precision": 0.43661971830985913,
+      "recall": 0.3163265306122449,
+      "f1": 0.3668639053254438,
       "support": 98
     },
     "BUY": {
-      "precision": 0.38372093023255816,
-      "recall": 0.4024390243902439,
-      "f1": 0.39285714285714285,
-=======
-  "f1_macro": 0.3043142695623862,
-  "per_class_metrics": {
-    "SELL": {
-      "precision": 0.11764705882352941,
-      "recall": 0.16666666666666666,
-      "f1": 0.13793103448275862,
-      "support": 36
-    },
-    "HOLD": {
-      "precision": 0.4625,
-      "recall": 0.37755102040816324,
-      "f1": 0.4157303370786517,
-      "support": 98
-    },
-    "BUY": {
-      "precision": 0.35294117647058826,
-      "recall": 0.36585365853658536,
-      "f1": 0.3592814371257485,
->>>>>>> parent of 8123219c (Made the text box cross hair and horizontal line functional)
+      "precision": 0.3804347826086957,
+      "recall": 0.4268292682926829,
+      "f1": 0.40229885057471265,
       "support": 82
     }
   },
-  "train_size": 859,
+  "train_size": 857,
   "test_size": 215,
-  "total_rows_after_features": 1074,
+  "total_rows_after_features": 1072,
   "label_distribution": {
-    "0": 246,
+    "0": 244,
     "1": 451,
     "2": 377
   },
   "confidence_stats": {
-<<<<<<< HEAD
-    "mean_max_proba": 0.4639461636543274,
-    "mean_top2_margin": 0.1514480710029602,
-    "f1_macro": 0.30735166793990326
+    "mean_max_proba": 0.5569049119949341,
+    "mean_top2_margin": 0.28183871507644653,
+    "f1_macro": 0.28703892629622074
   },
   "optuna": {
-    "best_value": 0.38199685124008426,
+    "best_value": 0.39178393809584827,
     "best_params": {
-      "n_estimators": 363,
+      "n_estimators": 423,
       "max_depth": 7,
-      "learning_rate": 0.040393429929716534,
-      "subsample": 0.8092423992413108,
-      "colsample_bytree": 0.7988341574443409,
-      "min_child_weight": 3,
-      "reg_lambda": 2.170824104331512,
-      "reg_alpha": 3.9261165374354974,
-      "gamma": 2.1385411964478047
-=======
-    "mean_max_proba": 0.496686726808548,
-    "mean_top2_margin": 0.19404739141464233,
-    "f1_macro": 0.3043142695623862
-  },
-  "optuna": {
-    "best_value": 0.4030172312056768,
-    "best_params": {
-      "n_estimators": 591,
-      "max_depth": 4,
-      "learning_rate": 0.034000431380307325,
-      "subsample": 0.9326260583026783,
-      "colsample_bytree": 0.9169236232760459,
+      "learning_rate": 0.059559542848965114,
+      "subsample": 0.7972972493616577,
+      "colsample_bytree": 0.8015897469012118,
       "min_child_weight": 9,
-      "reg_lambda": 10.935705221782504,
-      "reg_alpha": 0.7784954190837011,
-      "gamma": 1.9922968226668791
->>>>>>> parent of 8123219c (Made the text box cross hair and horizontal line functional)
+      "reg_lambda": 10.311114348970806,
+      "reg_alpha": 2.1679146126998985,
+      "gamma": 0.5190534254001544
     },
     "n_trials": 30,
     "cv_splits": 5,

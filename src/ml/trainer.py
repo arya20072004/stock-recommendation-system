@@ -231,6 +231,11 @@ def create_dataset(ticker, client):
         "banknifty_pcr_chg_5d",
         "nifty_futures_basis",
         "nifty_futures_basis_chg_5d",
+        "fii_net_value",
+        "fii_net_chg_5d",
+        "dii_net_value",
+        "dii_net_chg_5d",
+        "fii_dii_divergence",
     ]
 
     # Verify all required columns exist before dropna to give a clear error
@@ -245,6 +250,13 @@ def create_dataset(ticker, client):
 
     df = df.replace([float("inf"), float("-inf")], pd.NA)
     df = df.dropna(subset=required_columns)
+
+    if not df.empty:
+        row_hash = pd.util.hash_pandas_object(df[required_columns], index=True).sum()
+        logger.info(
+            "%s: dataset fingerprint — rows=%d, date_range=[%s, %s], row_hash=%s",
+            ticker, len(df), df.index.min(), df.index.max(), row_hash,
+        )
 
     return df
 
@@ -306,6 +318,11 @@ def _make_feature_list(df):
         "banknifty_pcr_chg_5d",
         "nifty_futures_basis",
         "nifty_futures_basis_chg_5d",
+        "fii_net_value",
+        "fii_net_chg_5d",
+        "dii_net_value",
+        "dii_net_chg_5d",
+        "fii_dii_divergence",
     ]
     return [feature for feature in candidate_features if feature in df.columns]
 
@@ -431,7 +448,7 @@ TICKER_MIN_CHILD_WEIGHT_FLOOR: dict[str, int] = {
 
 # Add near TICKER_HISTORY_OVERRIDE at module level:
 VERY_LOW_CONFIDENCE_TICKERS = {
-    "TITAN.NS",      # HOLD structurally broken, gold/wedding cycle unlearnable at 10d horizon
+    #"TITAN.NS",      # HOLD structurally broken, gold/wedding cycle unlearnable at 10d horizon
     #"TECHM.NS",      # BUY structurally broken across 4+ runs, all interventions failed
     "MARUTI.NS",     # 3yr lookback — thin test set (134 rows), BUY recall persistently near 0
     "NESTLEIND.NS",  # BUY f1=0.00 across 6 consecutive runs — unfixable with current features
@@ -444,7 +461,7 @@ VERY_LOW_CONFIDENCE_TICKERS = {
     "HINDALCO.NS",   # SELL f1=0.08 two consecutive runs; near-random on SELL
     "JSWSTEEL.NS",   # Sub-0.27 two consecutive runs; no recoverable pattern
     "SHRIRAMFIN.NS", # Sub-0.26 three consecutive runs; all classes weak
-    "BEL.NS",        # HOLD/BUY seesawing across 4 consecutive runs — no stable configuration
+    #"BEL.NS",        # HOLD/BUY seesawing across 4 consecutive runs — no stable configuration
     #"ADANIENT.NS",    # BUY f1=0.00 across 3 consecutive runs — unfixable with current features
     "RELIANCE.NS",    # HOLD/BUY persistently weak across 4+ runs, no recoverable pattern
     "TRENT.NS",       # SELL f1=0.12 across 3 consecutive runs; all classes weak
@@ -454,14 +471,14 @@ VERY_LOW_CONFIDENCE_TICKERS = {
     #"NTPC.NS",      # 6+ threshold/SMOTE iterations, no structural convergence
     #"BAJAJ-AUTO.NS",  # 3 consecutive sub-0.33 runs, declining CV scores
     #"LT.NS",        # train/test disconnect confirmed, HOLD structural failure
-    "ASIANPAINT.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    #"ASIANPAINT.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
     "JIOFIN.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
-    'SBIN.NS',  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    #'SBIN.NS',  # 3 consecutive sub-0.30 runs, no recoverable pattern
     #'INFY.NS',  # 3 consecutive sub-0.30 runs, no recoverable pattern
     'TATACONSUM.NS',  # 3 consecutive sub-0.30 runs, no recoverable pattern
     'COALINDIA.NS',  # 3 consecutive sub-0.30 runs, no recoverable pattern
     "HCLTECH.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
-    "BRITANNIA.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
+    #"BRITANNIA.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
     "TCS.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
 }
 
@@ -696,6 +713,11 @@ def train_model(df, ticker):
         "smote_floors_used": smote_floors,
         "threshold_calibration": TICKER_CLASS_THRESHOLDS.get(ticker),  # None if not applied
         "very_low_confidence": ticker in VERY_LOW_CONFIDENCE_TICKERS,
+        "data_fingerprint": {
+            "feature_date_min": str(df.index.min()),
+            "feature_date_max": str(df.index.max()),
+            "row_hash": pd.util.hash_pandas_object(X, index=True).sum(),
+        },
     }
     with open(metrics_filename, "w", encoding="utf-8") as metrics_file:
         json.dump(metrics_payload, metrics_file, indent=2)

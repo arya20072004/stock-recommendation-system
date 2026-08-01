@@ -1,81 +1,51 @@
 {
   "ticker": "TRENT.NS",
-<<<<<<< HEAD
-  "f1_macro": 0.25418612218654557,
+  "f1_macro": 0.2933567242394091,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.5,
-      "recall": 0.03409090909090909,
-      "f1": 0.06382978723404255,
+      "precision": 0.6363636363636364,
+      "recall": 0.07954545454545454,
+      "f1": 0.1414141414141414,
       "support": 88
     },
     "HOLD": {
-      "precision": 0.4032258064516129,
-      "recall": 0.3424657534246575,
-      "f1": 0.37037037037037035,
+      "precision": 0.4375,
+      "recall": 0.3835616438356164,
+      "f1": 0.40875912408759124,
       "support": 73
     },
     "BUY": {
-      "precision": 0.22448979591836735,
-      "recall": 0.6111111111111112,
-      "f1": 0.3283582089552239,
-=======
-  "f1_macro": 0.25229028505877343,
-  "per_class_metrics": {
-    "SELL": {
-      "precision": 0.6,
-      "recall": 0.06818181818181818,
-      "f1": 0.12244897959183673,
-      "support": 88
-    },
-    "HOLD": {
-      "precision": 0.3898305084745763,
-      "recall": 0.3108108108108108,
-      "f1": 0.3458646616541353,
-      "support": 74
-    },
-    "BUY": {
-      "precision": 0.19727891156462585,
-      "recall": 0.5370370370370371,
-      "f1": 0.2885572139303483,
->>>>>>> parent of 8123219c (Made the text box cross hair and horizontal line functional)
+      "precision": 0.22857142857142856,
+      "recall": 0.5925925925925926,
+      "f1": 0.32989690721649484,
       "support": 54
     }
   },
-  "train_size": 859,
+  "train_size": 857,
   "test_size": 215,
-  "total_rows_after_features": 1074,
+  "total_rows_after_features": 1072,
   "label_distribution": {
     "0": 260,
-    "1": 384,
+    "1": 382,
     "2": 430
   },
   "confidence_stats": {
-<<<<<<< HEAD
-    "mean_max_proba": 0.6470233798027039,
-    "mean_top2_margin": 0.36747002601623535,
-    "f1_macro": 0.25418612218654557
+    "mean_max_proba": 0.6079524755477905,
+    "mean_top2_margin": 0.3204488456249237,
+    "f1_macro": 0.2933567242394091
   },
   "optuna": {
-    "best_value": 0.2755667235896543,
-=======
-    "mean_max_proba": 0.6629268527030945,
-    "mean_top2_margin": 0.39901450276374817,
-    "f1_macro": 0.25229028505877343
-  },
-  "optuna": {
-    "best_value": 0.2761020890113143,
->>>>>>> parent of 8123219c (Made the text box cross hair and horizontal line functional)
+    "best_value": 0.27161261595989383,
     "best_params": {
-      "n_estimators": 682,
+      "n_estimators": 214,
       "max_depth": 6,
-      "learning_rate": 0.24420460844911424,
-      "subsample": 0.9579309401710595,
-      "colsample_bytree": 0.8391599915244341,
-      "min_child_weight": 15,
-      "reg_lambda": 3.1504025266749536,
-      "reg_alpha": 1.3819228808861534,
-      "gamma": 0.23115913784056039
+      "learning_rate": 0.1496790487290644,
+      "subsample": 0.7779307122946513,
+      "colsample_bytree": 0.9024562540177273,
+      "min_child_weight": 10,
+      "reg_lambda": 3.161800845280507,
+      "reg_alpha": 1.8346929188482675,
+      "gamma": 0.7728124885569345
     },
     "n_trials": 30,
     "cv_splits": 5,
