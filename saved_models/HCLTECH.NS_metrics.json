@@ -1,51 +1,51 @@
 {
   "ticker": "HCLTECH.NS",
-  "f1_macro": 0.3276638698308635,
+  "f1_macro": 0.35472514716638237,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.25,
-      "recall": 0.08888888888888889,
-      "f1": 0.13114754098360656,
+      "precision": 0.3333333333333333,
+      "recall": 0.17777777777777778,
+      "f1": 0.2318840579710145,
       "support": 45
     },
     "HOLD": {
-      "precision": 0.5792349726775956,
-      "recall": 0.8548387096774194,
-      "f1": 0.6905537459283387,
+      "precision": 0.6037735849056604,
+      "recall": 0.7741935483870968,
+      "f1": 0.6784452296819788,
       "support": 124
     },
     "BUY": {
-      "precision": 0.3125,
-      "recall": 0.10869565217391304,
-      "f1": 0.16129032258064516,
+      "precision": 0.1875,
+      "recall": 0.13043478260869565,
+      "f1": 0.15384615384615385,
       "support": 46
     }
   },
-  "train_size": 857,
+  "train_size": 856,
   "test_size": 215,
-  "total_rows_after_features": 1072,
+  "total_rows_after_features": 1071,
   "label_distribution": {
     "0": 227,
-    "1": 560,
+    "1": 559,
     "2": 285
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5615497827529907,
-    "mean_top2_margin": 0.28503331542015076,
-    "f1_macro": 0.3276638698308635
+    "mean_max_proba": 0.5852957963943481,
+    "mean_top2_margin": 0.31105247139930725,
+    "f1_macro": 0.35472514716638237
   },
   "optuna": {
-    "best_value": 0.30761126776815123,
+    "best_value": 0.3045796857669725,
     "best_params": {
-      "n_estimators": 254,
-      "max_depth": 7,
-      "learning_rate": 0.09592090687102475,
-      "subsample": 0.6614402981271629,
-      "colsample_bytree": 0.62199453940477,
-      "min_child_weight": 8,
-      "reg_lambda": 6.68752279683133,
-      "reg_alpha": 2.4876414080728027,
-      "gamma": 1.4016866464343702
+      "n_estimators": 547,
+      "max_depth": 6,
+      "learning_rate": 0.07119383723194282,
+      "subsample": 0.9157908265277859,
+      "colsample_bytree": 0.8801707863792713,
+      "min_child_weight": 15,
+      "reg_lambda": 2.0539267524506366,
+      "reg_alpha": 1.522125552428954,
+      "gamma": 0.7911026929373586
     },
     "n_trials": 30,
     "cv_splits": 5,
@@ -57,5 +57,10 @@
     "2": 0.5
   },
   "threshold_calibration": null,
-  "very_low_confidence": true
+  "very_low_confidence": true,
+  "data_fingerprint": {
+    "feature_date_min": "2021-09-14 00:00:00",
+    "feature_date_max": "2026-04-30 00:00:00",
+    "row_hash": 2201406069993818714
+  }
 }

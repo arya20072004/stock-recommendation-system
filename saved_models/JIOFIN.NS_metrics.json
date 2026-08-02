@@ -1,51 +1,51 @@
 {
   "ticker": "JIOFIN.NS",
-  "f1_macro": 0.3100324512089218,
+  "f1_macro": 0.2871794871794872,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.4067796610169492,
-      "recall": 0.6,
-      "f1": 0.48484848484848486,
-      "support": 40
+      "precision": 0.75,
+      "recall": 0.11538461538461539,
+      "f1": 0.2,
+      "support": 26
     },
     "HOLD": {
-      "precision": 0.23076923076923078,
-      "recall": 0.057692307692307696,
-      "f1": 0.09230769230769231,
-      "support": 52
+      "precision": 0.2222222222222222,
+      "recall": 0.18181818181818182,
+      "f1": 0.2,
+      "support": 22
     },
     "BUY": {
-      "precision": 0.2727272727272727,
-      "recall": 0.5,
-      "f1": 0.35294117647058826,
-      "support": 24
+      "precision": 0.3076923076923077,
+      "recall": 0.9230769230769231,
+      "f1": 0.46153846153846156,
+      "support": 13
     }
   },
-  "train_size": 461,
-  "test_size": 116,
-  "total_rows_after_features": 577,
+  "train_size": 240,
+  "test_size": 61,
+  "total_rows_after_features": 301,
   "label_distribution": {
-    "0": 164,
-    "1": 221,
-    "2": 192
+    "0": 107,
+    "1": 102,
+    "2": 92
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5523034930229187,
-    "mean_top2_margin": 0.2801625430583954,
-    "f1_macro": 0.3100324512089218
+    "mean_max_proba": 0.7380118370056152,
+    "mean_top2_margin": 0.5712384581565857,
+    "f1_macro": 0.2871794871794872
   },
   "optuna": {
-    "best_value": 0.31286294685340593,
+    "best_value": 0.3094523550160805,
     "best_params": {
-      "n_estimators": 384,
-      "max_depth": 3,
-      "learning_rate": 0.022576407996056758,
-      "subsample": 0.797520127728843,
-      "colsample_bytree": 0.863150830539858,
-      "min_child_weight": 6,
-      "reg_lambda": 3.972393044641391,
-      "reg_alpha": 0.8788206954007186,
-      "gamma": 2.4612745289636497
+      "n_estimators": 123,
+      "max_depth": 5,
+      "learning_rate": 0.09650280014594483,
+      "subsample": 0.9255636166899291,
+      "colsample_bytree": 0.8418758890714245,
+      "min_child_weight": 5,
+      "reg_lambda": 11.075256320070213,
+      "reg_alpha": 0.5522943273239895,
+      "gamma": 0.5043389334680451
     },
     "n_trials": 30,
     "cv_splits": 5,
@@ -57,5 +57,10 @@
     "2": 0.5
   },
   "threshold_calibration": null,
-  "very_low_confidence": true
+  "very_low_confidence": true,
+  "data_fingerprint": {
+    "feature_date_min": "2024-12-09 00:00:00",
+    "feature_date_max": "2026-04-30 00:00:00",
+    "row_hash": 9121803971459887194
+  }
 }

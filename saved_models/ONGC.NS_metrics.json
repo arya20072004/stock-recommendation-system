@@ -1,51 +1,51 @@
 {
   "ticker": "ONGC.NS",
-  "f1_macro": 0.3359972077041727,
+  "f1_macro": 0.3727464414993847,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.18055555555555555,
-      "recall": 0.2765957446808511,
-      "f1": 0.2184873949579832,
+      "precision": 0.23,
+      "recall": 0.48936170212765956,
+      "f1": 0.3129251700680272,
       "support": 47
     },
     "HOLD": {
-      "precision": 0.4375,
-      "recall": 0.2828282828282828,
-      "f1": 0.34355828220858897,
+      "precision": 0.5952380952380952,
+      "recall": 0.25252525252525254,
+      "f1": 0.3546099290780142,
       "support": 99
     },
     "BUY": {
-      "precision": 0.4177215189873418,
-      "recall": 0.4782608695652174,
-      "f1": 0.44594594594594594,
+      "precision": 0.4383561643835616,
+      "recall": 0.463768115942029,
+      "f1": 0.4507042253521127,
       "support": 69
     }
   },
-  "train_size": 857,
+  "train_size": 856,
   "test_size": 215,
-  "total_rows_after_features": 1072,
+  "total_rows_after_features": 1071,
   "label_distribution": {
-    "0": 248,
+    "0": 247,
     "1": 427,
     "2": 397
   },
   "confidence_stats": {
-    "mean_max_proba": 0.42629849910736084,
-    "mean_top2_margin": 0.08349767327308655,
-    "f1_macro": 0.3359972077041727
+    "mean_max_proba": 0.4110810458660126,
+    "mean_top2_margin": 0.0694412887096405,
+    "f1_macro": 0.3727464414993847
   },
   "optuna": {
-    "best_value": 0.3227895220406037,
+    "best_value": 0.32313698235082694,
     "best_params": {
-      "n_estimators": 379,
-      "max_depth": 6,
-      "learning_rate": 0.11273322653216135,
-      "subsample": 0.9326260583026783,
-      "colsample_bytree": 0.8013004308724878,
-      "min_child_weight": 8,
+      "n_estimators": 393,
+      "max_depth": 7,
+      "learning_rate": 0.034000431380307325,
+      "subsample": 0.7091045927632564,
+      "colsample_bytree": 0.851141196865582,
+      "min_child_weight": 4,
       "reg_lambda": 10.849658426818428,
-      "reg_alpha": 4.469756861904766,
-      "gamma": 2.6977144836191704
+      "reg_alpha": 4.9767762282221195,
+      "gamma": 2.9774536943425827
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -61,5 +61,10 @@
     "1": 0.33,
     "2": 0.33
   },
-  "very_low_confidence": false
+  "very_low_confidence": false,
+  "data_fingerprint": {
+    "feature_date_min": "2021-09-14 00:00:00",
+    "feature_date_max": "2026-04-30 00:00:00",
+    "row_hash": 17339251973881129798
+  }
 }

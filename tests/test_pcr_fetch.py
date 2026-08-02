@@ -113,6 +113,21 @@
 #     print(f"{t}: last 10 dates (most recent first) = {dates}")
 
 # client.close()
+# from pymongo import MongoClient
+# import os
+# from dotenv import load_dotenv
+
+# load_dotenv()
+# client = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017/"))
+# db = client["stock_market_db"]
+
+# for underlying in ["NIFTY", "BANKNIFTY"]:
+#     latest = db.pcr_data.find({"underlying": underlying}).sort("date", -1).limit(1)
+#     doc = next(latest, None)
+#     print(f"{underlying} PCR max date = {doc['date'] if doc else 'NO DATA'}")
+
+# client.close()
+
 from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
@@ -121,9 +136,12 @@ load_dotenv()
 client = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017/"))
 db = client["stock_market_db"]
 
-for underlying in ["NIFTY", "BANKNIFTY"]:
-    latest = db.pcr_data.find({"underlying": underlying}).sort("date", -1).limit(1)
-    doc = next(latest, None)
-    print(f"{underlying} PCR max date = {doc['date'] if doc else 'NO DATA'}")
+# Check the two flagged unverified overrides, plus a couple of known-clean ones
+for ticker in ["TMPV.NS", "ETERNAL.NS", "RELIANCE.NS", "ONGC.NS", "M&M.NS", "BAJAJ-AUTO.NS"]:
+    doc = db.pcr_data.find_one(
+        {"ticker": ticker},
+        sort=[("date", -1)]
+    )
+    print(f"{ticker}: {doc}")
 
 client.close()

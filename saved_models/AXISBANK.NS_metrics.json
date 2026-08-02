@@ -1,51 +1,51 @@
 {
   "ticker": "AXISBANK.NS",
-  "f1_macro": 0.4542204216104446,
+  "f1_macro": 0.42051865230673174,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.47368421052631576,
-      "recall": 0.27692307692307694,
-      "f1": 0.34951456310679613,
+      "precision": 0.35294117647058826,
+      "recall": 0.18461538461538463,
+      "f1": 0.24242424242424243,
       "support": 65
     },
     "HOLD": {
-      "precision": 0.48333333333333334,
-      "recall": 0.3918918918918919,
-      "f1": 0.43283582089552236,
+      "precision": 0.45454545454545453,
+      "recall": 0.47297297297297297,
+      "f1": 0.46357615894039733,
       "support": 74
     },
     "BUY": {
-      "precision": 0.47863247863247865,
-      "recall": 0.7368421052631579,
-      "f1": 0.5803108808290155,
+      "precision": 0.4807692307692308,
+      "recall": 0.6578947368421053,
+      "f1": 0.5555555555555556,
       "support": 76
     }
   },
-  "train_size": 857,
+  "train_size": 856,
   "test_size": 215,
-  "total_rows_after_features": 1072,
+  "total_rows_after_features": 1071,
   "label_distribution": {
     "0": 301,
-    "1": 383,
+    "1": 382,
     "2": 388
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6017590761184692,
-    "mean_top2_margin": 0.3252895474433899,
-    "f1_macro": 0.4542204216104446
+    "mean_max_proba": 0.6183414459228516,
+    "mean_top2_margin": 0.35972192883491516,
+    "f1_macro": 0.42051865230673174
   },
   "optuna": {
-    "best_value": 0.32536903551218943,
+    "best_value": 0.3279857695688479,
     "best_params": {
-      "n_estimators": 269,
-      "max_depth": 7,
-      "learning_rate": 0.26323699483913066,
-      "subsample": 0.9393135971089547,
-      "colsample_bytree": 0.823193864696292,
+      "n_estimators": 395,
+      "max_depth": 6,
+      "learning_rate": 0.2032019172395634,
+      "subsample": 0.8619284635133869,
+      "colsample_bytree": 0.8792176203822182,
       "min_child_weight": 5,
-      "reg_lambda": 6.3177923806076395,
-      "reg_alpha": 1.1040813315099296,
-      "gamma": 0.1614044043606404
+      "reg_lambda": 2.848631388241527,
+      "reg_alpha": 0.8835208439435904,
+      "gamma": 0.2795178994587624
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -57,5 +57,10 @@
     "2": 0.5
   },
   "threshold_calibration": null,
-  "very_low_confidence": false
+  "very_low_confidence": false,
+  "data_fingerprint": {
+    "feature_date_min": "2021-09-14 00:00:00",
+    "feature_date_max": "2026-04-30 00:00:00",
+    "row_hash": 10894410860265332474
+  }
 }

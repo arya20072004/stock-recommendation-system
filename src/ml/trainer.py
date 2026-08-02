@@ -73,6 +73,22 @@ optuna.logging.set_verbosity(optuna.logging.WARNING)
 # add_derived_features, add_calendar_features
 
 
+def _to_json_safe(obj):
+    """Recursively convert numpy/pandas-native values to JSON-safe Python types."""
+    if isinstance(obj, dict):
+        return {str(k): _to_json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple, set)):
+        return [_to_json_safe(v) for v in obj]
+    if isinstance(obj, np.ndarray):
+        return [_to_json_safe(v) for v in obj.tolist()]
+    if isinstance(obj, np.generic):
+        return obj.item()
+    if isinstance(obj, (pd.Timestamp, datetime)):
+        return obj.isoformat()
+    if isinstance(obj, pd.Timedelta):
+        return str(obj)
+    return obj
+
 
 def create_dataset(ticker, client):
     """
@@ -231,11 +247,13 @@ def create_dataset(ticker, client):
         "banknifty_pcr_chg_5d",
         "nifty_futures_basis",
         "nifty_futures_basis_chg_5d",
-        "fii_net_value",
-        "fii_net_chg_5d",
-        "dii_net_value",
-        "dii_net_chg_5d",
-        "fii_dii_divergence",
+        # "fii_net_value",
+        # "fii_net_chg_5d",
+        # "dii_net_value",
+        # "dii_net_chg_5d",
+        # "fii_dii_divergence",
+        "stock_pcr_oi",
+        "stock_pcr_chg_5d",
     ]
 
     # Verify all required columns exist before dropna to give a clear error
@@ -318,11 +336,13 @@ def _make_feature_list(df):
         "banknifty_pcr_chg_5d",
         "nifty_futures_basis",
         "nifty_futures_basis_chg_5d",
-        "fii_net_value",
-        "fii_net_chg_5d",
-        "dii_net_value",
-        "dii_net_chg_5d",
-        "fii_dii_divergence",
+        # "fii_net_value",
+        # "fii_net_chg_5d",
+        # "dii_net_value",
+        # "dii_net_chg_5d",
+        # "fii_dii_divergence",
+        "stock_pcr_oi",
+        "stock_pcr_chg_5d",
     ]
     return [feature for feature in candidate_features if feature in df.columns]
 
@@ -719,8 +739,9 @@ def train_model(df, ticker):
             "row_hash": pd.util.hash_pandas_object(X, index=True).sum(),
         },
     }
+    safe_metrics_payload = _to_json_safe(metrics_payload)
     with open(metrics_filename, "w", encoding="utf-8") as metrics_file:
-        json.dump(metrics_payload, metrics_file, indent=2)
+        json.dump(safe_metrics_payload, metrics_file, indent=2)
 
     logger.info("%s: model saved to %s", ticker, model_filename)
     logger.info("%s: features saved to %s", ticker, features_filename)

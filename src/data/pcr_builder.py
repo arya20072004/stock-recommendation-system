@@ -19,6 +19,7 @@ import pandas as pd
 import requests
 from dotenv import load_dotenv
 from pymongo import MongoClient, UpdateOne
+from src.data.nifty50 import TICKERS
 
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
@@ -39,6 +40,54 @@ SESSION.headers.update({
 # Underlyings to track PCR for — index-level only, per_ticker PCR too thin/noisy
 UNDERLYINGS = ["NIFTY", "BANKNIFTY"]
 
+TICKER_TO_FO_SYMBOL_OVERRIDES = {
+    "M&M.NS":        "M&M",
+    "BAJAJ-AUTO.NS": "BAJAJ-AUTO",
+    "TMPV.NS":       "TMPV",   # UNVERIFIED — confirm against live Bhavcopy;
+                                      # F&O symbol may not have migrated post-demerger
+    "ETERNAL.NS":    "ETERNAL",      # UNVERIFIED — confirm rename propagated to F&O
+}
+
+
+def _fo_symbol_for_ticker(ticker: str) -> str:
+    if ticker in TICKER_TO_FO_SYMBOL_OVERRIDES:
+        return TICKER_TO_FO_SYMBOL_OVERRIDES[ticker]
+    return ticker.replace(".NS", "")
+
+
+def _compute_daily_stock_pcr(dt: datetime, df: pd.DataFrame, tickers: list[str]) -> list[dict]:
+    """
+    Computes per-stock OI-based PCR from an already-fetched/normalized
+    Bhavcopy dataframe (reuses the same day's fetch as index-level PCR
+    to avoid a second network round-trip).
+    """
+    records = []
+    for ticker in tickers:
+        fo_symbol = _fo_symbol_for_ticker(ticker)
+
+        opt_rows = df[
+            (df["SYMBOL"] == fo_symbol)
+            & (df["OPTION_TYP"].isin(["CE", "PE"]))
+        ]
+        if opt_rows.empty:
+            continue  # not F&O-enabled, or symbol mismatch — zero-filled downstream
+
+        call_oi = pd.to_numeric(opt_rows.loc[opt_rows["OPTION_TYP"] == "CE", "OPEN_INT"], errors="coerce").sum()
+        put_oi  = pd.to_numeric(opt_rows.loc[opt_rows["OPTION_TYP"] == "PE", "OPEN_INT"], errors="coerce").sum()
+
+        if call_oi <= 0:
+            continue
+
+        records.append({
+            "underlying": fo_symbol,
+            "ticker": ticker,          # stored for traceability back to .NS ticker
+            "date": dt,
+            "call_oi": float(call_oi),
+            "put_oi": float(put_oi),
+            "pcr_oi": float(put_oi / call_oi),
+            "updated_at": datetime.now(timezone.utc),
+        })
+    return records
 
 def _legacy_url(dt: datetime) -> str:
     mon = dt.strftime("%b").upper()
@@ -96,7 +145,7 @@ def _normalize(df: pd.DataFrame, dt: datetime) -> pd.DataFrame:
     return keep
 
 
-def _compute_daily_pcr(dt: datetime) -> list[dict]:
+def _compute_daily_pcr(dt: datetime, stock_tickers: list[str] | None = None) -> list[dict]:
     raw = _fetch_bhavcopy(dt)
     if raw is None or raw.empty:
         return []
@@ -143,6 +192,10 @@ def _compute_daily_pcr(dt: datetime) -> list[dict]:
                         record["nifty_fut_expiry"] = near_month["EXPIRY_DT"].to_pydatetime()
 
         records.append(record)
+
+    if stock_tickers:
+        records.extend(_compute_daily_stock_pcr(dt, df, stock_tickers))
+
     return records
 
 
@@ -158,7 +211,7 @@ def build_pcr_history(client: MongoClient, start_date: datetime = None, end_date
     fetched, skipped = 0, 0
     for i, ts in enumerate(all_dates):
         dt = ts.to_pydatetime()
-        recs = _compute_daily_pcr(dt)
+        recs = _compute_daily_pcr(dt, stock_tickers=TICKERS)
         if not recs:
             skipped += 1
         for rec in recs:
@@ -182,6 +235,11 @@ def build_pcr_history(client: MongoClient, start_date: datetime = None, end_date
 
     db.pcr_data.create_index([("underlying", 1), ("date", 1)], unique=True)
     logger.info("PCR backfill complete: %d records fetched, %d days skipped/holiday", fetched, skipped)
+    logger.warning(
+        "Stock-level PCR uses TICKER_TO_FO_SYMBOL_OVERRIDES for symbol mapping — "
+        "spot-check a sample of tickers against a real Bhavcopy SYMBOL column "
+        "before trusting results, especially TMPV.NS and ETERNAL.NS (unverified overrides)."
+    )
 
 
 if __name__ == "__main__":

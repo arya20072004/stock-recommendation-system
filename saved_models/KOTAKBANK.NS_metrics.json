@@ -1,51 +1,51 @@
 {
   "ticker": "KOTAKBANK.NS",
-  "f1_macro": 0.3246804944479363,
+  "f1_macro": 0.32575402406626036,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2037037037037037,
-      "recall": 0.19642857142857142,
-      "f1": 0.2,
+      "precision": 0.15384615384615385,
+      "recall": 0.14285714285714285,
+      "f1": 0.14814814814814814,
       "support": 56
     },
     "HOLD": {
-      "precision": 0.5466666666666666,
+      "precision": 0.6119402985074627,
       "recall": 0.422680412371134,
-      "f1": 0.47674418604651164,
+      "f1": 0.5,
       "support": 97
     },
     "BUY": {
-      "precision": 0.2558139534883721,
-      "recall": 0.3548387096774194,
-      "f1": 0.2972972972972973,
+      "precision": 0.2708333333333333,
+      "recall": 0.41935483870967744,
+      "f1": 0.3291139240506329,
       "support": 62
     }
   },
-  "train_size": 857,
+  "train_size": 856,
   "test_size": 215,
-  "total_rows_after_features": 1072,
+  "total_rows_after_features": 1071,
   "label_distribution": {
     "0": 295,
     "1": 443,
-    "2": 334
+    "2": 333
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5461599826812744,
-    "mean_top2_margin": 0.24496141076087952,
-    "f1_macro": 0.3246804944479363
+    "mean_max_proba": 0.5142073631286621,
+    "mean_top2_margin": 0.20538605749607086,
+    "f1_macro": 0.32575402406626036
   },
   "optuna": {
-    "best_value": 0.33516040561043575,
+    "best_value": 0.3244548978837311,
     "best_params": {
-      "n_estimators": 228,
+      "n_estimators": 217,
       "max_depth": 3,
-      "learning_rate": 0.23232342261518463,
-      "subsample": 0.9132748380495701,
-      "colsample_bytree": 0.8859604537657414,
+      "learning_rate": 0.04641865443051567,
+      "subsample": 0.9346877191587385,
+      "colsample_bytree": 0.6706525345468757,
       "min_child_weight": 5,
-      "reg_lambda": 4.206417433052021,
-      "reg_alpha": 3.4872448767713946,
-      "gamma": 0.6188101809000701
+      "reg_lambda": 9.619121146935528,
+      "reg_alpha": 1.8722902333280058,
+      "gamma": 0.38195291969180895
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -61,5 +61,10 @@
     "1": 0.38,
     "2": 0.28
   },
-  "very_low_confidence": false
+  "very_low_confidence": false,
+  "data_fingerprint": {
+    "feature_date_min": "2021-09-14 00:00:00",
+    "feature_date_max": "2026-04-30 00:00:00",
+    "row_hash": 5476839960927156988
+  }
 }

@@ -1,51 +1,51 @@
 {
   "ticker": "HDFCBANK.NS",
-  "f1_macro": 0.3487913243320131,
+  "f1_macro": 0.38878436312656195,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.4482758620689655,
-      "recall": 0.29545454545454547,
-      "f1": 0.3561643835616438,
-      "support": 44
+      "precision": 0.3611111111111111,
+      "recall": 0.3023255813953488,
+      "f1": 0.3291139240506329,
+      "support": 43
     },
     "HOLD": {
-      "precision": 0.4186046511627907,
-      "recall": 0.4186046511627907,
-      "f1": 0.4186046511627907,
+      "precision": 0.4782608695652174,
+      "recall": 0.5116279069767442,
+      "f1": 0.4943820224719101,
       "support": 43
     },
     "BUY": {
-      "precision": 0.22916666666666666,
-      "recall": 0.3333333333333333,
-      "f1": 0.2716049382716049,
+      "precision": 0.32432432432432434,
+      "recall": 0.36363636363636365,
+      "f1": 0.34285714285714286,
       "support": 33
     }
   },
-  "train_size": 476,
-  "test_size": 120,
-  "total_rows_after_features": 596,
+  "train_size": 475,
+  "test_size": 119,
+  "total_rows_after_features": 594,
   "label_distribution": {
-    "0": 166,
-    "1": 223,
+    "0": 165,
+    "1": 222,
     "2": 207
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6230718493461609,
-    "mean_top2_margin": 0.35449525713920593,
-    "f1_macro": 0.3487913243320131
+    "mean_max_proba": 0.5831776857376099,
+    "mean_top2_margin": 0.29508176445961,
+    "f1_macro": 0.38878436312656195
   },
   "optuna": {
-    "best_value": 0.3981946393475927,
+    "best_value": 0.36870407728962384,
     "best_params": {
-      "n_estimators": 639,
-      "max_depth": 6,
-      "learning_rate": 0.25388676067369353,
-      "subsample": 0.672494563007906,
-      "colsample_bytree": 0.9291238295485579,
-      "min_child_weight": 13,
-      "reg_lambda": 11.04390434265747,
-      "reg_alpha": 1.0895002280971,
-      "gamma": 0.7919683149728125
+      "n_estimators": 656,
+      "max_depth": 7,
+      "learning_rate": 0.14285368142311106,
+      "subsample": 0.8035476374668177,
+      "colsample_bytree": 0.9984086893591239,
+      "min_child_weight": 8,
+      "reg_lambda": 14.471148641732235,
+      "reg_alpha": 3.1583773423774693,
+      "gamma": 0.255376848084906
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -57,5 +57,10 @@
     "2": 0.5
   },
   "threshold_calibration": null,
-  "very_low_confidence": false
+  "very_low_confidence": false,
+  "data_fingerprint": {
+    "feature_date_min": "2023-09-12 00:00:00",
+    "feature_date_max": "2026-04-30 00:00:00",
+    "row_hash": 6619310206652018607
+  }
 }

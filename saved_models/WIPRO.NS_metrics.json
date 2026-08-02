@@ -1,51 +1,51 @@
 {
   "ticker": "WIPRO.NS",
-  "f1_macro": 0.30236818800430293,
+  "f1_macro": 0.3181115126637814,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.19148936170212766,
-      "recall": 0.23684210526315788,
-      "f1": 0.21176470588235294,
+      "precision": 0.18181818181818182,
+      "recall": 0.2631578947368421,
+      "f1": 0.21505376344086022,
       "support": 38
     },
     "HOLD": {
-      "precision": 0.5379310344827586,
-      "recall": 0.6842105263157895,
-      "f1": 0.6023166023166023,
+      "precision": 0.5433070866141733,
+      "recall": 0.6052631578947368,
+      "f1": 0.5726141078838174,
       "support": 114
     },
     "BUY": {
-      "precision": 0.17391304347826086,
-      "recall": 0.06349206349206349,
-      "f1": 0.09302325581395349,
+      "precision": 0.24242424242424243,
+      "recall": 0.12698412698412698,
+      "f1": 0.16666666666666666,
       "support": 63
     }
   },
-  "train_size": 857,
+  "train_size": 856,
   "test_size": 215,
-  "total_rows_after_features": 1072,
+  "total_rows_after_features": 1071,
   "label_distribution": {
     "0": 254,
     "1": 545,
-    "2": 273
+    "2": 272
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5513479113578796,
-    "mean_top2_margin": 0.24888171255588531,
-    "f1_macro": 0.30236818800430293
+    "mean_max_proba": 0.5743399262428284,
+    "mean_top2_margin": 0.2846948206424713,
+    "f1_macro": 0.3181115126637814
   },
   "optuna": {
-    "best_value": 0.32116609332969287,
+    "best_value": 0.34269813290808293,
     "best_params": {
-      "n_estimators": 156,
-      "max_depth": 7,
-      "learning_rate": 0.11187588504212766,
-      "subsample": 0.7864054108954167,
-      "colsample_bytree": 0.6018960478612357,
-      "min_child_weight": 6,
-      "reg_lambda": 11.144959108845434,
-      "reg_alpha": 3.52972305844097,
-      "gamma": 0.10850637228560399
+      "n_estimators": 455,
+      "max_depth": 6,
+      "learning_rate": 0.12945252758379472,
+      "subsample": 0.8059779177330688,
+      "colsample_bytree": 0.9953801626160367,
+      "min_child_weight": 5,
+      "reg_lambda": 10.545983886665093,
+      "reg_alpha": 1.3991347251842803,
+      "gamma": 0.45731542209243675
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -57,5 +57,10 @@
     "2": 0.5
   },
   "threshold_calibration": null,
-  "very_low_confidence": false
+  "very_low_confidence": false,
+  "data_fingerprint": {
+    "feature_date_min": "2021-09-14 00:00:00",
+    "feature_date_max": "2026-04-30 00:00:00",
+    "row_hash": 6242929701255974581
+  }
 }

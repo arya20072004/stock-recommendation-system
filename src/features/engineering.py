@@ -525,6 +525,41 @@ def _prepare_macro_data(start_date, end_date, client):
     macro = macro.shift(1)
     return macro
 
+def _prepare_stock_pcr_data(ticker, client, start_date, end_date):
+    """
+    Fetches per-ticker stock-level options PCR from pcr_data collection
+    (populated by pcr_builder.py's _compute_daily_stock_pcr). Distinct
+    from the index-level NIFTY/BANKNIFTY PCR in _prepare_macro_data —
+    this is joined per-ticker, not market-wide, same architectural
+    pattern as _prepare_sector_data.
+
+    Returns empty DataFrame if the ticker has no F&O options data
+    (not all Nifty 50 constituents are F&O-enabled, and some symbol
+    mappings in TICKER_TO_FO_SYMBOL_OVERRIDES may be incomplete/wrong —
+    zero-filled downstream like any other missing-data case).
+    """
+    db = client["stock_market_db"]
+    docs = list(db.pcr_data.find(
+        {"ticker": ticker, "date": {"$gte": start_date, "$lte": end_date}},
+        {"date": 1, "pcr_oi": 1, "_id": 0}
+    ))
+    if not docs:
+        logger.info("%s: no stock-level PCR data found — stock_pcr features will be zeroed", ticker)
+        return pd.DataFrame()
+
+    pcr_df = pd.DataFrame(docs)
+    pcr_df["date"] = pd.to_datetime(pcr_df["date"]).dt.tz_localize(None)
+    pcr_df.set_index("date", inplace=True)
+    pcr_df.sort_index(inplace=True)
+
+    result = pd.DataFrame(index=pcr_df.index)
+    result["stock_pcr_oi"] = pcr_df["pcr_oi"]
+    result["stock_pcr_chg_5d"] = pcr_df["pcr_oi"].diff(5)
+
+    # Shift by 1 day — same leakage-safety convention as every other
+    # macro/PCR column (day T's PCR is only known after market close T).
+    result = result.shift(1)
+    return result
 
 def _prepare_sentiment_data(news_docs):
     news_df = pd.DataFrame(news_docs)
@@ -853,6 +888,14 @@ def add_derived_features(df, ticker, client):
     df["relative_volume"] = (
         df["volume"] / vol_sma_20.replace(0, pd.NA)
     ).shift(1)
+
+    stock_pcr_df = _prepare_stock_pcr_data(ticker, client, df.index.min(), df.index.max())
+    if not stock_pcr_df.empty:
+        df = df.join(stock_pcr_df, how="left")
+        logger.info("%s: stock-level PCR joined (%d rows with data)", ticker, stock_pcr_df["stock_pcr_oi"].notna().sum())
+    else:
+        df["stock_pcr_oi"] = 0.0
+        df["stock_pcr_chg_5d"] = 0.0
 
     # HL compression — today's high-low range vs. 20-day average range.
     daily_range = df["high"] - df["low"]
