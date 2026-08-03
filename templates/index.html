@@ -414,8 +414,9 @@
                 legendEl.innerHTML = '';
                 return;
             }
-            const chg = data.close - data.open;
-            const chgPct = data.open !== 0 ? (chg / data.open) * 100 : 0;
+            const prevClose = data.prevClose !== undefined ? data.prevClose : data.open;
+            const chg = data.close - prevClose;
+            const chgPct = prevClose !== 0 ? (chg / prevClose) * 100 : 0;
             const valClass = chg >= 0 ? 'up' : 'down';
             const sign = chg >= 0 ? '+' : '';
             
@@ -477,7 +478,8 @@
     /* ── Render Right Panel ────────────────────────────── */
     function renderPanel(data, latest){
         const close = latest.close;
-        const change = ((latest.close - latest.open)/latest.open*100);
+        const prevClose = latest.prevClose !== undefined ? latest.prevClose : latest.open;
+        const change = ((latest.close - prevClose)/prevClose*100);
         const up = change >= 0;
         const arrow = up ? '▲' : '▼';
         const chClass = up ? 'up' : 'down';
@@ -552,7 +554,11 @@
                 volume: parseFloat(d.volume) || 0
             }))
             .filter(d => d.time)
-            .sort((a, b) => a.time.localeCompare(b.time));
+            .sort((a, b) => a.time.localeCompare(b.time))
+            .map((d, i, arr) => {
+                d.prevClose = i > 0 ? arr[i-1].close : d.open;
+                return d;
+            });
 
         candleSeries.setData(formattedData);
 

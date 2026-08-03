@@ -192,6 +192,8 @@ def get_stock_data(ticker):
         # Drop rows with missing crucial price data so frontend doesn't calculate with nulls
         chart_df = chart_df.dropna(subset=['close', 'open'])
         
+        chart_df['prev_close'] = chart_df['close'].shift(1).fillna(chart_df['open'])
+        
         chart_data_list = [
             {
                 'time': row['date'].strftime('%Y-%m-%d'),
@@ -199,6 +201,7 @@ def get_stock_data(ticker):
                 'high': row.get('high') if pd.notna(row.get('high')) else row['open'],
                 'low': row.get('low') if pd.notna(row.get('low')) else row['open'],
                 'close': row['close'],
+                'prev_close': row['prev_close'],
                 'volume': row.get('volume', 0) if pd.notna(row.get('volume', 0)) else 0
             } for _, row in chart_df.iterrows()
         ]
@@ -248,8 +251,11 @@ def get_portfolio():
             
             if len(latest_docs) >= 1:
                 last_close = latest_docs[0].get('close', 0)
-                last_open = latest_docs[0].get('open', last_close)
-                day_change_pct = round(((last_close - last_open) / last_open) * 100, 2) if last_open else 0
+                if len(latest_docs) >= 2:
+                    prev_close = latest_docs[1].get('close', latest_docs[0].get('open', last_close))
+                else:
+                    prev_close = latest_docs[0].get('open', last_close)
+                day_change_pct = round(((last_close - prev_close) / prev_close) * 100, 2) if prev_close else 0
             else:
                 last_close = 0
                 day_change_pct = 0

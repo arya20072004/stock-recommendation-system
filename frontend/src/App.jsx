@@ -1,99 +1,77 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from './theme/ThemeContext';
-import { ThemeToggle } from './components/ThemeToggle';
-import { Dashboard } from './pages/Dashboard';
-import { Portfolio } from './pages/Portfolio';
-import { Activity, LayoutDashboard } from 'lucide-react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { AppLayout } from './components/layout/AppLayout'
+import { NotFoundPage, PlaceholderPage } from './pages/PlaceholderPage'
 
-// Create a client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
+const pages = {
+  dashboard: {
+    title: 'Dashboard',
+    description: 'Market and recommendation intelligence will be implemented in a later phase.',
   },
-});
-
-const NavLink = ({ to, icon, label }) => {
-  const location = useLocation();
-  const isActive = location.pathname === to;
-  
-  return (
-    <Link 
-      to={to} 
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-        padding: '0.5rem 1rem',
-        borderRadius: '0.5rem',
-        color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-        backgroundColor: isActive ? 'var(--bg-hover)' : 'transparent',
-        textDecoration: 'none',
-        fontWeight: isActive ? 600 : 500,
-        transition: 'background-color 0.2s',
-      }}
-    >
-      {icon}
-      <span>{label}</span>
-    </Link>
-  );
-};
-
-const Layout = ({ children }) => {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
-      <header style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-card)' }}>
-        <div className="flex items-center justify-between" style={{ padding: '0.75rem 1.5rem' }}>
-          <div className="flex items-center gap-6">
-            <Link to="/" style={{ textDecoration: 'none', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ 
-                width: '32px', 
-                height: '32px', 
-                backgroundColor: 'var(--accent-blue)', 
-                borderRadius: '0.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white'
-              }}>
-                <Activity size={20} />
-              </div>
-              <span style={{ fontWeight: 700, fontSize: '1.25rem', letterSpacing: '-0.025em' }}>QuantSignal</span>
-            </Link>
-            <nav className="flex items-center gap-2" style={{ marginLeft: '2rem' }}>
-              <NavLink to="/" icon={<Activity size={18} />} label="Terminal" />
-              <NavLink to="/portfolio" icon={<LayoutDashboard size={18} />} label="Portfolio" />
-            </nav>
-          </div>
-          <ThemeToggle />
-        </div>
-      </header>
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {children}
-      </main>
-    </div>
-  );
-};
-
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <BrowserRouter>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/portfolio" element={<Portfolio />} />
-            </Routes>
-          </Layout>
-        </BrowserRouter>
-      </ThemeProvider>
-    </QueryClientProvider>
-  );
+  stocks: {
+    title: 'Stocks',
+    description: 'Stock discovery will be implemented in a later phase.',
+  },
+  stockDetails: {
+    title: 'Stock details',
+    description: 'Stock analysis will be implemented in a later phase.',
+  },
+  screener: {
+    title: 'Screener',
+    description: 'Stock screening will be implemented in a later phase.',
+  },
+  watchlist: {
+    title: 'Watchlist',
+    description: 'Watchlist management will be implemented in a later phase.',
+  },
+  recommendations: {
+    title: 'Recommendations',
+    description: 'Recommendation intelligence will be implemented in a later phase.',
+  },
+  news: {
+    title: 'News Intelligence',
+    description: 'News and sentiment intelligence will be implemented in a later phase.',
+  },
+  history: {
+    title: 'Prediction History',
+    description: 'Historical model performance will be implemented in a later phase.',
+  },
+  model: {
+    title: 'Model Intelligence',
+    description: 'Model transparency will be implemented in a later phase.',
+  },
+  portfolio: {
+    title: 'Portfolio',
+    description: 'Portfolio functionality will be implemented in a later phase.',
+  },
+  settings: {
+    title: 'Settings',
+    description: 'Application settings will be implemented in a later phase.',
+  },
 }
 
-export default App;
+const placeholder = (page) => <PlaceholderPage {...page} />
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route path="/dashboard" element={placeholder(pages.dashboard)} />
+          <Route path="/stocks" element={placeholder(pages.stocks)} />
+          <Route path="/stocks/:ticker" element={placeholder(pages.stockDetails)} />
+          <Route path="/screener" element={placeholder(pages.screener)} />
+          <Route path="/watchlist" element={placeholder(pages.watchlist)} />
+          <Route path="/recommendations" element={placeholder(pages.recommendations)} />
+          <Route path="/news" element={placeholder(pages.news)} />
+          <Route path="/predictions/history" element={placeholder(pages.history)} />
+          <Route path="/model" element={placeholder(pages.model)} />
+          <Route path="/portfolio" element={placeholder(pages.portfolio)} />
+          <Route path="/settings" element={placeholder(pages.settings)} />
+          <Route path="/not-found" element={<NotFoundPage />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/not-found" replace />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  )
+}
