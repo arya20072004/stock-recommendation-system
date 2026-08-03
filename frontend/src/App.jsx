@@ -1,16 +1,14 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
 import { Dashboard } from './pages/Dashboard'
+import { Recommendations } from './pages/Recommendations'
+import { StockDetails } from './pages/StockDetails'
 import { NotFoundPage, PlaceholderPage } from './pages/PlaceholderPage'
 
 const pages = {
   stocks: {
     title: 'Stocks',
     description: 'Stock discovery will be implemented in a later phase.',
-  },
-  stockDetails: {
-    title: 'Stock details',
-    description: 'Stock analysis will be implemented in a later phase.',
   },
   screener: {
     title: 'Screener',
@@ -19,10 +17,6 @@ const pages = {
   watchlist: {
     title: 'Watchlist',
     description: 'Watchlist management will be implemented in a later phase.',
-  },
-  recommendations: {
-    title: 'Recommendations',
-    description: 'Recommendation intelligence will be implemented in a later phase.',
   },
   news: {
     title: 'News Intelligence',
@@ -55,10 +49,10 @@ export default function App() {
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/stocks" element={placeholder(pages.stocks)} />
-          <Route path="/stocks/:ticker" element={placeholder(pages.stockDetails)} />
+          <Route path="/stocks/:ticker" element={<StockDetails />} />
           <Route path="/screener" element={placeholder(pages.screener)} />
           <Route path="/watchlist" element={placeholder(pages.watchlist)} />
-          <Route path="/recommendations" element={placeholder(pages.recommendations)} />
+          <Route path="/recommendations" element={<Recommendations />} />
           <Route path="/news" element={placeholder(pages.news)} />
           <Route path="/predictions/history" element={placeholder(pages.history)} />
           <Route path="/model" element={placeholder(pages.model)} />
@@ -72,3 +66,4 @@ export default function App() {
     </BrowserRouter>
   )
 }
+

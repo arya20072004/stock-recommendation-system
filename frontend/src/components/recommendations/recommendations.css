@@ -7,3 +7,12 @@
 .confidence-bar__fill--positive { background: var(--positive); }
 .confidence-bar__fill--warning { background: var(--warning); }
 .confidence-bar__fill--negative { background: var(--negative); }
+.confidence-bar--compact { display: flex; align-items: center; gap: var(--space-2); }
+.confidence-bar--compact .confidence-bar__track { flex: 1; }
+.confidence-bar__value { color: var(--text-primary); font-size: var(--text-xs); white-space: nowrap; }
+.risk-badge { letter-spacing: 0.06em; font-size: 0.6875rem; }
+.explanation-card { padding: var(--space-4); }
+.explanation-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.explanation-list li { display: flex; align-items: flex-start; gap: var(--space-3); color: var(--text-secondary); font-size: var(--text-sm); line-height: 1.5; }
+.explanation-list li svg { flex: 0 0 auto; color: var(--positive); margin-top: 0.15rem; }
+
