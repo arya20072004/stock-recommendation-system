@@ -1,12 +1,9 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
+import { Dashboard } from './pages/Dashboard'
 import { NotFoundPage, PlaceholderPage } from './pages/PlaceholderPage'
 
 const pages = {
-  dashboard: {
-    title: 'Dashboard',
-    description: 'Market and recommendation intelligence will be implemented in a later phase.',
-  },
   stocks: {
     title: 'Stocks',
     description: 'Stock discovery will be implemented in a later phase.',
@@ -56,7 +53,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<AppLayout />}>
-          <Route path="/dashboard" element={placeholder(pages.dashboard)} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/stocks" element={placeholder(pages.stocks)} />
           <Route path="/stocks/:ticker" element={placeholder(pages.stockDetails)} />
           <Route path="/screener" element={placeholder(pages.screener)} />

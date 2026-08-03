@@ -1,0 +1,9 @@
+.recommendation-badge { letter-spacing: 0.06em; }
+.confidence-bar { display: grid; gap: var(--space-2); }
+.confidence-bar__heading { display: flex; align-items: center; justify-content: space-between; color: var(--text-secondary); font-size: var(--text-sm); }
+.confidence-bar__heading strong { color: var(--text-primary); font-size: var(--text-base); }
+.confidence-bar__track { height: 0.38rem; overflow: hidden; background: var(--surface-secondary); border-radius: 999px; }
+.confidence-bar__fill { display: block; height: 100%; border-radius: inherit; }
+.confidence-bar__fill--positive { background: var(--positive); }
+.confidence-bar__fill--warning { background: var(--warning); }
+.confidence-bar__fill--negative { background: var(--negative); }
