@@ -173,3 +173,20 @@ export function getStockNews(ticker) {
 export function getSectors() {
   return [...new Set(stocks.map(s => s.sector))].sort()
 }
+
+/** All tracked stocks (summary objects for Stocks/Screener pages) */
+export function getAllStocks() {
+  return stocks.map(({ ticker, symbol, companyName, exchange, sector, currentPrice, priceChange, priceChangePercent, signal, confidence, targetPrice, expectedReturn, risk }) => ({
+    ticker, symbol, companyName, exchange, sector, currentPrice, priceChange, priceChangePercent, signal, confidence, targetPrice, expectedReturn, risk,
+  }))
+}
+
+/** Unique signal values present in mock data */
+export function getSignals() {
+  return [...new Set(stocks.map(s => s.signal))]
+}
+
+/** Unique risk levels present in mock data */
+export function getRiskLevels() {
+  return [...new Set(stocks.map(s => s.risk))]
+}

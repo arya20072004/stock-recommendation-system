@@ -2,22 +2,13 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
 import { Dashboard } from './pages/Dashboard'
 import { Recommendations } from './pages/Recommendations'
+import { Screener } from './pages/Screener'
 import { StockDetails } from './pages/StockDetails'
+import { Stocks } from './pages/Stocks'
+import { Watchlist } from './pages/Watchlist'
 import { NotFoundPage, PlaceholderPage } from './pages/PlaceholderPage'
 
 const pages = {
-  stocks: {
-    title: 'Stocks',
-    description: 'Stock discovery will be implemented in a later phase.',
-  },
-  screener: {
-    title: 'Screener',
-    description: 'Stock screening will be implemented in a later phase.',
-  },
-  watchlist: {
-    title: 'Watchlist',
-    description: 'Watchlist management will be implemented in a later phase.',
-  },
   news: {
     title: 'News Intelligence',
     description: 'News and sentiment intelligence will be implemented in a later phase.',
@@ -48,10 +39,10 @@ export default function App() {
       <Routes>
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/stocks" element={placeholder(pages.stocks)} />
+          <Route path="/stocks" element={<Stocks />} />
           <Route path="/stocks/:ticker" element={<StockDetails />} />
-          <Route path="/screener" element={placeholder(pages.screener)} />
-          <Route path="/watchlist" element={placeholder(pages.watchlist)} />
+          <Route path="/screener" element={<Screener />} />
+          <Route path="/watchlist" element={<Watchlist />} />
           <Route path="/recommendations" element={<Recommendations />} />
           <Route path="/news" element={placeholder(pages.news)} />
           <Route path="/predictions/history" element={placeholder(pages.history)} />

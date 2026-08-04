@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowDownRight, ArrowLeft, ArrowUpRight, ChevronRight, Star } from 'lucide-react'
 import { Badge } from '../components/common/Badge'
 import { Button } from '../components/common/Button'
@@ -12,6 +12,7 @@ import { RecommendationExplanation } from '../components/recommendations/Recomme
 import { RiskBadge } from '../components/recommendations/RiskBadge'
 import { SentimentBadge } from '../components/news/SentimentBadge'
 import { TechnicalIndicators } from '../components/stocks/TechnicalIndicators'
+import { useWatchlist } from '../context/WatchlistContext'
 import { getStockDetail, getStockNews } from '../mocks/stocks'
 import { directionForValue, formatCurrency, formatPercent } from '../utils/formatters'
 import './stock-details.css'
@@ -22,15 +23,27 @@ const signalTones = { BUY: 'positive', 'STRONG BUY': 'positive', HOLD: 'warning'
 
 export function StockDetails() {
   const { ticker } = useParams()
+  const navigate = useNavigate()
   const decodedTicker = decodeURIComponent(ticker)
   const stock = getStockDetail(decodedTicker)
   const news = stock ? getStockNews(decodedTicker) : []
+  const { isInWatchlist, toggleWatchlist } = useWatchlist()
+  const saved = stock ? isInWatchlist(stock.ticker) : false
+
+  const goBack = () => {
+    // Use browser history if available, otherwise fall back to /stocks
+    if (window.history.length > 1) {
+      navigate(-1)
+    } else {
+      navigate('/stocks')
+    }
+  }
 
   if (!stock) {
     return (
       <div className="stock-details">
-        <Link to="/recommendations" className="back-link"><ArrowLeft size={16} aria-hidden="true" />Back to Recommendations</Link>
-        <EmptyState title="Stock not found" description={`No demo stock data exists for "${decodedTicker}".`} action={{ label: 'Browse recommendations', onClick: () => window.history.back() }} />
+        <button className="back-link" onClick={goBack}><ArrowLeft size={16} aria-hidden="true" />Back</button>
+        <EmptyState title="Stock not found" description={`No demo stock data exists for "${decodedTicker}".`} action={{ label: 'Browse stocks', onClick: () => navigate('/stocks') }} />
       </div>
     )
   }
@@ -40,7 +53,7 @@ export function StockDetails() {
 
   return (
     <div className="stock-details">
-      <Link to="/recommendations" className="back-link"><ArrowLeft size={16} aria-hidden="true" />Back to Recommendations</Link>
+      <button className="back-link" onClick={goBack}><ArrowLeft size={16} aria-hidden="true" />Back</button>
 
       {/* ── Stock Header ── */}
       <header className="stock-header">
@@ -59,7 +72,9 @@ export function StockDetails() {
               {stock.priceChange > 0 ? '+' : ''}{formatCurrency(stock.priceChange).replace('₹', '₹')} ({formatPercent(stock.priceChangePercent)}) Today
             </span>
           </div>
-          <Button variant="secondary" className="watchlist-button"><Star size={16} aria-hidden="true" />Add to Watchlist</Button>
+          <Button variant="secondary" className={`watchlist-button ${saved ? 'watchlist-button--saved' : ''}`} onClick={() => toggleWatchlist(stock.ticker)} aria-pressed={saved}>
+            <Star size={16} aria-hidden="true" fill={saved ? 'currentColor' : 'none'} />{saved ? 'In Watchlist' : 'Add to Watchlist'}
+          </Button>
         </div>
       </header>
 
@@ -129,3 +144,4 @@ export function StockDetails() {
     </div>
   )
 }
+
