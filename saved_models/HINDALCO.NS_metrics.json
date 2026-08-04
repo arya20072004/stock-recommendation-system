@@ -1,51 +1,51 @@
 {
   "ticker": "HINDALCO.NS",
-  "f1_macro": 0.37738383210081317,
+  "f1_macro": 0.3322704239278211,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.20833333333333334,
-      "recall": 0.3333333333333333,
-      "f1": 0.2564102564102564,
+      "precision": 0.14035087719298245,
+      "recall": 0.26666666666666666,
+      "f1": 0.1839080459770115,
       "support": 30
     },
     "HOLD": {
       "precision": 0.3333333333333333,
-      "recall": 0.323943661971831,
-      "f1": 0.32857142857142857,
+      "recall": 0.39436619718309857,
+      "f1": 0.36129032258064514,
       "support": 71
     },
     "BUY": {
-      "precision": 0.5918367346938775,
-      "recall": 0.5087719298245614,
-      "f1": 0.5471698113207547,
-      "support": 114
+      "precision": 0.5753424657534246,
+      "recall": 0.37168141592920356,
+      "f1": 0.45161290322580644,
+      "support": 113
     }
   },
   "train_size": 856,
-  "test_size": 215,
-  "total_rows_after_features": 1071,
+  "test_size": 214,
+  "total_rows_after_features": 1070,
   "label_distribution": {
     "0": 275,
-    "1": 353,
+    "1": 352,
     "2": 443
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6025580763816833,
-    "mean_top2_margin": 0.3288799226284027,
-    "f1_macro": 0.37738383210081317
+    "mean_max_proba": 0.5664236545562744,
+    "mean_top2_margin": 0.2793620824813843,
+    "f1_macro": 0.3322704239278211
   },
   "optuna": {
-    "best_value": 0.33189121842803354,
+    "best_value": 0.33503739288323164,
     "best_params": {
-      "n_estimators": 495,
-      "max_depth": 5,
-      "learning_rate": 0.2334804902790474,
-      "subsample": 0.6444012880678767,
-      "colsample_bytree": 0.6386328169639126,
-      "min_child_weight": 10,
-      "reg_lambda": 10.210585243848232,
-      "reg_alpha": 1.2988133261251154,
-      "gamma": 0.33038233791769145
+      "n_estimators": 171,
+      "max_depth": 6,
+      "learning_rate": 0.13297554090738672,
+      "subsample": 0.8245108790277985,
+      "colsample_bytree": 0.9083868719818244,
+      "min_child_weight": 9,
+      "reg_lambda": 8.795526781965922,
+      "reg_alpha": 2.423934582613473,
+      "gamma": 0.17371546755787604
     },
     "n_trials": 30,
     "cv_splits": 5,
@@ -59,8 +59,8 @@
   "threshold_calibration": null,
   "very_low_confidence": true,
   "data_fingerprint": {
-    "feature_date_min": "2021-09-14 00:00:00",
+    "feature_date_min": "2021-09-15 00:00:00",
     "feature_date_max": "2026-04-30 00:00:00",
-    "row_hash": 15655212685355968685
+    "row_hash": 14680358592264510453
   }
 }

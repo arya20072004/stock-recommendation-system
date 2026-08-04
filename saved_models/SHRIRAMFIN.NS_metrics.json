@@ -1,23 +1,23 @@
 {
   "ticker": "SHRIRAMFIN.NS",
-  "f1_macro": 0.23428536057453578,
+  "f1_macro": 0.27387523507497497,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.1951219512195122,
-      "recall": 0.43243243243243246,
-      "f1": 0.2689075630252101,
+      "precision": 0.23333333333333334,
+      "recall": 0.3783783783783784,
+      "f1": 0.28865979381443296,
       "support": 37
     },
     "HOLD": {
-      "precision": 0.14705882352941177,
-      "recall": 0.13513513513513514,
-      "f1": 0.14084507042253522,
+      "precision": 0.11764705882352941,
+      "recall": 0.10810810810810811,
+      "f1": 0.11267605633802817,
       "support": 37
     },
     "BUY": {
-      "precision": 0.4594594594594595,
-      "recall": 0.21518987341772153,
-      "f1": 0.29310344827586204,
+      "precision": 0.4915254237288136,
+      "recall": 0.3670886075949367,
+      "f1": 0.42028985507246375,
       "support": 79
     }
   },
@@ -30,22 +30,22 @@
     "2": 343
   },
   "confidence_stats": {
-    "mean_max_proba": 0.4948354959487915,
-    "mean_top2_margin": 0.19518554210662842,
-    "f1_macro": 0.23428536057453578
+    "mean_max_proba": 0.5190629959106445,
+    "mean_top2_margin": 0.2190653532743454,
+    "f1_macro": 0.27387523507497497
   },
   "optuna": {
-    "best_value": 0.3200028820521958,
+    "best_value": 0.3071693894270623,
     "best_params": {
-      "n_estimators": 425,
-      "max_depth": 5,
-      "learning_rate": 0.1614041255299027,
-      "subsample": 0.6054040621843348,
-      "colsample_bytree": 0.6397213697724285,
-      "min_child_weight": 6,
-      "reg_lambda": 3.552329429068968,
-      "reg_alpha": 3.7761142440497273,
-      "gamma": 1.214051134722753
+      "n_estimators": 480,
+      "max_depth": 4,
+      "learning_rate": 0.06194942014087477,
+      "subsample": 0.792198075995192,
+      "colsample_bytree": 0.6018338280816098,
+      "min_child_weight": 3,
+      "reg_lambda": 10.397427620818183,
+      "reg_alpha": 0.5351572420249925,
+      "gamma": 0.510161882695834
     },
     "n_trials": 30,
     "cv_splits": 5,
@@ -61,6 +61,6 @@
   "data_fingerprint": {
     "feature_date_min": "2022-12-28 00:00:00",
     "feature_date_max": "2026-04-30 00:00:00",
-    "row_hash": 1513847798091626635
+    "row_hash": 7621363974439248044
   }
 }

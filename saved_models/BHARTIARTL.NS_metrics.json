@@ -1,51 +1,51 @@
 {
   "ticker": "BHARTIARTL.NS",
-  "f1_macro": 0.31395402956283786,
+  "f1_macro": 0.3159474107671768,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.6,
-      "recall": 0.14516129032258066,
-      "f1": 0.23376623376623376,
+      "precision": 0.7777777777777778,
+      "recall": 0.11290322580645161,
+      "f1": 0.19718309859154928,
       "support": 62
     },
     "HOLD": {
-      "precision": 0.42574257425742573,
-      "recall": 0.4673913043478261,
-      "f1": 0.44559585492227977,
+      "precision": 0.38823529411764707,
+      "recall": 0.358695652173913,
+      "f1": 0.3728813559322034,
       "support": 92
     },
     "BUY": {
-      "precision": 0.21212121212121213,
-      "recall": 0.3442622950819672,
-      "f1": 0.2625,
-      "support": 61
+      "precision": 0.2833333333333333,
+      "recall": 0.5666666666666667,
+      "f1": 0.37777777777777777,
+      "support": 60
     }
   },
   "train_size": 856,
-  "test_size": 215,
-  "total_rows_after_features": 1071,
+  "test_size": 214,
+  "total_rows_after_features": 1070,
   "label_distribution": {
     "0": 225,
-    "1": 460,
+    "1": 459,
     "2": 386
   },
   "confidence_stats": {
-    "mean_max_proba": 0.512768030166626,
-    "mean_top2_margin": 0.1736045628786087,
-    "f1_macro": 0.31395402956283786
+    "mean_max_proba": 0.4894903898239136,
+    "mean_top2_margin": 0.13718770444393158,
+    "f1_macro": 0.3159474107671768
   },
   "optuna": {
-    "best_value": 0.3817059575415649,
+    "best_value": 0.3568979353522398,
     "best_params": {
-      "n_estimators": 438,
-      "max_depth": 7,
-      "learning_rate": 0.18445889234646215,
-      "subsample": 0.9215952763210582,
-      "colsample_bytree": 0.7099029225708355,
-      "min_child_weight": 5,
-      "reg_lambda": 4.933101931184143,
-      "reg_alpha": 1.5210638620045533,
-      "gamma": 2.0678725334135373
+      "n_estimators": 428,
+      "max_depth": 5,
+      "learning_rate": 0.047228646207025785,
+      "subsample": 0.99259261068894,
+      "colsample_bytree": 0.9612521485232282,
+      "min_child_weight": 7,
+      "reg_lambda": 9.654635396621822,
+      "reg_alpha": 1.0287540118927276,
+      "gamma": 2.295209010323324
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -59,8 +59,8 @@
   "threshold_calibration": null,
   "very_low_confidence": false,
   "data_fingerprint": {
-    "feature_date_min": "2021-09-14 00:00:00",
+    "feature_date_min": "2021-09-15 00:00:00",
     "feature_date_max": "2026-04-30 00:00:00",
-    "row_hash": 14032854313732133908
+    "row_hash": 3169523181977697692
   }
 }

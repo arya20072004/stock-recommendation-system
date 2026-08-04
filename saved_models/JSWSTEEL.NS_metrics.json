@@ -1,51 +1,51 @@
 {
   "ticker": "JSWSTEEL.NS",
-  "f1_macro": 0.294166316620206,
+  "f1_macro": 0.27975821646707727,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.12244897959183673,
-      "recall": 0.17142857142857143,
-      "f1": 0.14285714285714285,
+      "precision": 0.07547169811320754,
+      "recall": 0.11428571428571428,
+      "f1": 0.09090909090909091,
       "support": 35
     },
     "HOLD": {
-      "precision": 0.4473684210526316,
-      "recall": 0.3469387755102041,
-      "f1": 0.39080459770114945,
-      "support": 98
+      "precision": 0.43529411764705883,
+      "recall": 0.38144329896907214,
+      "f1": 0.4065934065934066,
+      "support": 97
     },
     "BUY": {
-      "precision": 0.3333333333333333,
-      "recall": 0.36585365853658536,
-      "f1": 0.3488372093023256,
+      "precision": 0.35526315789473684,
+      "recall": 0.32926829268292684,
+      "f1": 0.34177215189873417,
       "support": 82
     }
   },
   "train_size": 856,
-  "test_size": 215,
-  "total_rows_after_features": 1071,
+  "test_size": 214,
+  "total_rows_after_features": 1070,
   "label_distribution": {
-    "0": 244,
+    "0": 243,
     "1": 451,
     "2": 376
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5979341864585876,
-    "mean_top2_margin": 0.3348987102508545,
-    "f1_macro": 0.294166316620206
+    "mean_max_proba": 0.5975880026817322,
+    "mean_top2_margin": 0.337455689907074,
+    "f1_macro": 0.27975821646707727
   },
   "optuna": {
-    "best_value": 0.3687952540899764,
+    "best_value": 0.37223223192302307,
     "best_params": {
-      "n_estimators": 246,
+      "n_estimators": 268,
       "max_depth": 6,
-      "learning_rate": 0.1066838020032223,
-      "subsample": 0.8676160997935245,
-      "colsample_bytree": 0.9646768081772032,
-      "min_child_weight": 11,
-      "reg_lambda": 7.527337155631932,
-      "reg_alpha": 0.6046374958784471,
-      "gamma": 0.37072976971774374
+      "learning_rate": 0.08240472437384992,
+      "subsample": 0.8368507714294098,
+      "colsample_bytree": 0.939930449168694,
+      "min_child_weight": 9,
+      "reg_lambda": 8.901730450905623,
+      "reg_alpha": 1.6265764883441574,
+      "gamma": 0.12251792009704437
     },
     "n_trials": 30,
     "cv_splits": 5,
@@ -59,8 +59,8 @@
   "threshold_calibration": null,
   "very_low_confidence": true,
   "data_fingerprint": {
-    "feature_date_min": "2021-09-14 00:00:00",
+    "feature_date_min": "2021-09-15 00:00:00",
     "feature_date_max": "2026-04-30 00:00:00",
-    "row_hash": 11856892856240899679
+    "row_hash": 7912116401830745112
   }
 }

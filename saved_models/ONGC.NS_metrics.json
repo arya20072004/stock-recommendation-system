@@ -1,51 +1,51 @@
 {
   "ticker": "ONGC.NS",
-  "f1_macro": 0.3727464414993847,
+  "f1_macro": 0.3371895424836602,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.23,
-      "recall": 0.48936170212765956,
-      "f1": 0.3129251700680272,
+      "precision": 0.2206896551724138,
+      "recall": 0.6808510638297872,
+      "f1": 0.3333333333333333,
       "support": 47
     },
     "HOLD": {
-      "precision": 0.5952380952380952,
-      "recall": 0.25252525252525254,
-      "f1": 0.3546099290780142,
-      "support": 99
+      "precision": 0.6052631578947368,
+      "recall": 0.23469387755102042,
+      "f1": 0.3382352941176471,
+      "support": 98
     },
     "BUY": {
-      "precision": 0.4383561643835616,
-      "recall": 0.463768115942029,
-      "f1": 0.4507042253521127,
+      "precision": 0.5483870967741935,
+      "recall": 0.2463768115942029,
+      "f1": 0.34,
       "support": 69
     }
   },
   "train_size": 856,
-  "test_size": 215,
-  "total_rows_after_features": 1071,
+  "test_size": 214,
+  "total_rows_after_features": 1070,
   "label_distribution": {
     "0": 247,
     "1": 427,
-    "2": 397
+    "2": 396
   },
   "confidence_stats": {
-    "mean_max_proba": 0.4110810458660126,
-    "mean_top2_margin": 0.0694412887096405,
-    "f1_macro": 0.3727464414993847
+    "mean_max_proba": 0.40707337856292725,
+    "mean_top2_margin": 0.0722774863243103,
+    "f1_macro": 0.3371895424836602
   },
   "optuna": {
-    "best_value": 0.32313698235082694,
+    "best_value": 0.32107573024768565,
     "best_params": {
-      "n_estimators": 393,
-      "max_depth": 7,
-      "learning_rate": 0.034000431380307325,
-      "subsample": 0.7091045927632564,
-      "colsample_bytree": 0.851141196865582,
-      "min_child_weight": 4,
-      "reg_lambda": 10.849658426818428,
-      "reg_alpha": 4.9767762282221195,
-      "gamma": 2.9774536943425827
+      "n_estimators": 177,
+      "max_depth": 4,
+      "learning_rate": 0.01729952538706938,
+      "subsample": 0.9033454827708636,
+      "colsample_bytree": 0.8975279188216273,
+      "min_child_weight": 13,
+      "reg_lambda": 14.40393316598982,
+      "reg_alpha": 3.8770774082384456,
+      "gamma": 2.8945374828669337
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -63,8 +63,8 @@
   },
   "very_low_confidence": false,
   "data_fingerprint": {
-    "feature_date_min": "2021-09-14 00:00:00",
+    "feature_date_min": "2021-09-15 00:00:00",
     "feature_date_max": "2026-04-30 00:00:00",
-    "row_hash": 17339251973881129798
+    "row_hash": 5465414424378963764
   }
 }

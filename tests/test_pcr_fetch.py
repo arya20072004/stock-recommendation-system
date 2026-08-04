@@ -1,5 +1,6 @@
 # from datetime import datetime
-# from pcr_builder import _fetch_bhavcopy, _normalize, _compute_daily_pcr
+# from src.config import db
+# from src.data.pcr_builder import _fetch_bhavcopy, _normalize, _compute_daily_pcr
 
 # TEST_DATES = [
 #     # Pre-cutover (legacy format)
@@ -37,6 +38,12 @@
 #         continue
 #     for r in recs:
 #         print(f"  {r['underlying']}: call_oi={r['call_oi']:.0f} put_oi={r['put_oi']:.0f} pcr_oi={r['pcr_oi']:.3f}")
+
+#     docs = list(db.pcr_data.find(
+#         {"underlying": "NIFTY", "nifty_fut_close": {"$exists": True}},
+#         {"date": 1, "_id": 0}
+#     ).sort("date", -1).limit(5))
+#     print(docs)
 # from pymongo import MongoClient
 # from pcr_builder import build_pcr_history, MONGO_URI
 
@@ -45,35 +52,41 @@
 #     build_pcr_history(client)
 # finally:
 #     client.close()
-# from pymongo import MongoClient
-# import pandas as pd
-# from src.data.pcr_builder import MONGO_URI
+from pymongo import MongoClient
+import pandas as pd
+from src.data.pcr_builder import MONGO_URI, pcr_data
 
-# client = MongoClient(MONGO_URI)
-# db = client["stock_market_db"]
+client = MongoClient(MONGO_URI)
+db = client["stock_market_db"]
 
-# for underlying in ["NIFTY", "BANKNIFTY"]:
-#     docs = list(db.pcr_data.find({"underlying": underlying}, {"date": 1, "pcr_oi": 1, "_id": 0}).sort("date", 1))
-#     df = pd.DataFrame(docs)
-#     df["date"] = pd.to_datetime(df["date"])
+for underlying in ["NIFTY", "BANKNIFTY"]:
+    docs = list(db.pcr_data.find({"underlying": underlying}, {"date": 1, "pcr_oi": 1, "_id": 0}).sort("date", 1))
+    df = pd.DataFrame(docs)
+    df["date"] = pd.to_datetime(df["date"])
 
-#     print(f"\n=== {underlying} ===")
-#     print(f"rows: {len(df)}, date range: {df['date'].min().date()} to {df['date'].max().date()}")
-#     print(f"pcr_oi stats: min={df['pcr_oi'].min():.3f} max={df['pcr_oi'].max():.3f} "
-#           f"mean={df['pcr_oi'].mean():.3f} std={df['pcr_oi'].std():.3f}")
+    print(f"\n=== {underlying} ===")
+    print(f"rows: {len(df)}, date range: {df['date'].min().date()} to {df['date'].max().date()}")
+    print(f"pcr_oi stats: min={df['pcr_oi'].min():.3f} max={df['pcr_oi'].max():.3f} "
+          f"mean={df['pcr_oi'].mean():.3f} std={df['pcr_oi'].std():.3f}")
 
-#     # Gap check — flag any stretch >5 calendar days between consecutive records
-#     gaps = df["date"].diff().dt.days
-#     big_gaps = df.loc[gaps > 5, "date"]
-#     print(f"gaps >5 days: {len(big_gaps)}")
-#     if len(big_gaps) > 0:
-#         print(big_gaps.dt.date.tolist()[:10])
+    # Gap check — flag any stretch >5 calendar days between consecutive records
+    gaps = df["date"].diff().dt.days
+    big_gaps = df.loc[gaps > 5, "date"]
+    print(f"gaps >5 days: {len(big_gaps)}")
+    if len(big_gaps) > 0:
+        print(big_gaps.dt.date.tolist()[:10])
 
-#     # Flatline check — any 10-day rolling window with zero variance
-#     flat = (df["pcr_oi"].rolling(10).std() == 0).sum()
-#     print(f"flatlined 10-day windows: {flat}")
+    # Flatline check — any 10-day rolling window with zero variance
+    flat = (df["pcr_oi"].rolling(10).std() == 0).sum()
+    print(f"flatlined 10-day windows: {flat}")
 
-# client.close()
+    docs = list(db.pcr_data.find(
+            {"underlying": "NIFTY", "nifty_fut_close": {"$exists": True}},
+            {"date": 1, "_id": 0}
+        ).sort("date", -1).limit(5))
+    print(docs) 
+
+client.close()
 
 # from pymongo import MongoClient
 # import os
@@ -128,20 +141,20 @@
 
 # client.close()
 
-from pymongo import MongoClient
-import os
-from dotenv import load_dotenv
+# from pymongo import MongoClient
+# import os
+# from dotenv import load_dotenv
 
-load_dotenv()
-client = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017/"))
-db = client["stock_market_db"]
+# load_dotenv()
+# client = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017/"))
+# db = client["stock_market_db"]
 
-# Check the two flagged unverified overrides, plus a couple of known-clean ones
-for ticker in ["TMPV.NS", "ETERNAL.NS", "RELIANCE.NS", "ONGC.NS", "M&M.NS", "BAJAJ-AUTO.NS"]:
-    doc = db.pcr_data.find_one(
-        {"ticker": ticker},
-        sort=[("date", -1)]
-    )
-    print(f"{ticker}: {doc}")
+# # Check the two flagged unverified overrides, plus a couple of known-clean ones
+# for ticker in ["TMPV.NS", "ETERNAL.NS", "RELIANCE.NS", "ONGC.NS", "M&M.NS", "BAJAJ-AUTO.NS"]:
+#     doc = db.pcr_data.find_one(
+#         {"ticker": ticker},
+#         sort=[("date", -1)]
+#     )
+#     print(f"{ticker}: {doc}")
 
-client.close()
+# client.close()

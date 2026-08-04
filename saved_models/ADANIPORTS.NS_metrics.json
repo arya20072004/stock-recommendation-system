@@ -1,51 +1,51 @@
 {
   "ticker": "ADANIPORTS.NS",
-  "f1_macro": 0.4527265415438448,
+  "f1_macro": 0.39993418344799075,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.30303030303030304,
-      "recall": 0.3508771929824561,
-      "f1": 0.3252032520325203,
+      "precision": 0.3116883116883117,
+      "recall": 0.42105263157894735,
+      "f1": 0.3582089552238806,
       "support": 57
     },
     "HOLD": {
-      "precision": 0.44047619047619047,
-      "recall": 0.49333333333333335,
-      "f1": 0.46540880503144655,
+      "precision": 0.3829787234042553,
+      "recall": 0.24,
+      "f1": 0.29508196721311475,
       "support": 75
     },
     "BUY": {
-      "precision": 0.6461538461538462,
-      "recall": 0.5060240963855421,
-      "f1": 0.5675675675675675,
-      "support": 83
+      "precision": 0.5222222222222223,
+      "recall": 0.573170731707317,
+      "f1": 0.5465116279069767,
+      "support": 82
     }
   },
   "train_size": 856,
-  "test_size": 215,
-  "total_rows_after_features": 1071,
+  "test_size": 214,
+  "total_rows_after_features": 1070,
   "label_distribution": {
     "0": 279,
-    "1": 418,
+    "1": 417,
     "2": 374
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6152893304824829,
-    "mean_top2_margin": 0.3379569947719574,
-    "f1_macro": 0.4527265415438448
+    "mean_max_proba": 0.5210440754890442,
+    "mean_top2_margin": 0.20878972113132477,
+    "f1_macro": 0.39993418344799075
   },
   "optuna": {
-    "best_value": 0.3393174370756174,
+    "best_value": 0.33082533745307235,
     "best_params": {
-      "n_estimators": 276,
-      "max_depth": 6,
-      "learning_rate": 0.09651701404868011,
-      "subsample": 0.727812979971984,
-      "colsample_bytree": 0.9645746274289179,
-      "min_child_weight": 13,
-      "reg_lambda": 5.0956900594747845,
-      "reg_alpha": 0.5002576604338024,
-      "gamma": 0.2604808899481429
+      "n_estimators": 641,
+      "max_depth": 7,
+      "learning_rate": 0.05500311517477808,
+      "subsample": 0.9970825033575164,
+      "colsample_bytree": 0.8827331714839857,
+      "min_child_weight": 5,
+      "reg_lambda": 10.281172563357249,
+      "reg_alpha": 2.1925545821600703,
+      "gamma": 0.5115115278529315
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -63,8 +63,8 @@
   },
   "very_low_confidence": false,
   "data_fingerprint": {
-    "feature_date_min": "2021-09-14 00:00:00",
+    "feature_date_min": "2021-09-15 00:00:00",
     "feature_date_max": "2026-04-30 00:00:00",
-    "row_hash": 1623685654975401748
+    "row_hash": 10014133845878644183
   }
 }

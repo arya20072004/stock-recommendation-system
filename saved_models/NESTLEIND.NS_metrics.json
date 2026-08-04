@@ -1,51 +1,51 @@
 {
   "ticker": "NESTLEIND.NS",
-  "f1_macro": 0.2415349041855066,
+  "f1_macro": 0.2900323357413141,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2413793103448276,
-      "recall": 0.14583333333333334,
-      "f1": 0.18181818181818182,
+      "precision": 0.32142857142857145,
+      "recall": 0.1875,
+      "f1": 0.23684210526315788,
       "support": 48
     },
     "HOLD": {
-      "precision": 0.34523809523809523,
-      "recall": 0.7160493827160493,
-      "f1": 0.46586345381526106,
-      "support": 81
+      "precision": 0.36470588235294116,
+      "recall": 0.775,
+      "f1": 0.496,
+      "support": 80
     },
     "BUY": {
-      "precision": 0.2222222222222222,
-      "recall": 0.046511627906976744,
-      "f1": 0.07692307692307693,
+      "precision": 0.4375,
+      "recall": 0.08139534883720931,
+      "f1": 0.13725490196078433,
       "support": 86
     }
   },
   "train_size": 856,
-  "test_size": 215,
-  "total_rows_after_features": 1071,
+  "test_size": 214,
+  "total_rows_after_features": 1070,
   "label_distribution": {
-    "0": 264,
+    "0": 263,
     "1": 466,
     "2": 341
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5830546021461487,
-    "mean_top2_margin": 0.31764987111091614,
-    "f1_macro": 0.2415349041855066
+    "mean_max_proba": 0.5630429983139038,
+    "mean_top2_margin": 0.2866416871547699,
+    "f1_macro": 0.2900323357413141
   },
   "optuna": {
-    "best_value": 0.35390107537517645,
+    "best_value": 0.350956965169167,
     "best_params": {
-      "n_estimators": 332,
-      "max_depth": 4,
-      "learning_rate": 0.06478738741229284,
-      "subsample": 0.7513456792953959,
-      "colsample_bytree": 0.7805926746123348,
-      "min_child_weight": 15,
-      "reg_lambda": 2.099714621704641,
-      "reg_alpha": 4.990259259828997,
-      "gamma": 0.11370893626054251
+      "n_estimators": 261,
+      "max_depth": 5,
+      "learning_rate": 0.25275060329158505,
+      "subsample": 0.9404593498196885,
+      "colsample_bytree": 0.79627954235079,
+      "min_child_weight": 12,
+      "reg_lambda": 4.325344438035868,
+      "reg_alpha": 4.048197095822521,
+      "gamma": 0.4255556718851558
     },
     "n_trials": 30,
     "cv_splits": 5,
@@ -59,8 +59,8 @@
   "threshold_calibration": null,
   "very_low_confidence": true,
   "data_fingerprint": {
-    "feature_date_min": "2021-09-14 00:00:00",
+    "feature_date_min": "2021-09-15 00:00:00",
     "feature_date_max": "2026-04-30 00:00:00",
-    "row_hash": 11530937058734801870
+    "row_hash": 16745159794759194745
   }
 }

@@ -29,6 +29,7 @@ from src.features.engineering import (
     TICKER_ATR_THRESHOLD_SCALE,
     EVENT_DRIVEN_SECTORS_NO_INDEX,
     SECTOR_INDEX_DISABLED_TICKERS,
+    TICKER_START_DATE_OVERRIDE,
     TREND_FOLLOWING_SECTORS,
     ALL_MACRO_COLS,
     SECTOR_MIN_PEERS,
@@ -96,8 +97,12 @@ def create_dataset(ticker, client):
     """
 
     db = client["stock_market_db"]
-    history_years = TICKER_HISTORY_OVERRIDE.get(ticker, HISTORY_YEARS)
-    cutoff_date = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=365 * history_years + 10)
+    if ticker in TICKER_START_DATE_OVERRIDE:
+        cutoff_date = TICKER_START_DATE_OVERRIDE[ticker]
+        logger.info("%s: using explicit start-date override — cutoff=%s", ticker, cutoff_date)
+    else:
+        history_years = TICKER_HISTORY_OVERRIDE.get(ticker, HISTORY_YEARS)
+        cutoff_date = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=365 * history_years + 10)
 
     prices_df = pd.DataFrame(
         list(db.historical_data.find({"ticker": ticker, "date": {"$gte": cutoff_date}}))

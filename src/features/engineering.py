@@ -130,6 +130,19 @@ TICKER_HISTORY_OVERRIDE = {
     "HDFCBANK.NS": 3, # sector disable insufficient — regime mismatch
 }
 
+# Explicit start-date floors — for tickers where a relative "N years
+# back" window would still reach into contaminated/pre-corporate-action
+# history. Checked BEFORE TICKER_HISTORY_OVERRIDE's relative window in
+# create_dataset() and build_feature_row().
+TICKER_START_DATE_OVERRIDE = {
+    "TMPV.NS": datetime(2025, 10, 15),  # demerger date confirmed via
+                                        # -40.15% single-day break on
+                                        # 2025-10-14 (old combined-entity
+                                        # Tata Motors price series before
+                                        # this date is not representative
+                                        # of TMPV standalone post-demerger)
+}
+
 TICKER_ATR_THRESHOLD_SCALE: dict[str, float] = {
     "NTPC.NS":       0.70,
     "POWERGRID.NS":  0.65,
@@ -940,8 +953,11 @@ def build_feature_row(ticker, client, db):
     Returns the full DataFrame; the caller should select
     df[feature_names].iloc[-1] to get the latest feature row.
     """
-    history_years = TICKER_HISTORY_OVERRIDE.get(ticker, HISTORY_YEARS)
-    cutoff_date = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=365 * history_years + 10)
+    if ticker in TICKER_START_DATE_OVERRIDE:
+        cutoff_date = TICKER_START_DATE_OVERRIDE[ticker]
+    else:
+        history_years = TICKER_HISTORY_OVERRIDE.get(ticker, HISTORY_YEARS)
+        cutoff_date = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=365 * history_years + 10)
 
     prices_df = pd.DataFrame(
         list(db.historical_data.find({"ticker": ticker, "date": {"$gte": cutoff_date}}))
