@@ -2,6 +2,8 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
 import { Dashboard } from './pages/Dashboard'
 import { Recommendations } from './pages/Recommendations'
+import { NewsDetail } from './pages/NewsDetail'
+import { NewsIntelligence } from './pages/NewsIntelligence'
 import { Screener } from './pages/Screener'
 import { StockDetails } from './pages/StockDetails'
 import { Stocks } from './pages/Stocks'
@@ -44,7 +46,8 @@ export default function App() {
           <Route path="/screener" element={<Screener />} />
           <Route path="/watchlist" element={<Watchlist />} />
           <Route path="/recommendations" element={<Recommendations />} />
-          <Route path="/news" element={placeholder(pages.news)} />
+          <Route path="/news" element={<NewsIntelligence />} />
+          <Route path="/news/:newsId" element={<NewsDetail />} />
           <Route path="/predictions/history" element={placeholder(pages.history)} />
           <Route path="/model" element={placeholder(pages.model)} />
           <Route path="/portfolio" element={placeholder(pages.portfolio)} />
@@ -57,4 +60,3 @@ export default function App() {
     </BrowserRouter>
   )
 }
-

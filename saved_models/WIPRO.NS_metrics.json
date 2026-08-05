@@ -1,23 +1,23 @@
 {
   "ticker": "WIPRO.NS",
-  "f1_macro": 0.3401780577353097,
+  "f1_macro": 0.3224789915966386,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.2,
+      "precision": 0.26666666666666666,
       "recall": 0.21052631578947367,
-      "f1": 0.20512820512820512,
+      "f1": 0.23529411764705882,
       "support": 38
     },
     "HOLD": {
-      "precision": 0.5570469798657718,
-      "recall": 0.7345132743362832,
-      "f1": 0.6335877862595419,
+      "precision": 0.5508982035928144,
+      "recall": 0.8141592920353983,
+      "f1": 0.6571428571428571,
       "support": 113
     },
     "BUY": {
-      "precision": 0.32,
-      "recall": 0.12698412698412698,
-      "f1": 0.18181818181818182,
+      "precision": 0.17647058823529413,
+      "recall": 0.047619047619047616,
+      "f1": 0.075,
       "support": 63
     }
   },
@@ -26,26 +26,26 @@
   "total_rows_after_features": 1070,
   "label_distribution": {
     "0": 254,
-    "1": 544,
-    "2": 272
+    "1": 543,
+    "2": 273
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5644100308418274,
-    "mean_top2_margin": 0.27051660418510437,
-    "f1_macro": 0.3401780577353097
+    "mean_max_proba": 0.5189700126647949,
+    "mean_top2_margin": 0.2123648077249527,
+    "f1_macro": 0.3224789915966386
   },
   "optuna": {
-    "best_value": 0.3416233254374729,
+    "best_value": 0.34164029790691086,
     "best_params": {
-      "n_estimators": 188,
-      "max_depth": 4,
-      "learning_rate": 0.08129387345336546,
-      "subsample": 0.8531505611737858,
-      "colsample_bytree": 0.850300531997307,
+      "n_estimators": 573,
+      "max_depth": 6,
+      "learning_rate": 0.06328860947230604,
+      "subsample": 0.9735643581390478,
+      "colsample_bytree": 0.8178094779271214,
       "min_child_weight": 4,
-      "reg_lambda": 12.951325513129257,
-      "reg_alpha": 1.3803847841675772,
-      "gamma": 0.47935936552559544
+      "reg_lambda": 12.163194817803998,
+      "reg_alpha": 0.9162841239145623,
+      "gamma": 0.987760339402439
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -59,8 +59,8 @@
   "threshold_calibration": null,
   "very_low_confidence": false,
   "data_fingerprint": {
-    "feature_date_min": "2021-09-15 00:00:00",
+    "feature_date_min": "2021-09-16 00:00:00",
     "feature_date_max": "2026-04-30 00:00:00",
-    "row_hash": 148400576180354084
+    "row_hash": 3180401684463709673
   }
 }

@@ -1,23 +1,23 @@
 {
   "ticker": "ICICIBANK.NS",
-  "f1_macro": 0.3648316192780802,
+  "f1_macro": 0.3695149911816579,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.5,
-      "recall": 0.1951219512195122,
-      "f1": 0.2807017543859649,
+      "precision": 0.7222222222222222,
+      "recall": 0.15853658536585366,
+      "f1": 0.26,
       "support": 82
     },
     "HOLD": {
-      "precision": 0.3956043956043956,
-      "recall": 0.43373493975903615,
-      "f1": 0.41379310344827586,
+      "precision": 0.41353383458646614,
+      "recall": 0.6626506024096386,
+      "f1": 0.5092592592592593,
       "support": 83
     },
     "BUY": {
-      "precision": 0.3076923076923077,
-      "recall": 0.5714285714285714,
-      "f1": 0.4,
+      "precision": 0.30158730158730157,
+      "recall": 0.3877551020408163,
+      "f1": 0.3392857142857143,
       "support": 49
     }
   },
@@ -30,22 +30,22 @@
     "2": 376
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5908060073852539,
-    "mean_top2_margin": 0.2966650426387787,
-    "f1_macro": 0.3648316192780802
+    "mean_max_proba": 0.5211253762245178,
+    "mean_top2_margin": 0.20935870707035065,
+    "f1_macro": 0.3695149911816579
   },
   "optuna": {
-    "best_value": 0.3280151850517135,
+    "best_value": 0.3448038297216369,
     "best_params": {
-      "n_estimators": 266,
+      "n_estimators": 329,
       "max_depth": 7,
-      "learning_rate": 0.2247040075816006,
-      "subsample": 0.6358449077948135,
-      "colsample_bytree": 0.8626482335217973,
-      "min_child_weight": 11,
-      "reg_lambda": 11.084927471589944,
-      "reg_alpha": 1.731220161450487,
-      "gamma": 0.6000032029874354
+      "learning_rate": 0.13022044469024033,
+      "subsample": 0.9381958758605512,
+      "colsample_bytree": 0.8063665741422081,
+      "min_child_weight": 6,
+      "reg_lambda": 3.772262084497089,
+      "reg_alpha": 0.5586872436905963,
+      "gamma": 2.102697862338254
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -59,8 +59,8 @@
   "threshold_calibration": null,
   "very_low_confidence": false,
   "data_fingerprint": {
-    "feature_date_min": "2021-09-15 00:00:00",
+    "feature_date_min": "2021-09-16 00:00:00",
     "feature_date_max": "2026-04-30 00:00:00",
-    "row_hash": 12629940395172104425
+    "row_hash": 6319602690666593689
   }
 }

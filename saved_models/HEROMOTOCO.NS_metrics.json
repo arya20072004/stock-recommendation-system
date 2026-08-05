@@ -1,23 +1,23 @@
 {
   "ticker": "HEROMOTOCO.NS",
-  "f1_macro": 0.41904761904761906,
+  "f1_macro": 0.3783685684644418,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.3125,
-      "recall": 0.4166666666666667,
-      "f1": 0.35714285714285715,
+      "precision": 0.3037974683544304,
+      "recall": 0.5,
+      "f1": 0.3779527559055118,
       "support": 48
     },
     "HOLD": {
-      "precision": 0.4489795918367347,
-      "recall": 0.5641025641025641,
-      "f1": 0.5,
+      "precision": 0.38028169014084506,
+      "recall": 0.34615384615384615,
+      "f1": 0.3624161073825503,
       "support": 78
     },
     "BUY": {
-      "precision": 0.5384615384615384,
-      "recall": 0.3181818181818182,
-      "f1": 0.4,
+      "precision": 0.46875,
+      "recall": 0.3409090909090909,
+      "f1": 0.39473684210526316,
       "support": 88
     }
   },
@@ -25,27 +25,27 @@
   "test_size": 214,
   "total_rows_after_features": 1070,
   "label_distribution": {
-    "0": 307,
-    "1": 377,
+    "0": 308,
+    "1": 376,
     "2": 386
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5612553954124451,
-    "mean_top2_margin": 0.2824327051639557,
-    "f1_macro": 0.41904761904761906
+    "mean_max_proba": 0.5757561326026917,
+    "mean_top2_margin": 0.28896909952163696,
+    "f1_macro": 0.3783685684644418
   },
   "optuna": {
-    "best_value": 0.29906061552121144,
+    "best_value": 0.30510365223073,
     "best_params": {
-      "n_estimators": 506,
+      "n_estimators": 144,
       "max_depth": 6,
-      "learning_rate": 0.2282902997948177,
-      "subsample": 0.6605563409877211,
-      "colsample_bytree": 0.8478302521720974,
-      "min_child_weight": 3,
-      "reg_lambda": 2.7682549511149577,
-      "reg_alpha": 4.088481953515094,
-      "gamma": 0.7892880128915047
+      "learning_rate": 0.2997773346592014,
+      "subsample": 0.8625185275175776,
+      "colsample_bytree": 0.9781651026421929,
+      "min_child_weight": 15,
+      "reg_lambda": 4.726528594870911,
+      "reg_alpha": 2.033987505824273,
+      "gamma": 0.3045485197275545
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -63,8 +63,8 @@
   },
   "very_low_confidence": false,
   "data_fingerprint": {
-    "feature_date_min": "2021-09-15 00:00:00",
+    "feature_date_min": "2021-09-16 00:00:00",
     "feature_date_max": "2026-04-30 00:00:00",
-    "row_hash": 7481327138320433936
+    "row_hash": 6768330633613552876
   }
 }

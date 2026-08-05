@@ -125,7 +125,7 @@ export function StockDetails() {
         <section aria-labelledby="stock-news-heading">
           <div className="section-heading">
             <h2 id="stock-news-heading">Relevant news</h2>
-            <Link className="section-link" to="/news">View all news <ChevronRight aria-hidden="true" size={15} /></Link>
+            <Link className="section-link" to={`/news?stock=${stock.symbol}`}>View all news <ChevronRight aria-hidden="true" size={15} /></Link>
           </div>
           <Card className="stock-news-card">
             {news.map(story => (
@@ -134,7 +134,7 @@ export function StockDetails() {
                   <SentimentBadge sentiment={story.sentiment} />
                   <time>{story.publishedAt}</time>
                 </div>
-                <h3>{story.headline}</h3>
+                <Link to={`/news/${story.id}`}><h3>{story.headline}</h3></Link>
                 <span className="stock-news-item__source">{story.source}</span>
               </article>
             ))}
@@ -144,4 +144,3 @@ export function StockDetails() {
     </div>
   )
 }
-

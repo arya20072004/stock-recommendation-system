@@ -257,8 +257,8 @@ def create_dataset(ticker, client):
         # "dii_net_value",
         # "dii_net_chg_5d",
         # "fii_dii_divergence",
-        "stock_pcr_oi",
-        "stock_pcr_chg_5d",
+        # "stock_pcr_oi",
+        # "stock_pcr_chg_5d",
     ]
 
     # Verify all required columns exist before dropna to give a clear error
@@ -346,8 +346,8 @@ def _make_feature_list(df):
         # "dii_net_value",
         # "dii_net_chg_5d",
         # "fii_dii_divergence",
-        "stock_pcr_oi",
-        "stock_pcr_chg_5d",
+        # "stock_pcr_oi",
+        # "stock_pcr_chg_5d",
     ]
     return [feature for feature in candidate_features if feature in df.columns]
 

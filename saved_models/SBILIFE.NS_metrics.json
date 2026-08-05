@@ -1,11 +1,11 @@
 {
   "ticker": "SBILIFE.NS",
-  "f1_macro": 0.29284242848987047,
+  "f1_macro": 0.26498279730740465,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.17647058823529413,
-      "recall": 0.2857142857142857,
-      "f1": 0.21818181818181817,
+      "precision": 0.14285714285714285,
+      "recall": 0.23809523809523808,
+      "f1": 0.17857142857142858,
       "support": 42
     },
     "HOLD": {
@@ -15,9 +15,9 @@
       "support": 113
     },
     "BUY": {
-      "precision": 0.23529411764705882,
-      "recall": 0.2711864406779661,
-      "f1": 0.25196850393700787,
+      "precision": 0.19696969696969696,
+      "recall": 0.22033898305084745,
+      "f1": 0.208,
       "support": 59
     }
   },
@@ -26,26 +26,26 @@
   "total_rows_after_features": 1070,
   "label_distribution": {
     "0": 278,
-    "1": 451,
-    "2": 341
+    "1": 452,
+    "2": 340
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6456142067909241,
-    "mean_top2_margin": 0.4054880142211914,
-    "f1_macro": 0.29284242848987047
+    "mean_max_proba": 0.5863770842552185,
+    "mean_top2_margin": 0.3129658102989197,
+    "f1_macro": 0.26498279730740465
   },
   "optuna": {
-    "best_value": 0.2790107430047289,
+    "best_value": 0.30384392766443263,
     "best_params": {
-      "n_estimators": 615,
-      "max_depth": 5,
-      "learning_rate": 0.07363582861446227,
-      "subsample": 0.9159862754125332,
-      "colsample_bytree": 0.8503273030040277,
-      "min_child_weight": 8,
-      "reg_lambda": 12.226162333009977,
-      "reg_alpha": 0.5164321133177401,
-      "gamma": 0.13186864880693672
+      "n_estimators": 249,
+      "max_depth": 3,
+      "learning_rate": 0.21049378735459387,
+      "subsample": 0.9929564095335032,
+      "colsample_bytree": 0.9402468530565207,
+      "min_child_weight": 6,
+      "reg_lambda": 10.145425050322407,
+      "reg_alpha": 1.1183138028119572,
+      "gamma": 0.5618079346304373
     },
     "n_trials": 30,
     "cv_splits": 5,
@@ -59,8 +59,8 @@
   "threshold_calibration": null,
   "very_low_confidence": true,
   "data_fingerprint": {
-    "feature_date_min": "2021-09-15 00:00:00",
+    "feature_date_min": "2021-09-16 00:00:00",
     "feature_date_max": "2026-04-30 00:00:00",
-    "row_hash": 8706525512358392774
+    "row_hash": 11010820813655354214
   }
 }

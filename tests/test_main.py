@@ -18,7 +18,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-TICKER = "TMPV.NS"
+TICKERS = ["ADANIENT.NS", "ADANIPORTS.NS", "APOLLOHOSP.NS"]
 
 def run_single(ticker):
     client = MongoClient(MONGO_URI)
@@ -34,7 +34,8 @@ def run_single(ticker):
         logger.info("Single-ticker training run complete for %s", ticker)
 
 if __name__ == "__main__":
-    run_single(TICKER)
+    for ticker in TICKERS:
+        run_single(ticker)
 
 # # 1. Is TMPV.NS in the ticker list?
 # from src.data.nifty50 import TICKERS
