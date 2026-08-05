@@ -278,6 +278,100 @@ def get_portfolio():
 
     return jsonify({'portfolio': portfolio_data})
 
+from bson import ObjectId
+
+@app.route('/api/predictions/history')
+def get_prediction_history():
+    from flask import request
+    symbol = request.args.get('symbol')
+    recommendation = request.args.get('recommendation')
+    outcome = request.args.get('outcome')
+    model_version = request.args.get('model_version')
+    limit = int(request.args.get('limit', 50))
+    offset = int(request.args.get('offset', 0))
+    
+    query = {}
+    if symbol: query['symbol'] = symbol
+    if recommendation: query['recommendation'] = recommendation
+    if outcome: query['outcome'] = outcome
+    if model_version: query['model_version'] = model_version
+        
+    total_count = db.prediction_history.count_documents(query)
+    
+    cursor = db.prediction_history.find(query).sort('market_date', -1).skip(offset).limit(limit)
+    
+    results = []
+    for doc in cursor:
+        doc['_id'] = str(doc['_id'])
+        doc['prediction_timestamp'] = doc['prediction_timestamp'].isoformat() if doc.get('prediction_timestamp') else None
+        if 'evaluation_timestamp' in doc and doc['evaluation_timestamp']:
+            doc['evaluation_timestamp'] = doc['evaluation_timestamp'].isoformat()
+        # Clean up feature_snapshot for listing
+        if 'feature_snapshot' in doc:
+            del doc['feature_snapshot']
+        results.append(doc)
+        
+    return jsonify({
+        'total': total_count,
+        'limit': limit,
+        'offset': offset,
+        'data': results
+    })
+
+@app.route('/api/predictions/history/<prediction_id>')
+def get_prediction_detail(prediction_id):
+    try:
+        doc = db.prediction_history.find_one({'_id': ObjectId(prediction_id)})
+        if not doc:
+            return jsonify({'error': 'Prediction not found'}), 404
+            
+        doc['_id'] = str(doc['_id'])
+        doc['prediction_timestamp'] = doc['prediction_timestamp'].isoformat() if doc.get('prediction_timestamp') else None
+        if 'evaluation_timestamp' in doc and doc['evaluation_timestamp']:
+            doc['evaluation_timestamp'] = doc['evaluation_timestamp'].isoformat()
+            
+        return jsonify(doc)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+@app.route('/api/predictions/performance')
+@cache.cached(timeout=900)
+def get_prediction_performance():
+    total_predictions = db.prediction_history.count_documents({})
+    evaluated_predictions = db.prediction_history.count_documents({"status": "EVALUATED"})
+    pending_predictions = db.prediction_history.count_documents({"status": "PENDING"})
+    
+    correct_predictions = db.prediction_history.count_documents({"outcome": "CORRECT"})
+    
+    accuracy = (correct_predictions / evaluated_predictions) if evaluated_predictions > 0 else 0
+    
+    buy_eval = db.prediction_history.count_documents({"recommendation": "BUY", "status": "EVALUATED"})
+    buy_correct = db.prediction_history.count_documents({"recommendation": "BUY", "outcome": "CORRECT"})
+    buy_accuracy = (buy_correct / buy_eval) if buy_eval > 0 else 0
+    
+    hold_eval = db.prediction_history.count_documents({"recommendation": "HOLD", "status": "EVALUATED"})
+    hold_correct = db.prediction_history.count_documents({"recommendation": "HOLD", "outcome": "CORRECT"})
+    hold_accuracy = (hold_correct / hold_eval) if hold_eval > 0 else 0
+    
+    sell_eval = db.prediction_history.count_documents({"recommendation": "SELL", "status": "EVALUATED"})
+    sell_correct = db.prediction_history.count_documents({"recommendation": "SELL", "outcome": "CORRECT"})
+    sell_accuracy = (sell_correct / sell_eval) if sell_eval > 0 else 0
+    
+    # Avg confidence
+    pipeline = [{"$group": {"_id": None, "avg_confidence": {"$avg": "$confidence"}}}]
+    result = list(db.prediction_history.aggregate(pipeline))
+    avg_confidence = result[0]['avg_confidence'] if result else 0
+    
+    return jsonify({
+        "total_predictions": total_predictions,
+        "evaluated_predictions": evaluated_predictions,
+        "pending_predictions": pending_predictions,
+        "accuracy": round(accuracy, 3),
+        "buy_accuracy": round(buy_accuracy, 3),
+        "hold_accuracy": round(hold_accuracy, 3),
+        "sell_accuracy": round(sell_accuracy, 3),
+        "average_confidence": round(avg_confidence, 1) if avg_confidence else 0
+    })
+
 if __name__ == '__main__':
     app.run(debug=True)
-

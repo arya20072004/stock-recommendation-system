@@ -1,0 +1,335 @@
+.prediction-history-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  font-size: 24px;
+  margin: 0 0 8px 0;
+  color: var(--text-primary, #fff);
+}
+
+.page-header p {
+  color: var(--text-secondary, #a1a1aa);
+  margin: 0;
+}
+
+.demo-badge {
+  display: inline-block;
+  background-color: var(--warning-bg, rgba(234, 179, 8, 0.1));
+  color: var(--warning-text, #eab308);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 12px;
+  vertical-align: middle;
+}
+
+.performance-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.summary-card {
+  background-color: var(--card-bg, #18181b);
+  border: 1px solid var(--border-color, #27272a);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-card-title {
+  font-size: 12px;
+  color: var(--text-secondary, #a1a1aa);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.summary-card-value {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-primary, #fff);
+}
+
+.chart-section {
+  background-color: var(--card-bg, #18181b);
+  border: 1px solid var(--border-color, #27272a);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 32px;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.chart-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary, #fff);
+  margin: 0;
+}
+
+.chart-controls button {
+  background: none;
+  border: none;
+  color: var(--text-secondary, #a1a1aa);
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.chart-controls button.active {
+  background-color: var(--accent-bg, rgba(59, 130, 246, 0.1));
+  color: var(--accent-color, #3b82f6);
+}
+
+.filter-toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.filter-input, .filter-select {
+  background-color: var(--card-bg, #18181b);
+  border: 1px solid var(--border-color, #27272a);
+  color: var(--text-primary, #fff);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+}
+
+.filter-input:focus, .filter-select:focus {
+  border-color: var(--accent-color, #3b82f6);
+}
+
+.history-table-container {
+  background-color: var(--card-bg, #18181b);
+  border: 1px solid var(--border-color, #27272a);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.history-table th {
+  padding: 12px 16px;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--text-secondary, #a1a1aa);
+  border-bottom: 1px solid var(--border-color, #27272a);
+  font-weight: 500;
+}
+
+.history-table td {
+  padding: 16px;
+  font-size: 14px;
+  color: var(--text-primary, #fff);
+  border-bottom: 1px solid var(--border-color, #27272a);
+}
+
+.history-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.history-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge.buy {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.badge.hold {
+  background-color: rgba(234, 179, 8, 0.1);
+  color: #eab308;
+}
+
+.badge.sell {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.badge.correct {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.badge.incorrect {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.badge.pending {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.text-green {
+  color: #22c55e;
+}
+
+.text-red {
+  color: #ef4444;
+}
+
+.text-muted {
+  color: var(--text-secondary, #a1a1aa);
+}
+
+/* Prediction Detail specific styles */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary, #a1a1aa);
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: 24px;
+  cursor: pointer;
+}
+
+.back-link:hover {
+  color: var(--text-primary, #fff);
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+
+.detail-title {
+  font-size: 32px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: var(--text-primary, #fff);
+}
+
+.detail-meta {
+  color: var(--text-secondary, #a1a1aa);
+  font-size: 14px;
+}
+
+.detail-prediction-info {
+  text-align: right;
+}
+
+.detail-prediction-badge {
+  font-size: 20px;
+  padding: 6px 12px;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+
+.detail-confidence {
+  font-size: 16px;
+  color: var(--text-secondary, #a1a1aa);
+}
+
+.detail-section {
+  background-color: var(--card-bg, #18181b);
+  border: 1px solid var(--border-color, #27272a);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.detail-section h2 {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary, #fff);
+  margin: 0 0 24px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color, #27272a);
+}
+
+.price-outcome-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+}
+
+.price-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.price-label {
+  font-size: 12px;
+  color: var(--text-secondary, #a1a1aa);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.price-value {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-primary, #fff);
+}
+
+.pending-message {
+  color: var(--text-secondary, #a1a1aa);
+  font-style: italic;
+  padding: 16px;
+  background-color: rgba(255,255,255,0.02);
+  border-radius: 6px;
+  margin-top: 16px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.feature-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background-color: rgba(255, 255, 255, 0.02);
+  border-radius: 6px;
+}
+
+.feature-name {
+  color: var(--text-secondary, #a1a1aa);
+  font-size: 14px;
+  font-family: monospace;
+}
+
+.feature-value {
+  color: var(--text-primary, #fff);
+  font-size: 14px;
+  font-weight: 500;
+}

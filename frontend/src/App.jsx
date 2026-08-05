@@ -9,6 +9,8 @@ import { StockDetails } from './pages/StockDetails'
 import { Stocks } from './pages/Stocks'
 import { Watchlist } from './pages/Watchlist'
 import { NotFoundPage, PlaceholderPage } from './pages/PlaceholderPage'
+import { PredictionHistory } from './pages/PredictionHistory'
+import { PredictionDetail } from './pages/PredictionDetail'
 
 const pages = {
   news: {
@@ -48,7 +50,8 @@ export default function App() {
           <Route path="/recommendations" element={<Recommendations />} />
           <Route path="/news" element={<NewsIntelligence />} />
           <Route path="/news/:newsId" element={<NewsDetail />} />
-          <Route path="/predictions/history" element={placeholder(pages.history)} />
+          <Route path="/predictions/history" element={<PredictionHistory />} />
+          <Route path="/predictions/:id" element={<PredictionDetail />} />
           <Route path="/model" element={placeholder(pages.model)} />
           <Route path="/portfolio" element={placeholder(pages.portfolio)} />
           <Route path="/settings" element={placeholder(pages.settings)} />
