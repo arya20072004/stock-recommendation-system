@@ -1,4 +1,4 @@
-import { demoNews } from './news'
+// import removed
 import { stockBySymbol } from './stocks'
 
 const reliance = stockBySymbol.RELIANCE
@@ -42,5 +42,5 @@ export const dashboardData = {
     { ticker: itc.symbol, price: itc.currentPrice, change: itc.priceChangePercent, signal: itc.signal, sparkline: [10, 10, 11, 10, 11, 11] },
     { ticker: infy.symbol, price: infy.currentPrice, change: infy.priceChangePercent, signal: infy.signal, sparkline: [15, 14, 14, 15, 14, 14] },
   ],
-  importantNews: demoNews.slice().sort((a, b) => b.relevance - a.relevance).slice(0, 3),
+  importantNews: [],
 }

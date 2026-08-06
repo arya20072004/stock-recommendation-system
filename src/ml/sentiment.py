@@ -3,6 +3,7 @@ import time
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from transformers import pipeline
+from datetime import datetime
 
 # --- SETUP ---
 load_dotenv()
@@ -22,7 +23,7 @@ def run():
 
     articles_to_analyze = collection.find({
         '$or': [
-            {'sentiment': {'$exists': False}},
+            {'sentiment_processed_at': {'$exists': False}},
             {'compound': {'$exists': False}},
             {'label': {'$exists': False}}
         ]
@@ -34,16 +35,22 @@ def run():
         client.close()
         return
 
-    print(f'Starting sentiment analysis for {len(articles_list)} new articles...')
+    print("=" * 50)
+    print("SENTIMENT ANALYSIS SUMMARY")
+    print("=" * 50)
+    print(f"Articles awaiting sentiment: {len(articles_list)}")
+    
     analyzed_count = 0
+    failed_count = 0
 
     for index, article in enumerate(articles_list, start=1):
         try:
             title = article.get('title', '')
-            content = article.get('content', '')
+            content = article.get('description', '') or article.get('content', '')
             text_to_analyze = f"{title}. {content[:500]}".strip()
 
             if not text_to_analyze:
+                failed_count += 1
                 continue
 
             result = finbert(text_to_analyze)[0]
@@ -62,18 +69,33 @@ def run():
                 {'$set': {
                     'label': label,
                     'score': score,
-                    'compound': compound
+                    'compound': compound,
+                    'sentiment_model': 'ProsusAI/finbert',
+                    'sentiment_processed_at': datetime.utcnow()
                 }}
             )
             analyzed_count += 1
 
-            if index % 10 == 0:
-                print(f'Processed {index} articles...')
+            if index % 20 == 0:
+                print(f"Processed {index}/{len(articles_list)} articles...")
 
         except Exception as e:
             print(f'Could not analyze article {article.get("_id")}: {e}')
+            failed_count += 1
 
-    print(f'Sentiment analysis complete. Analyzed and updated {analyzed_count} articles.')
+    remaining = collection.count_documents({
+        '$or': [
+            {'sentiment_processed_at': {'$exists': False}},
+            {'compound': {'$exists': False}},
+            {'label': {'$exists': False}}
+        ]
+    })
+    
+    print(f"Processed successfully: {analyzed_count}")
+    print(f"Failed to process: {failed_count}")
+    print(f"Remaining unprocessed: {remaining}")
+    print("=" * 50)
+    
     client.close()
 
 

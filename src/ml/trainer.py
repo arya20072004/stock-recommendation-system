@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import hashlib
 from datetime import datetime, timedelta, timezone
 
 import joblib
@@ -52,9 +53,14 @@ from src.ml.model_utils import get_model_version
 # --- SETUP ---
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
-MODELS_DIR = "saved_models"
-FEATURES_DIR = "saved_features"
+MODELS_DIR = os.getenv("MODELS_DIR", "saved_models")
+FEATURES_DIR = os.getenv("FEATURES_DIR", "saved_features")
 RANDOM_STATE = 42
+if os.getenv("ENFORCE_SEEDS") == "1":
+    import random
+    random.seed(RANDOM_STATE)
+    np.random.seed(RANDOM_STATE)
+
 MIN_ROWS_AFTER_FEATURES = 200
 N_SPLITS = 5
 N_OPTUNA_TRIALS = 75
@@ -123,6 +129,13 @@ def create_dataset(ticker, client):
 
     start_date = prices_df.index.min()
     end_date = prices_df.index.max()
+    
+    cutoff_str = os.getenv("TRAINING_CUTOFF_DATE")
+    if cutoff_str:
+        dt_cutoff = pd.to_datetime(cutoff_str)
+        if dt_cutoff < end_date:
+            end_date = dt_cutoff
+            
     nifty_df = _prepare_nifty_data(start_date, end_date)
     if nifty_df.empty:
         logger.warning("%s: failed to fetch Nifty data, skipping", ticker)
@@ -152,12 +165,13 @@ def create_dataset(ticker, client):
     df["return"] = df["close"].pct_change()
     df["outperformance"] = df["return"].shift(1) - df["nifty_return"].shift(1)
 
-    news_docs = list(
-        db.news_articles.find(
-            {"ticker": ticker, "published_at": {"$gte": cutoff_date}},
-            {"published_at": 1, "compound": 1, "sentiment": 1},
-        )
-    )
+    news_query = {"$or": [{"tickers": ticker}, {"ticker": ticker}], "published_at": {"$gte": cutoff_date}}
+    cutoff_str = os.getenv("TRAINING_CUTOFF_DATE")
+    if cutoff_str:
+        dt_cutoff = datetime.fromisoformat(cutoff_str)
+        news_query["published_at"] = {"$gte": cutoff_date, "$lte": dt_cutoff.replace(hour=23, minute=59, second=59)}
+    
+    news_docs = list(db.news_articles.find(news_query))
     sentiment_df = _prepare_sentiment_data(news_docs)
     if sentiment_df.empty:
         df["sentiment"] = 0.0
@@ -275,6 +289,15 @@ def create_dataset(ticker, client):
 
     df = df.replace([float("inf"), float("-inf")], pd.NA)
     df = df.dropna(subset=required_columns)
+
+    # Strictly truncate dataset to experiment cutoff (if provided)
+    # This ensures no future knowledge sneaks into the training matrix,
+    # and matches the temporal boundary of the historical baseline.
+    cutoff_date_str = os.getenv("TRAINING_CUTOFF_DATE")
+    if cutoff_date_str:
+        dt_cutoff = pd.to_datetime(cutoff_date_str)
+        df = df[df.index <= dt_cutoff]
+        logger.info("%s: truncated dataset to <= %s. Rows remaining: %d", ticker, dt_cutoff, len(df))
 
     if not df.empty:
         row_hash = pd.util.hash_pandas_object(df[required_columns], index=True).sum()
@@ -771,6 +794,18 @@ def train_model(df, ticker):
         "data_fingerprint": {
             "feature_date_min": str(df.index.min()),
             "feature_date_max": str(df.index.max()),
+            "train_date_min": str(X_train.index.min()),
+            "train_date_max": str(X_train.index.max()),
+            "test_date_min": str(X_test.index.min()),
+            "test_date_max": str(X_test.index.max()),
+            "feature_matrix_hash": hashlib.sha256(X.values.tobytes()).hexdigest(),
+            "train_matrix_hash": hashlib.sha256(X_train.values.tobytes()).hexdigest(),
+            "test_matrix_hash": hashlib.sha256(X_test.values.tobytes()).hexdigest(),
+            "train_labels_hash": hashlib.sha256(y_train.values.tobytes()).hexdigest(),
+            "test_labels_hash": hashlib.sha256(y_test.values.tobytes()).hexdigest(),
+            "row_identity_hash": hashlib.sha256(''.join(X.index.to_series().dt.strftime('%Y-%m-%d')).encode('utf-8')).hexdigest(),
+            "train_row_identity_hash": hashlib.sha256(''.join(X_train.index.to_series().dt.strftime('%Y-%m-%d')).encode('utf-8')).hexdigest(),
+            "test_row_identity_hash": hashlib.sha256(''.join(X_test.index.to_series().dt.strftime('%Y-%m-%d')).encode('utf-8')).hexdigest(),
             "row_hash": pd.util.hash_pandas_object(X, index=True).sum(),
         },
     }

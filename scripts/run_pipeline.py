@@ -65,6 +65,11 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
+from pymongo import MongoClient
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 # ======================================================================
@@ -547,6 +552,34 @@ def main():
             sys.exit(1)
 
         # --------------------------------------------------------------
+        # News Collector
+        # --------------------------------------------------------------
+
+        if not run_step(
+            [
+                sys.executable,
+                "-m",
+                "src.data.news_collector",
+            ],
+            "news_collector.py (financial news)",
+        ):
+            print("\nWARNING: News collection failed. Pipeline continuing but sentiment will be affected.")
+
+        # --------------------------------------------------------------
+        # Sentiment
+        # --------------------------------------------------------------
+
+        if not run_step(
+            [
+                sys.executable,
+                "-m",
+                "src.ml.sentiment",
+            ],
+            "sentiment.py (FinBERT inference)",
+        ):
+            print("\nWARNING: Sentiment analysis failed. Pipeline continuing but sentiment will be affected.")
+
+        # --------------------------------------------------------------
         # Sector indices
         # --------------------------------------------------------------
 
@@ -610,6 +643,40 @@ def main():
         )
 
         input()
+
+    # ==================================================================
+    # Sentiment Freshness Warning before Training
+    # ==================================================================
+    try:
+        MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
+        client = MongoClient(MONGO_URI)
+        db = client['stock_market_db']
+        
+        newest_doc = db.news_articles.find_one({}, sort=[("published_at", -1)])
+        now_utc = datetime.utcnow()
+        if newest_doc and newest_doc.get("published_at"):
+            age_hours = (now_utc - newest_doc.get("published_at")).total_seconds() / 3600.0
+            
+            # Count 7d articles
+            t_7d = now_utc - timedelta(days=7)
+            articles_7d = db.news_articles.count_documents({"published_at": {"$gte": t_7d}})
+            
+            if age_hours < 24 and articles_7d > 10:
+                state = "CURRENT_SENTIMENT"
+            elif age_hours < 72:
+                state = "PARTIAL_SENTIMENT"
+                print(f"\nWARNING: News state is DEGRADED. Newest article is {age_hours:.1f} hours old. Feature generation will use {state}.")
+            else:
+                state = "STALE_SENTIMENT"
+                print(f"\nWARNING: News state is STALE. Newest article is {age_hours:.1f} hours old. Feature generation will use {state}.")
+        else:
+            state = "NO_SENTIMENT"
+            print(f"\nWARNING: News state is EMPTY. Feature generation will use {state}.")
+            
+        print(f">>> Feature generation using: {state}")
+        client.close()
+    except Exception as e:
+        print(f"\nWARNING: Failed to check sentiment freshness: {e}")
 
     # ==================================================================
     # Step 5: Model training

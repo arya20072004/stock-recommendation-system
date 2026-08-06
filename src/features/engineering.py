@@ -633,8 +633,14 @@ def _prepare_sector_data(ticker, client, history_years=None):
 
     index_sector_name = SECTOR_INDEX_NAME_MAP.get(sector, sector)
 
+    query = {"sector": index_sector_name, "date": {"$gte": cutoff_date}}
+    import os
+    env_cutoff = os.getenv("TRAINING_CUTOFF_DATE")
+    if env_cutoff:
+        query["date"]["$lte"] = datetime.fromisoformat(env_cutoff)
+
     index_docs = list(db.sector_indices.find(
-        {"sector": index_sector_name, "date": {"$gte": cutoff_date}},
+        query,
         {"date": 1, "return": 1, "peer_count": 1, "_id": 0}
     ))
     logger.info("%s: sector index query '%s' returned %d docs", ticker, index_sector_name, len(index_docs))
@@ -1097,7 +1103,7 @@ def build_feature_row(ticker, client, db):
     # --- 4. Sentiment join ---
     news_docs = list(
         db.news_articles.find(
-            {"ticker": ticker, "published_at": {"$gte": cutoff_date}},
+            {"$or": [{"tickers": ticker}, {"ticker": ticker}], "published_at": {"$gte": cutoff_date}},
             {"published_at": 1, "compound": 1, "sentiment": 1},
         )
     )

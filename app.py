@@ -1,6 +1,6 @@
 import logging
 # pyrefly: ignore [missing-import]
-from flask import Flask, jsonify, render_template, g
+from flask import Flask, jsonify, render_template, g, request
 from flask_caching import Cache
 from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
@@ -12,11 +12,14 @@ import json
 import os
 import warnings
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from pymongo.errors import PyMongoError
 from dotenv import load_dotenv
 from xgboost import XGBClassifier
-from src.data.nifty50 import TICKERS
+from src.data.nifty50 import TICKERS, NIFTY50_TICKER_MAP
 from src.ml.confidence import compute_confidence_tier, get_display_signal
 from src.features.engineering import build_feature_row, TICKER_CLASS_THRESHOLDS, apply_threshold_calibration
+from src.data.sector_index_builder import NIFTY500_SECTOR_MAP
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +30,13 @@ MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
 
 # --- CACHING SETUP ---
 cache = Cache(app, config={'CACHE_TYPE': 'SimpleCache', 'CACHE_DEFAULT_TIMEOUT': 900}) # 15-minute cache
+
+# --- INVERT SECTOR MAP ---
+TICKER_TO_SECTOR = {}
+for sector, sector_tickers in NIFTY500_SECTOR_MAP.items():
+    for t in sector_tickers:
+        TICKER_TO_SECTOR[t] = sector
+
 
 # --- DATABASE & MODEL LOADING ---
 client = MongoClient(MONGO_URI)
@@ -278,9 +288,437 @@ def get_portfolio():
 
     return jsonify({'portfolio': portfolio_data})
 
-from bson import ObjectId
+def get_latest_predictions_snapshot(db, active_tickers):
+    """
+    Finds the latest authoritative market_date and fetches predictions 
+    for all active tickers. Handles mixed-date snapshots if some tickers
+    are missing from the latest date.
+    
+    Returns: (predictions_list, meta_dict)
+    """
+    latest_doc = db.prediction_history.find_one({}, sort=[("market_date", -1)])
+    if not latest_doc:
+        return [], {
+            "market_date": None,
+            "expected_tickers": len(active_tickers),
+            "returned_tickers": 0,
+            "missing_tickers": active_tickers,
+            "complete": False,
+            "mixed_date": False
+        }
+        
+    latest_market_date = latest_doc['market_date']
+    
+    # Check if we have predictions for all active tickers for this date
+    predictions = list(db.prediction_history.find({
+        "market_date": latest_market_date,
+        "symbol": {"$in": active_tickers}
+    }))
+    
+    returned_symbols = {p['symbol'] for p in predictions}
+    missing_symbols = set(active_tickers) - returned_symbols
+    
+    mixed_date = False
+    
+    # If missing tickers, fetch their latest valid prediction
+    if missing_symbols:
+        mixed_date = True
+        for ticker in missing_symbols:
+            latest_ticker_doc = db.prediction_history.find_one(
+                {"symbol": ticker},
+                sort=[("market_date", -1)]
+            )
+            if latest_ticker_doc:
+                predictions.append(latest_ticker_doc)
+                returned_symbols.add(ticker)
+                
+        # Re-evaluate missing
+        missing_symbols = set(active_tickers) - returned_symbols
+        
+    meta = {
+        "market_date": latest_market_date,
+        "expected_tickers": len(active_tickers),
+        "returned_tickers": len(returned_symbols),
+        "missing_tickers": list(missing_symbols),
+        "complete": len(missing_symbols) == 0,
+        "mixed_date": mixed_date
+    }
+    
+    return predictions, meta
 
-@app.route('/api/predictions/history')
+@app.route('/api/recommendations')
+@cache.cached(timeout=300)
+def get_recommendations():
+    """Returns authoritative recommendation snapshots from prediction_history."""
+    predictions, meta = get_latest_predictions_snapshot(db, TICKERS)
+    
+    if not predictions:
+        return jsonify({'error': 'No predictions available.'}), 404
+        
+    data = []
+    
+    for p in predictions:
+        ticker = p['symbol']
+        
+        # Get price data from historical_data
+        # We need last_close and previous close for day_change_pct
+        latest_docs = list(db.historical_data.find({'ticker': ticker}).sort('date', -1).limit(5))
+        latest_docs = [d for d in latest_docs if pd.notna(d.get('close')) and pd.notna(d.get('open'))]
+        
+        if len(latest_docs) >= 1:
+            last_close = latest_docs[0].get('close', 0)
+            if len(latest_docs) >= 2:
+                prev_close = latest_docs[1].get('close', latest_docs[0].get('open', last_close))
+            else:
+                prev_close = latest_docs[0].get('open', last_close)
+            day_change_pct = round(((last_close - prev_close) / prev_close) * 100, 2) if prev_close else 0
+        else:
+            last_close = 0
+            day_change_pct = 0
+            
+        pred_ts = p.get('prediction_timestamp')
+        if pred_ts and hasattr(pred_ts, 'isoformat'):
+            pred_ts = pred_ts.isoformat()
+            
+        data.append({
+            "ticker": ticker,
+            "market_date": p['market_date'],
+            "prediction_timestamp": pred_ts,
+            "recommendation": p['recommendation'],
+            "raw_prediction": p.get('raw_prediction', p['recommendation']),
+            "confidence": p['confidence'],
+            "confidence_tier": p.get('confidence_tier', 'UNKNOWN'),
+            "model_version": p.get('model_version', 'unknown'),
+            "last_close": round(last_close, 2),
+            "day_change_pct": day_change_pct
+        })
+        
+    # Sort data for consistent display (e.g., conviction order)
+    order = {'BUY': 0, 'HOLD': 1, 'UNCERTAIN': 2, 'SELL': 3}
+    data.sort(key=lambda x: (order.get(x['recommendation'], 4), -x['confidence']))
+    
+    return jsonify({
+        "data": data,
+        "meta": meta,
+        "total": len(data)
+    })
+
+@app.route('/api/stocks/summary')
+@cache.cached(timeout=300)
+def get_stocks_summary():
+    """Shared authoritative endpoint for Stocks and Screener."""
+    predictions, meta = get_latest_predictions_snapshot(db, TICKERS)
+    
+    if not predictions:
+        return jsonify({'error': 'No predictions available.'}), 404
+        
+    # Batch price lookup
+    pipeline = [
+        {"$match": {"ticker": {"$in": TICKERS}}},
+        {"$sort": {"date": -1}},
+        {"$group": {
+            "_id": "$ticker",
+            "docs": {"$push": {"close": "$close", "open": "$open", "volume": "$volume"}}
+        }},
+        {"$project": {"docs": {"$slice": ["$docs", 2]}}}
+    ]
+    price_results = list(db.historical_data.aggregate(pipeline))
+    price_map = {}
+    for r in price_results:
+        ticker = r["_id"]
+        docs = r["docs"]
+        valid_docs = [d for d in docs if pd.notna(d.get('close')) and pd.notna(d.get('open'))]
+        
+        if len(valid_docs) >= 1:
+            last_close = valid_docs[0].get('close')
+            volume = valid_docs[0].get('volume')
+            
+            if len(valid_docs) >= 2:
+                prev_close = valid_docs[1].get('close')
+            else:
+                prev_close = valid_docs[0].get('open')
+            
+            if pd.isna(prev_close) or prev_close == 0:
+                prev_close = None
+                day_change = None
+                day_change_pct = None
+            else:
+                day_change = round(last_close - prev_close, 2)
+                day_change_pct = round(((last_close - prev_close) / prev_close) * 100, 2)
+                
+            price_map[ticker] = {
+                "last_close": round(last_close, 2) if pd.notna(last_close) else None,
+                "previous_close": round(prev_close, 2) if pd.notna(prev_close) else None,
+                "day_change": day_change,
+                "day_change_pct": day_change_pct,
+                "volume": volume if pd.notna(volume) else None
+            }
+            
+    data = []
+    
+    for p in predictions:
+        ticker = p['symbol']
+        price_info = price_map.get(ticker, {})
+        
+        data.append({
+            "ticker": ticker,
+            "company_name": NIFTY50_TICKER_MAP.get(ticker, ticker),
+            "sector": TICKER_TO_SECTOR.get(ticker, None),
+            "market_date": p['market_date'],
+            
+            "last_close": price_info.get("last_close"),
+            "previous_close": price_info.get("previous_close"),
+            "day_change": price_info.get("day_change"),
+            "day_change_pct": price_info.get("day_change_pct"),
+            "volume": price_info.get("volume"),
+            
+            "recommendation": p['recommendation'],
+            "raw_prediction": p.get('raw_prediction', p['recommendation']),
+            "confidence": p['confidence'],
+            "confidence_tier": p.get('confidence_tier', 'UNKNOWN'),
+            "model_version": p.get('model_version', 'unknown')
+        })
+        
+    return jsonify({
+        "data": data,
+        "meta": meta,
+        "total": len(data)
+    })
+
+@app.route('/api/stocks/<ticker>/details')
+@cache.cached(timeout=300, query_string=True)
+def get_stock_details_persisted(ticker):
+    """
+    Returns authoritative persisted data for the Stock Details view.
+    No live inference is performed.
+    """
+    if ticker not in TICKERS:
+        return jsonify({'error': 'Ticker not supported'}), 404
+        
+    range_param = request.args.get('range', '1Y')
+    valid_ranges = {'1M', '3M', '6M', '1Y', '5Y'}
+    if range_param not in valid_ranges:
+        return jsonify({'error': 'Invalid range'}), 400
+        
+    try:
+        # Get latest market date to anchor the chart range
+        latest_hist_doc = db.historical_data.find_one({"ticker": ticker}, sort=[("date", -1)])
+        if not latest_hist_doc:
+            return jsonify({'error': 'Historical data not found'}), 404
+            
+        latest_market_date_obj = latest_hist_doc['date']
+        
+        if range_param == '1M':
+            start_date = latest_market_date_obj - relativedelta(months=1)
+        elif range_param == '3M':
+            start_date = latest_market_date_obj - relativedelta(months=3)
+        elif range_param == '6M':
+            start_date = latest_market_date_obj - relativedelta(months=6)
+        elif range_param == '1Y':
+            start_date = latest_market_date_obj - relativedelta(years=1)
+        elif range_param == '5Y':
+            start_date = latest_market_date_obj - relativedelta(years=5)
+            
+        chart_cursor = db.historical_data.find({
+            "ticker": ticker,
+            "date": {"$gte": start_date, "$lte": latest_market_date_obj}
+        }).sort("date", 1)
+        
+        chart_data_list = []
+        for row in chart_cursor:
+            chart_data_list.append({
+                'time': row['date'].strftime('%Y-%m-%d'),
+                'open': row.get('open'),
+                'high': row.get('high'),
+                'low': row.get('low'),
+                'close': row.get('close'),
+                'volume': row.get('volume')
+            })
+            
+        latest_docs = list(db.historical_data.find({"ticker": ticker}).sort("date", -1).limit(2))
+        latest_docs = [d for d in latest_docs if pd.notna(d.get('close')) and pd.notna(d.get('open'))]
+        
+        market_stats = {
+            "market_date": latest_market_date_obj.strftime('%Y-%m-%d'),
+            "open": None, "high": None, "low": None, "last_close": None, 
+            "previous_close": None, "day_change": None, "day_change_pct": None, "volume": None
+        }
+        
+        if len(latest_docs) >= 1:
+            d0 = latest_docs[0]
+            market_stats["open"] = d0.get('open')
+            market_stats["high"] = d0.get('high')
+            market_stats["low"] = d0.get('low')
+            market_stats["last_close"] = d0.get('close')
+            market_stats["volume"] = d0.get('volume')
+            
+            if len(latest_docs) >= 2:
+                prev_close = latest_docs[1].get('close')
+            else:
+                prev_close = d0.get('open')
+                
+            market_stats["previous_close"] = prev_close
+            
+            if prev_close:
+                market_stats["day_change"] = round(d0.get('close') - prev_close, 2)
+                market_stats["day_change_pct"] = round(((d0.get('close') - prev_close) / prev_close) * 100, 2)
+
+        pred_doc = db.prediction_history.find_one({"symbol": ticker}, sort=[("market_date", -1)])
+        prediction_obj = None
+        if pred_doc:
+            prediction_obj = {
+                "market_date": pred_doc.get("market_date"),
+                "recommendation": pred_doc.get("recommendation"),
+                "raw_prediction": pred_doc.get("raw_prediction"),
+                "confidence": pred_doc.get("confidence"),
+                "confidence_tier": pred_doc.get("confidence_tier"),
+                "prediction_timestamp": pred_doc.get("prediction_timestamp").isoformat() if hasattr(pred_doc.get("prediction_timestamp"), 'isoformat') else pred_doc.get("prediction_timestamp"),
+                "prediction_horizon": pred_doc.get("prediction_horizon", 10),
+                "model_version": pred_doc.get("model_version")
+            }
+
+        response = {
+            "ticker": ticker,
+            "company": {
+                "name": NIFTY50_TICKER_MAP.get(ticker, ticker),
+                "sector": TICKER_TO_SECTOR.get(ticker, None)
+            },
+            "market": market_stats,
+            "prediction": prediction_obj,
+            "chartData": chart_data_list,
+            "meta": {
+                "range": range_param,
+                "chart_start": start_date.strftime('%Y-%m-%d'),
+                "chart_end": latest_market_date_obj.strftime('%Y-%m-%d'),
+                "chart_points": len(chart_data_list)
+            }
+        }
+        return jsonify(response)
+
+    except PyMongoError as e:
+        logger.error(f"Database error for {ticker}: {e}")
+        return jsonify({'error': 'Database failure'}), 503
+    except Exception as e:
+        logger.error(f"Unexpected error for {ticker}: {e}")
+        return jsonify({'error': 'Unexpected internal error'}), 500
+
+from bson import ObjectId
+import math
+import datetime
+
+def normalize_news_article(doc):
+    tickers = doc.get("tickers", [])
+    if not tickers and doc.get("ticker"):
+        tickers = [doc.get("ticker")]
+    # Some older docs don't have ticker populated if they were malformed, filter Nones
+    tickers = [t for t in tickers if t]
+    
+    return {
+        "id": str(doc.get("_id", "")),
+        "headline": doc.get("title", ""),
+        "summary": doc.get("description", doc.get("content", "")),
+        "source": doc.get("source", ""),
+        "url": doc.get("url"),
+        "published_at": doc.get("published_at").isoformat() + "Z" if hasattr(doc.get("published_at"), "isoformat") else None,
+        "sentiment": doc.get("label", "neutral").upper(),
+        "ticker": tickers[0] if tickers else None,
+        "tickers": tickers
+    }
+
+@app.route('/api/news')
+def get_news():
+    try:
+        ticker = request.args.get('ticker')
+        sentiment = request.args.get('sentiment')
+        try:
+            page = int(request.args.get('page', 1))
+            limit = int(request.args.get('limit', 25))
+        except ValueError:
+            return jsonify({'error': 'Invalid page or limit'}), 400
+            
+        if page < 1 or limit < 1 or limit > 100:
+            return jsonify({'error': 'Page must be >= 1, limit must be between 1 and 100'}), 400
+            
+        if ticker and ticker not in TICKERS:
+            return jsonify({'error': 'Unsupported ticker'}), 400
+            
+        if sentiment and sentiment not in ['POSITIVE', 'NEUTRAL', 'NEGATIVE']:
+            return jsonify({'error': 'Unsupported sentiment'}), 400
+            
+        offset = (page - 1) * limit
+        
+        
+        # Freshness Check
+        newest_doc = db.news_articles.find_one({}, sort=[("published_at", -1)])
+        newest_article_at = newest_doc.get("published_at") if newest_doc else None
+        is_stale = False
+        newest_article_at_str = None
+        if newest_article_at:
+            newest_article_at_str = newest_article_at.isoformat() + "Z" if hasattr(newest_article_at, "isoformat") else None
+            is_stale = (datetime.datetime.utcnow() - newest_article_at).days >= 7
+
+        query = {}
+        if ticker:
+            # Query matches either the new `tickers` array or the old `ticker` string field
+            query["$or"] = [{"tickers": ticker}, {"ticker": ticker}]
+        if sentiment:
+            query["label"] = sentiment.lower()
+            
+        # Compute sentiment counts
+        sentiment_pipeline = [
+            {"$match": query},
+            {"$group": {"_id": "$label", "count": {"$sum": 1}}}
+        ]
+        sentiment_results = list(db.news_articles.aggregate(sentiment_pipeline))
+        sentiment_counts = {"POSITIVE": 0, "NEUTRAL": 0, "NEGATIVE": 0, "UNSCORED": 0}
+        for r in sentiment_results:
+            label = r.get("_id")
+            if label and label.upper() in sentiment_counts:
+                sentiment_counts[label.upper()] = r["count"]
+            else:
+                sentiment_counts["UNSCORED"] += r["count"]
+        total = sum(sentiment_counts.values())
+
+        cursor = db.news_articles.find(query).sort("published_at", -1).skip(offset).limit(limit)
+        data = [normalize_news_article(doc) for doc in cursor]
+            
+        return jsonify({
+            "data": data,
+            "meta": {
+                "page": page,
+                "limit": limit,
+                "total": total,
+                "total_pages": math.ceil(total / limit) if total > 0 else 0,
+                "sentiment_counts": sentiment_counts,
+                "newest_article_at": newest_article_at_str,
+                "stale": is_stale
+            }
+        })
+    except PyMongoError as e:
+        logger.error(f"Database error in /api/news: {e}")
+        return jsonify({'error': 'Database unavailable'}), 503
+    except Exception as e:
+        logger.error(f"Unexpected error in /api/news: {e}")
+        return jsonify({'error': 'Internal error'}), 500
+
+@app.route('/api/news/<news_id>')
+def get_news_detail(news_id):
+    try:
+        doc = db.news_articles.find_one({"_id": ObjectId(news_id)})
+        if not doc:
+            return jsonify({"error": "Article not found"}), 404
+            
+        # Fetch associated tickers (logical deduplication)
+        title = doc.get("title")
+        source = doc.get("source")
+        if title and source:
+            matching_docs = db.news_articles.find({"title": title, "source": source}, {"ticker": 1})
+            tickers = list(set(d.get("ticker") for d in matching_docs if d.get("ticker")))
+            doc["tickers"] = tickers
+            
+        return jsonify(normalize_news_article(doc, deduplicated=True))
+    except Exception as e:
+        return jsonify({"error": "Invalid news ID or request"}), 400
 def get_prediction_history():
     from flask import request
     symbol = request.args.get('symbol')

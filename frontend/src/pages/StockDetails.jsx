@@ -1,6 +1,6 @@
-import { lazy, Suspense } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowDownRight, ArrowLeft, ArrowUpRight, ChevronRight, Star } from 'lucide-react'
+import { lazy, Suspense, useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { ArrowDownRight, ArrowLeft, ArrowUpRight, Star } from 'lucide-react'
 import { Badge } from '../components/common/Badge'
 import { Button } from '../components/common/Button'
 import { Card } from '../components/common/Card'
@@ -8,30 +8,66 @@ import { EmptyState } from '../components/common/EmptyState'
 import { LoadingState } from '../components/common/LoadingState'
 import { ConfidenceBar } from '../components/recommendations/ConfidenceBar'
 import { RecommendationBadge } from '../components/recommendations/RecommendationBadge'
-import { RecommendationExplanation } from '../components/recommendations/RecommendationExplanation'
 import { RiskBadge } from '../components/recommendations/RiskBadge'
-import { SentimentBadge } from '../components/news/SentimentBadge'
-import { TechnicalIndicators } from '../components/stocks/TechnicalIndicators'
 import { useWatchlist } from '../context/WatchlistContext'
-import { getStockDetail, getStockNews } from '../mocks/stocks'
+import { fetchStockDetails } from '../api/stocks'
 import { directionForValue, formatCurrency, formatPercent } from '../utils/formatters'
 import './stock-details.css'
 
 const PriceChart = lazy(() => import('../components/charts/PriceChart').then(m => ({ default: m.PriceChart })))
 
-const signalTones = { BUY: 'positive', 'STRONG BUY': 'positive', HOLD: 'warning', SELL: 'negative', 'STRONG SELL': 'negative' }
+const signalTones = { BUY: 'positive', HOLD: 'warning', SELL: 'negative', UNCERTAIN: 'neutral' }
 
 export function StockDetails() {
   const { ticker } = useParams()
   const navigate = useNavigate()
   const decodedTicker = decodeURIComponent(ticker)
-  const stock = getStockDetail(decodedTicker)
-  const news = stock ? getStockNews(decodedTicker) : []
+  
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [range, setRange] = useState('1Y')
+  const [chartLoading, setChartLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [notFound, setNotFound] = useState(false)
+
   const { isInWatchlist, toggleWatchlist } = useWatchlist()
-  const saved = stock ? isInWatchlist(stock.ticker) : false
+  const saved = isInWatchlist(decodedTicker)
+
+  useEffect(() => {
+    async function loadInitial() {
+      try {
+        setLoading(true)
+        setError(null)
+        setNotFound(false)
+        const res = await fetchStockDetails(decodedTicker, '1Y')
+        setData(res)
+        setRange('1Y')
+      } catch (err) {
+        if (err.status === 404) setNotFound(true)
+        else setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadInitial()
+  }, [decodedTicker]) // Load 1Y initially on mount/ticker change
+
+  const handleRangeChange = async (newRange) => {
+    if (newRange === range) return
+    try {
+      setChartLoading(true)
+      const res = await fetchStockDetails(decodedTicker, newRange)
+      setData(res)
+      setRange(newRange)
+    } catch (err) {
+      console.error('Failed to change range', err)
+      // On failure to switch range, just silently fail or show toast. We'll leave it as is.
+    } finally {
+      setChartLoading(false)
+    }
+  }
 
   const goBack = () => {
-    // Use browser history if available, otherwise fall back to /stocks
     if (window.history.length > 1) {
       navigate(-1)
     } else {
@@ -39,17 +75,40 @@ export function StockDetails() {
     }
   }
 
-  if (!stock) {
+  if (loading) {
     return (
       <div className="stock-details">
         <button className="back-link" onClick={goBack}><ArrowLeft size={16} aria-hidden="true" />Back</button>
-        <EmptyState title="Stock not found" description={`No demo stock data exists for "${decodedTicker}".`} action={{ label: 'Browse stocks', onClick: () => navigate('/stocks') }} />
+        <LoadingState label={`Loading data for ${decodedTicker}...`} />
       </div>
     )
   }
 
-  const direction = directionForValue(stock.priceChangePercent)
+  if (notFound) {
+    return (
+      <div className="stock-details">
+        <button className="back-link" onClick={goBack}><ArrowLeft size={16} aria-hidden="true" />Back</button>
+        <EmptyState title="Stock not found" description={`No data exists for "${decodedTicker}".`} action={{ label: 'Browse stocks', onClick: () => navigate('/stocks') }} />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="stock-details">
+        <button className="back-link" onClick={goBack}><ArrowLeft size={16} aria-hidden="true" />Back</button>
+        <EmptyState title="Failed to load stock" description={error} />
+      </div>
+    )
+  }
+
+  if (!data) return null
+
+  const { company, market, prediction, chartData } = data
+  const direction = directionForValue(market.day_change_pct)
   const MovementIcon = direction === 'negative' ? ArrowDownRight : ArrowUpRight
+  
+  const isPartial = !prediction
 
   return (
     <div className="stock-details">
@@ -59,20 +118,22 @@ export function StockDetails() {
       <header className="stock-header">
         <div className="stock-header__identity">
           <div>
-            <span className="eyebrow">{stock.symbol}</span>
-            <h1>{stock.companyName} <span className="stock-header__exchange">{stock.exchange}</span></h1>
+            <span className="eyebrow">{decodedTicker}</span>
+            <h1>{company.name} <span className="stock-header__exchange">{company.sector || 'Unknown Sector'}</span></h1>
           </div>
-          <Badge tone="accent">Demo data</Badge>
+          {isPartial ? <Badge tone="warning">Partial Data</Badge> : <Badge tone="positive">Live</Badge>}
         </div>
         <div className="stock-header__price-row">
           <div>
-            <strong className="stock-header__price mono">{formatCurrency(stock.currentPrice)}</strong>
-            <span className={`stock-header__change stock-header__change--${direction}`}>
-              <MovementIcon aria-hidden="true" size={15} />
-              {stock.priceChange > 0 ? '+' : ''}{formatCurrency(stock.priceChange).replace('₹', '₹')} ({formatPercent(stock.priceChangePercent)}) Today
-            </span>
+            <strong className="stock-header__price mono">{market.last_close != null ? formatCurrency(market.last_close) : '—'}</strong>
+            {market.day_change != null && (
+              <span className={`stock-header__change stock-header__change--${direction}`}>
+                <MovementIcon aria-hidden="true" size={15} />
+                {market.day_change > 0 ? '+' : ''}{formatCurrency(market.day_change).replace('₹', '₹')} ({formatPercent(market.day_change_pct)}) Today
+              </span>
+            )}
           </div>
-          <Button variant="secondary" className={`watchlist-button ${saved ? 'watchlist-button--saved' : ''}`} onClick={() => toggleWatchlist(stock.ticker)} aria-pressed={saved}>
+          <Button variant="secondary" className={`watchlist-button ${saved ? 'watchlist-button--saved' : ''}`} onClick={() => toggleWatchlist(decodedTicker)} aria-pressed={saved}>
             <Star size={16} aria-hidden="true" fill={saved ? 'currentColor' : 'none'} />{saved ? 'In Watchlist' : 'Add to Watchlist'}
           </Button>
         </div>
@@ -81,66 +142,37 @@ export function StockDetails() {
       {/* ── Chart + Signal (row 1) ── */}
       <div className="details-grid">
         <Suspense fallback={<LoadingState label="Loading price chart" />}>
-          <PriceChart seriesByRange={stock.priceHistory} direction={direction} />
+          <PriceChart chartData={chartData} range={range} onRangeChange={handleRangeChange} loading={chartLoading} direction={direction} />
         </Suspense>
 
         <section aria-labelledby="signal-heading">
           <h2 id="signal-heading" className="section-label">Model signal</h2>
-          <Card className="signal-card">
-            <RecommendationBadge signal={stock.signal} />
-            <ConfidenceBar value={stock.confidence} tone={signalTones[stock.signal] ?? 'positive'} />
-            <div className="signal-card__metrics">
-              <div>
-                <span>Target Price</span>
-                <strong className="mono">{formatCurrency(stock.targetPrice)}</strong>
-              </div>
-              <div>
-                <span>Expected Return</span>
-                <strong className={`mono ${stock.expectedReturn >= 0 ? 'metric-positive' : 'metric-negative'}`}>{formatPercent(stock.expectedReturn)}</strong>
-              </div>
-              <div>
-                <span>Risk</span>
-                <RiskBadge risk={stock.risk} />
-              </div>
-            </div>
-          </Card>
-        </section>
-      </div>
-
-      {/* ── Explanations + Indicators (row 2) ── */}
-      <div className="details-grid">
-        <section aria-labelledby="explanation-heading">
-          <h2 id="explanation-heading" className="section-label">Why this recommendation?</h2>
-          <RecommendationExplanation explanations={stock.explanations} />
-        </section>
-
-        <section aria-labelledby="indicators-heading">
-          <h2 id="indicators-heading" className="section-label">Technical indicators</h2>
-          <TechnicalIndicators indicators={stock.technicalIndicators} />
-        </section>
-      </div>
-
-      {/* ── Relevant News ── */}
-      {news.length > 0 && (
-        <section aria-labelledby="stock-news-heading">
-          <div className="section-heading">
-            <h2 id="stock-news-heading">Relevant news</h2>
-            <Link className="section-link" to={`/news?stock=${stock.symbol}`}>View all news <ChevronRight aria-hidden="true" size={15} /></Link>
-          </div>
-          <Card className="stock-news-card">
-            {news.map(story => (
-              <article className="stock-news-item" key={story.id}>
-                <div className="stock-news-item__heading">
-                  <SentimentBadge sentiment={story.sentiment} />
-                  <time>{story.publishedAt}</time>
+          {prediction ? (
+            <Card className="signal-card">
+              <RecommendationBadge signal={prediction.recommendation} />
+              <ConfidenceBar value={prediction.confidence} tone={signalTones[prediction.recommendation] ?? 'positive'} />
+              <div className="signal-card__metrics">
+                <div>
+                  <span>Raw Prediction</span>
+                  <strong className="mono">{prediction.raw_prediction}</strong>
                 </div>
-                <Link to={`/news/${story.id}`}><h3>{story.headline}</h3></Link>
-                <span className="stock-news-item__source">{story.source}</span>
-              </article>
-            ))}
-          </Card>
+                <div>
+                  <span>Confidence Tier</span>
+                  <RiskBadge risk={prediction.confidence_tier} />
+                </div>
+                <div>
+                  <span>Model Version</span>
+                  <strong className="mono" style={{ fontSize: '0.85em' }}>{prediction.model_version || 'unknown'}</strong>
+                </div>
+              </div>
+            </Card>
+          ) : (
+            <Card className="signal-card">
+              <EmptyState title="No prediction" description="No ML model prediction is available for this stock." />
+            </Card>
+          )}
         </section>
-      )}
+      </div>
     </div>
   )
 }

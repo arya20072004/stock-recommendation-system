@@ -1,5 +1,3 @@
-import { demoNews } from './news'
-
 // Phase 3 stock universe and detail metadata. This remains the single stock source of truth.
 function createRng(seed) {
   let h = 0
@@ -74,7 +72,13 @@ export function getStockByRouteTicker(routeTicker) { const normalized = decodeUR
 export function toRouteTicker(symbol) { return stockBySymbol[symbol]?.ticker ?? `${symbol}.NS` }
 export function getRecommendations() { return stocks.map((stock) => ({ ticker: stock.ticker, symbol: stock.symbol, companyName: stock.companyName, exchange: stock.exchange, sector: stock.sector, currentPrice: stock.currentPrice, priceChange: stock.priceChange, priceChangePercent: stock.priceChangePercent, signal: stock.signal, confidence: stock.confidence, targetPrice: stock.targetPrice, expectedReturn: stock.expectedReturn, risk: stock.risk })) }
 export function getStockDetail(ticker) { return stocks.find((stock) => stock.ticker === ticker) ?? null }
-export function getStockNews(ticker) { const symbol = ticker.replace('.NS', ''); return demoNews.filter((article) => article.tickers.includes(symbol)) }
+export function getStockNews(ticker) { 
+  // News logic temporarily disabled until dashboard integration
+  return { 
+    totalNews: 0, 
+    sentiment: { POSITIVE: 0, NEUTRAL: 0, NEGATIVE: 0 } 
+  }
+}
 export function getSectors() { return [...new Set(stocks.map((stock) => stock.sector))].sort() }
 export function getAllStocks() { return getRecommendations() }
 export function getSignals() { return [...new Set(stocks.map((stock) => stock.signal))] }
