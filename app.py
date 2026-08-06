@@ -291,7 +291,9 @@ def get_prediction_history():
     offset = int(request.args.get('offset', 0))
     
     query = {}
-    if symbol: query['symbol'] = symbol
+    if symbol:
+        import re
+        query['symbol'] = {'$regex': re.escape(symbol), '$options': 'i'}
     if recommendation: query['recommendation'] = recommendation
     if outcome: query['outcome'] = outcome
     if model_version: query['model_version'] = model_version

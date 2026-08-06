@@ -2,32 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import './prediction-history.css';
-import { demoPredictionDetail } from '../data/predictionHistoryDemoData';
 
 export function PredictionDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isDemo, setIsDemo] = useState(false);
+  const [error, setError] = useState(false);
   const [showAllFeatures, setShowAllFeatures] = useState(false);
 
   useEffect(() => {
     const fetchDetail = async () => {
       setLoading(true);
+      setError(false);
       try {
         const res = await fetch(`/api/predictions/history/${id}`);
         if (res.ok) {
           const json = await res.json();
           setData(json);
-          setIsDemo(false);
         } else {
           throw new Error('API failed');
         }
       } catch (err) {
-        console.error("Failed to fetch prediction detail, using demo data:", err);
-        setData(demoPredictionDetail);
-        setIsDemo(true);
+        console.error("Failed to fetch prediction detail:", err);
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -37,11 +35,24 @@ export function PredictionDetail() {
   }, [id]);
 
   if (loading) {
-    return <div className="prediction-history-page">Loading...</div>;
+    return <div className="prediction-history-page" style={{textAlign: 'center', padding: '48px'}}>Loading...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="prediction-history-page">
+        <div className="back-link" onClick={() => navigate('/predictions/history')}>
+          <ArrowLeft size={16} /> Back
+        </div>
+        <div style={{textAlign: 'center', padding: '48px', color: 'var(--negative, #ef4444)'}}>
+          Unable to load prediction detail.
+        </div>
+      </div>
+    );
   }
 
   if (!data) {
-    return <div className="prediction-history-page">Prediction not found.</div>;
+    return <div className="prediction-history-page" style={{textAlign: 'center', padding: '48px', color: 'var(--text-muted, #a1a1aa)'}}>Prediction not found.</div>;
   }
 
   const getBadgeClass = (value) => {
@@ -83,7 +94,7 @@ export function PredictionDetail() {
 
       <div className="detail-header">
         <div>
-          <h1 className="detail-title">{data.symbol} {isDemo && <span className="demo-badge">Demo data</span>}</h1>
+          <h1 className="detail-title">{data.symbol}</h1>
           <div className="detail-meta">
             Generated: {new Date(displayDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} · {new Date(displayDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
             <br />
