@@ -11,6 +11,7 @@ import { Watchlist } from './pages/Watchlist'
 import { NotFoundPage, PlaceholderPage } from './pages/PlaceholderPage'
 import { PredictionHistory } from './pages/PredictionHistory'
 import { PredictionDetail } from './pages/PredictionDetail'
+import { ModelIntelligence } from './pages/ModelIntelligence'
 
 const pages = {
   news: {
@@ -52,7 +53,7 @@ export default function App() {
           <Route path="/news/:newsId" element={<NewsDetail />} />
           <Route path="/predictions/history" element={<PredictionHistory />} />
           <Route path="/predictions/:id" element={<PredictionDetail />} />
-          <Route path="/model" element={placeholder(pages.model)} />
+          <Route path="/model" element={<ModelIntelligence />} />
           <Route path="/portfolio" element={placeholder(pages.portfolio)} />
           <Route path="/settings" element={placeholder(pages.settings)} />
           <Route path="/not-found" element={<NotFoundPage />} />

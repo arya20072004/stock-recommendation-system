@@ -375,5 +375,91 @@ def get_prediction_performance():
         "average_confidence": round(avg_confidence, 1) if avg_confidence else 0
     })
 
+@app.route('/api/models')
+def get_models():
+    """Return a list of available models and their high-level metadata."""
+    MODELS_DIR = "saved_models"
+    models_data = []
+    
+    if os.path.exists(MODELS_DIR):
+        for filename in os.listdir(MODELS_DIR):
+            if filename.endswith("_metrics.json"):
+                ticker = filename.replace("_metrics.json", "")
+                filepath = os.path.join(MODELS_DIR, filename)
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    
+                    model_metadata = data.get("model_metadata", {})
+                    models_data.append({
+                        "ticker": ticker,
+                        "model_version": model_metadata.get("model_version"),
+                        "trained_at": model_metadata.get("trained_at"),
+                        "f1_macro": data.get("f1_macro"),
+                        "very_low_confidence": data.get("very_low_confidence", False)
+                    })
+                except Exception as e:
+                    print(f"Error reading {filename}: {e}")
+                    
+    return jsonify({
+        "data": models_data,
+        "total": len(models_data)
+    })
+
+@app.route('/api/models/<ticker>/intelligence')
+def get_model_intelligence(ticker):
+    """Return complete Model Intelligence payload for a specific ticker."""
+    MODELS_DIR = "saved_models"
+    metrics_path = os.path.join(MODELS_DIR, f"{ticker}_metrics.json")
+    
+    if not os.path.exists(metrics_path):
+        return jsonify({"error": "Metrics artifact not found"}), 404
+        
+    try:
+        with open(metrics_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            
+        # Structure the payload as requested
+        payload = {
+            "ticker": ticker,
+            "model_metadata": data.get("model_metadata"),  # will be null if legacy
+            "metrics": {
+                "f1_macro": data.get("f1_macro"),
+                "per_class": data.get("per_class_metrics", {}),
+                "train_size": data.get("train_size"),
+                "test_size": data.get("test_size"),
+                "total_rows_after_features": data.get("total_rows_after_features"),
+                "mean_max_probability": data.get("confidence_stats", {}).get("mean_max_proba"),
+                "mean_top2_margin": data.get("confidence_stats", {}).get("mean_top2_margin"),
+                "very_low_confidence": data.get("very_low_confidence", False)
+            },
+            "distributions": {
+                "training_labels": data.get("label_distribution", {}),
+                "test_predictions": data.get("test_prediction_distribution") # will be null if legacy
+            },
+            "feature_importance": data.get("feature_importance", []), # will be [] if legacy
+            "training": {
+                "data_start": data.get("data_fingerprint", {}).get("feature_date_min"),
+                "data_end": data.get("data_fingerprint", {}).get("feature_date_max"),
+                "data_fingerprint": str(data.get("data_fingerprint", {}).get("row_hash", "")),
+                "optuna": data.get("optuna"),
+                "smote_floors": data.get("smote_floors_used"),
+                "threshold_calibration": data.get("threshold_calibration")
+            }
+        }
+        
+        # Normalize numeric keys in training_labels to strings ("0" -> "SELL", etc.)
+        class_map = {"0": "SELL", "1": "HOLD", "2": "BUY"}
+        if payload["distributions"]["training_labels"]:
+            normalized_labels = {}
+            for k, v in payload["distributions"]["training_labels"].items():
+                normalized_labels[class_map.get(k, k)] = v
+            payload["distributions"]["training_labels"] = normalized_labels
+            
+        return jsonify(payload)
+        
+    except Exception as e:
+        return jsonify({"error": f"Error reading metrics for {ticker}: {str(e)}"}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)

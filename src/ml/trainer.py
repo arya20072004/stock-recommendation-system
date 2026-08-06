@@ -46,6 +46,7 @@ from src.features.engineering import (
     TICKER_CLASS_THRESHOLDS,
     apply_threshold_calibration,
 )
+from src.ml.model_utils import get_model_version
 
 
 # --- SETUP ---
@@ -706,14 +707,52 @@ def train_model(df, ticker):
     sorted_probas  = np.sort(y_proba, axis=1)[:, ::-1]
     top2_margins   = sorted_probas[:, 0] - sorted_probas[:, 1]
 
+    # Model Intelligence: test prediction distribution using the exact final y_pred
+    pred_counts = pd.Series(y_pred).value_counts()
+    test_prediction_distribution = {
+        "SELL": int(pred_counts.get(0, 0)),
+        "HOLD": int(pred_counts.get(1, 0)),
+        "BUY":  int(pred_counts.get(2, 0))
+    }
+
+    # Model Intelligence: feature importance
+    try:
+        importances = best_model.feature_importances_
+        if len(importances) == len(features):
+            feature_importance = [
+                {"feature": f, "importance": float(imp)} 
+                for f, imp in zip(features, importances)
+            ]
+            feature_importance.sort(key=lambda x: x["importance"], reverse=True)
+        else:
+            logger.error("%s: feature_importances length (%d) != features length (%d)", ticker, len(importances), len(features))
+            feature_importance = []
+    except Exception as e:
+        logger.warning("%s: could not extract feature importance: %s", ticker, e)
+        feature_importance = []
+
+    # Model Intelligence: metadata
+    trained_at = datetime.now(timezone.utc).isoformat()
+    model_version = get_model_version(ticker)
+    prediction_horizon = TICKER_HORIZON_OVERRIDE.get(ticker, 10)
+
     metrics_payload = {
         "ticker": ticker,
+        "model_metadata": {
+            "trained_at": trained_at,
+            "model_version": model_version,
+            "prediction_horizon": prediction_horizon,
+            "feature_count": len(features),
+            "model_type": "XGBClassifier"
+        },
         "f1_macro": float(f1_macro),
         "per_class_metrics": per_class_metrics,
         "train_size": int(len(X_train)),
         "test_size":  int(len(X_test)),
         "total_rows_after_features": int(len(df)),
         "label_distribution": label_distribution,
+        "test_prediction_distribution": test_prediction_distribution,
+        "feature_importance": feature_importance,
         "confidence_stats": {
             "mean_max_proba":   float(np.mean(max_probas)),
             "mean_top2_margin": float(np.mean(top2_margins)),
