@@ -1,51 +1,51 @@
 {
   "ticker": "COALINDIA.NS",
-  "f1_macro": 0.3158217218296269,
+  "f1_macro": 0.3003062076452466,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.34146341463414637,
-      "recall": 0.23728813559322035,
-      "f1": 0.28,
+      "precision": 0.2653061224489796,
+      "recall": 0.22033898305084745,
+      "f1": 0.24074074074074073,
       "support": 59
     },
     "HOLD": {
-      "precision": 0.3269230769230769,
-      "recall": 0.2463768115942029,
-      "f1": 0.2809917355371901,
+      "precision": 0.30612244897959184,
+      "recall": 0.21739130434782608,
+      "f1": 0.2542372881355932,
       "support": 69
     },
     "BUY": {
-      "precision": 0.3305785123966942,
-      "recall": 0.46511627906976744,
-      "f1": 0.3864734299516908,
+      "precision": 0.35344827586206895,
+      "recall": 0.47674418604651164,
+      "f1": 0.40594059405940597,
       "support": 86
     }
   },
-  "train_size": 856,
+  "train_size": 855,
   "test_size": 214,
-  "total_rows_after_features": 1070,
+  "total_rows_after_features": 1069,
   "label_distribution": {
     "0": 293,
     "1": 297,
-    "2": 480
+    "2": 479
   },
   "confidence_stats": {
-    "mean_max_proba": 0.573131263256073,
-    "mean_top2_margin": 0.2968340814113617,
-    "f1_macro": 0.3158217218296269
+    "mean_max_proba": 0.5381923317909241,
+    "mean_top2_margin": 0.24521803855895996,
+    "f1_macro": 0.3003062076452466
   },
   "optuna": {
-    "best_value": 0.3251847109380709,
+    "best_value": 0.30942410167542034,
     "best_params": {
-      "n_estimators": 250,
-      "max_depth": 4,
-      "learning_rate": 0.29867222827017564,
-      "subsample": 0.7041316888433558,
-      "colsample_bytree": 0.7636675739049248,
-      "min_child_weight": 5,
-      "reg_lambda": 12.754473924640912,
-      "reg_alpha": 2.07096785298185,
-      "gamma": 0.48096917845022935
+      "n_estimators": 275,
+      "max_depth": 5,
+      "learning_rate": 0.14316829155817146,
+      "subsample": 0.7086032039931008,
+      "colsample_bytree": 0.7245956418266708,
+      "min_child_weight": 12,
+      "reg_lambda": 7.028526536370975,
+      "reg_alpha": 3.67306312062773,
+      "gamma": 0.489663950871865
     },
     "n_trials": 30,
     "cv_splits": 5,
@@ -63,8 +63,8 @@
   },
   "very_low_confidence": true,
   "data_fingerprint": {
-    "feature_date_min": "2021-09-16 00:00:00",
+    "feature_date_min": "2021-09-17 00:00:00",
     "feature_date_max": "2026-04-30 00:00:00",
-    "row_hash": 15127543379702700803
+    "row_hash": 5676589625066152763
   }
 }

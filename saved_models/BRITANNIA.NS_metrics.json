@@ -1,51 +1,51 @@
 {
   "ticker": "BRITANNIA.NS",
-  "f1_macro": 0.3653020636736403,
+  "f1_macro": 0.30128747438901743,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.30303030303030304,
-      "recall": 0.18181818181818182,
-      "f1": 0.22727272727272727,
+      "precision": 0.19230769230769232,
+      "recall": 0.09090909090909091,
+      "f1": 0.12345679012345678,
       "support": 55
     },
     "HOLD": {
-      "precision": 0.5604395604395604,
-      "recall": 0.5,
-      "f1": 0.5284974093264249,
+      "precision": 0.4782608695652174,
+      "recall": 0.43137254901960786,
+      "f1": 0.4536082474226804,
       "support": 102
     },
     "BUY": {
-      "precision": 0.2777777777777778,
+      "precision": 0.2604166666666667,
       "recall": 0.43859649122807015,
-      "f1": 0.3401360544217687,
+      "f1": 0.32679738562091504,
       "support": 57
     }
   },
-  "train_size": 856,
+  "train_size": 855,
   "test_size": 214,
-  "total_rows_after_features": 1070,
+  "total_rows_after_features": 1069,
   "label_distribution": {
-    "0": 271,
+    "0": 270,
     "1": 483,
     "2": 316
   },
   "confidence_stats": {
-    "mean_max_proba": 0.6675501465797424,
-    "mean_top2_margin": 0.4293607473373413,
-    "f1_macro": 0.3653020636736403
+    "mean_max_proba": 0.6534391045570374,
+    "mean_top2_margin": 0.411236971616745,
+    "f1_macro": 0.30128747438901743
   },
   "optuna": {
-    "best_value": 0.33986936743320967,
+    "best_value": 0.3119034880886922,
     "best_params": {
-      "n_estimators": 349,
+      "n_estimators": 686,
       "max_depth": 4,
-      "learning_rate": 0.21799617045428893,
-      "subsample": 0.7344523932147171,
-      "colsample_bytree": 0.875970337469617,
+      "learning_rate": 0.035540023808746796,
+      "subsample": 0.9569088942115528,
+      "colsample_bytree": 0.9275924461282984,
       "min_child_weight": 14,
-      "reg_lambda": 5.7979278221886155,
-      "reg_alpha": 1.6804468250722056,
-      "gamma": 0.2099081743280751
+      "reg_lambda": 2.4185407360483975,
+      "reg_alpha": 1.851388584718252,
+      "gamma": 0.11295119156270389
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -63,8 +63,8 @@
   },
   "very_low_confidence": false,
   "data_fingerprint": {
-    "feature_date_min": "2021-09-16 00:00:00",
+    "feature_date_min": "2021-09-17 00:00:00",
     "feature_date_max": "2026-04-30 00:00:00",
-    "row_hash": 8759750061823885629
+    "row_hash": 1809657283102345479
   }
 }

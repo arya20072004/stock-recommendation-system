@@ -1,51 +1,51 @@
 {
   "ticker": "ICICIBANK.NS",
-  "f1_macro": 0.3695149911816579,
+  "f1_macro": 0.37269427896329904,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.7222222222222222,
-      "recall": 0.15853658536585366,
-      "f1": 0.26,
+      "precision": 0.7083333333333334,
+      "recall": 0.2073170731707317,
+      "f1": 0.32075471698113206,
       "support": 82
     },
     "HOLD": {
-      "precision": 0.41353383458646614,
-      "recall": 0.6626506024096386,
-      "f1": 0.5092592592592593,
+      "precision": 0.40869565217391307,
+      "recall": 0.5662650602409639,
+      "f1": 0.47474747474747475,
       "support": 83
     },
     "BUY": {
-      "precision": 0.30158730158730157,
-      "recall": 0.3877551020408163,
-      "f1": 0.3392857142857143,
+      "precision": 0.26666666666666666,
+      "recall": 0.40816326530612246,
+      "f1": 0.3225806451612903,
       "support": 49
     }
   },
-  "train_size": 856,
+  "train_size": 855,
   "test_size": 214,
-  "total_rows_after_features": 1070,
+  "total_rows_after_features": 1069,
   "label_distribution": {
-    "0": 306,
+    "0": 305,
     "1": 388,
     "2": 376
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5211253762245178,
-    "mean_top2_margin": 0.20935870707035065,
-    "f1_macro": 0.3695149911816579
+    "mean_max_proba": 0.545693576335907,
+    "mean_top2_margin": 0.24168647825717926,
+    "f1_macro": 0.37269427896329904
   },
   "optuna": {
-    "best_value": 0.3448038297216369,
+    "best_value": 0.33647597181848354,
     "best_params": {
-      "n_estimators": 329,
-      "max_depth": 7,
-      "learning_rate": 0.13022044469024033,
-      "subsample": 0.9381958758605512,
-      "colsample_bytree": 0.8063665741422081,
-      "min_child_weight": 6,
-      "reg_lambda": 3.772262084497089,
-      "reg_alpha": 0.5586872436905963,
-      "gamma": 2.102697862338254
+      "n_estimators": 501,
+      "max_depth": 6,
+      "learning_rate": 0.19270441172138872,
+      "subsample": 0.9895694488805038,
+      "colsample_bytree": 0.7693694129667569,
+      "min_child_weight": 13,
+      "reg_lambda": 3.552329429068968,
+      "reg_alpha": 1.0712012113538718,
+      "gamma": 0.9223785254324268
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -59,8 +59,8 @@
   "threshold_calibration": null,
   "very_low_confidence": false,
   "data_fingerprint": {
-    "feature_date_min": "2021-09-16 00:00:00",
+    "feature_date_min": "2021-09-17 00:00:00",
     "feature_date_max": "2026-04-30 00:00:00",
-    "row_hash": 6319602690666593689
+    "row_hash": 6591097102806502674
   }
 }

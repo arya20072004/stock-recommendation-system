@@ -130,6 +130,16 @@ TICKER_HISTORY_OVERRIDE = {
     "HDFCBANK.NS": 3, # sector disable insufficient — regime mismatch
 }
 
+TICKER_HORIZON_OVERRIDE: dict[str, int] = {
+    "NTPC.NS":      5,
+    "POWERGRID.NS": 5,
+    "BAJAJFINSV.NS":5,
+    "INFY.NS":      5,   # ADD — 10d too noisy for IT earnings-driven stock
+    "WIPRO.NS":     5,   # ADD — same reasoning
+    "HCLTECH.NS":   5,   # ADD — same reasoning
+    "SBIN.NS":      5,   # ADD — same reasoning, persistent train/test disconnect
+}
+
 # Explicit start-date floors — for tickers where a relative "N years
 # back" window would still reach into contaminated/pre-corporate-action
 # history. Checked BEFORE TICKER_HISTORY_OVERRIDE's relative window in
@@ -874,9 +884,49 @@ def add_derived_features(df, ticker, client):
     df["price_change_1d"]   = df["close"].shift(1).pct_change(1)
     df["price_change_5d"]   = df["close"].shift(1).pct_change(5)
     df["market_correlation"] = (
-        df["return"].shift(1)
-        .rolling(window=30)
-        .corr(df["nifty_return"].shift(1))
+        df["return"]
+        .shift(1)
+        .rolling(
+            window=30,
+            min_periods=20,
+        )
+        .corr(
+            df["nifty_return"].shift(1)
+        )
+    )
+
+    # --- DIAGNOSTIC: inspect market correlation inputs/output ---
+    logger.info(
+        "%s: MARKET CORRELATION DIAGNOSTIC | "
+        "latest_date=%s | "
+        "market_corr_latest=%s | market_corr_last_valid=%s | "
+        "nifty_return_latest=%s | nifty_return_last_valid=%s | "
+        "stock_return_latest=%s | stock_return_last_valid=%s",
+        ticker,
+        df.index[-1],
+        df["market_correlation"].iloc[-1],
+        df["market_correlation"].last_valid_index(),
+        df["nifty_return"].iloc[-1],
+        df["nifty_return"].last_valid_index(),
+        df["return"].iloc[-1],
+        df["return"].last_valid_index(),
+    )
+
+    # Count valid stock/Nifty return pairs in the latest 30-row window
+    latest_30 = pd.DataFrame({
+        "stock_return": df["return"].shift(1),
+        "nifty_return": df["nifty_return"].shift(1),
+    }).tail(30)
+
+    valid_pairs = latest_30.dropna()
+
+    logger.info(
+        "%s: MARKET CORRELATION WINDOW | "
+        "rows=30 | valid_pairs=%d | missing_stock=%d | missing_nifty=%d",
+        ticker,
+        len(valid_pairs),
+        int(latest_30["stock_return"].isna().sum()),
+        int(latest_30["nifty_return"].isna().sum()),
     )
 
     # --- OBV deviation ---
@@ -984,6 +1034,41 @@ def build_feature_row(ticker, client, db):
         raise ValueError(f"{ticker}: failed to fetch Nifty data")
 
     df = prices_df.join(nifty_df[["nifty_return", "market_regime"]], how="left")
+
+    # --- DIAGNOSTIC: verify Nifty alignment with stock trading dates ---
+    missing_nifty = df["nifty_return"].isna()
+
+    if missing_nifty.any():
+        missing_dates = df.index[missing_nifty]
+
+        logger.warning(
+            "%s: Nifty return missing on %d/%d stock trading dates | "
+            "first_missing=%s | last_missing=%s | nifty_last_valid=%s",
+            ticker,
+            int(missing_nifty.sum()),
+            len(df),
+            missing_dates.min(),
+            missing_dates.max(),
+            df["nifty_return"].last_valid_index(),
+        )
+    else:
+        logger.info(
+            "%s: Nifty return alignment OK | %d/%d dates populated | "
+            "last_valid=%s",
+            ticker,
+            int(df["nifty_return"].notna().sum()),
+            len(df),
+            df["nifty_return"].last_valid_index(),
+        )
+
+    logger.info(
+        "%s: stock_date_range=%s -> %s | nifty_date_range=%s -> %s",
+        ticker,
+        df.index.min(),
+        df.index.max(),
+        nifty_df.index.min(),
+        nifty_df.index.max(),
+    )
 
     # --- 2. Macro join (zero-fill on failure, matching ALL_MACRO_COLS) ---
     macro_df = _prepare_macro_data(start_date, end_date, client)

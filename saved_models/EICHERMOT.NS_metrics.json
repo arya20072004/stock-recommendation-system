@@ -1,51 +1,51 @@
 {
   "ticker": "EICHERMOT.NS",
-  "f1_macro": 0.2165810441494489,
+  "f1_macro": 0.2620180806325703,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.15267175572519084,
-      "recall": 0.5263157894736842,
-      "f1": 0.23668639053254437,
+      "precision": 0.13953488372093023,
+      "recall": 0.3157894736842105,
+      "f1": 0.1935483870967742,
       "support": 38
     },
     "HOLD": {
-      "precision": 0.43636363636363634,
-      "recall": 0.2553191489361702,
-      "f1": 0.3221476510067114,
+      "precision": 0.4431818181818182,
+      "recall": 0.4148936170212766,
+      "f1": 0.42857142857142855,
       "support": 94
     },
     "BUY": {
-      "precision": 0.17857142857142858,
-      "recall": 0.06097560975609756,
-      "f1": 0.09090909090909091,
+      "precision": 0.25,
+      "recall": 0.12195121951219512,
+      "f1": 0.16393442622950818,
       "support": 82
     }
   },
-  "train_size": 856,
+  "train_size": 855,
   "test_size": 214,
-  "total_rows_after_features": 1070,
+  "total_rows_after_features": 1069,
   "label_distribution": {
     "0": 264,
-    "1": 410,
+    "1": 409,
     "2": 396
   },
   "confidence_stats": {
-    "mean_max_proba": 0.4330686330795288,
-    "mean_top2_margin": 0.10379114001989365,
-    "f1_macro": 0.2165810441494489
+    "mean_max_proba": 0.5195246934890747,
+    "mean_top2_margin": 0.20953671634197235,
+    "f1_macro": 0.2620180806325703
   },
   "optuna": {
-    "best_value": 0.37030048275508093,
+    "best_value": 0.3522109636030135,
     "best_params": {
-      "n_estimators": 102,
-      "max_depth": 7,
-      "learning_rate": 0.012290040357157465,
-      "subsample": 0.9657533989519007,
-      "colsample_bytree": 0.9748981511512295,
-      "min_child_weight": 3,
-      "reg_lambda": 2.018850153305795,
-      "reg_alpha": 0.5499578462614688,
-      "gamma": 2.095754886306689
+      "n_estimators": 431,
+      "max_depth": 6,
+      "learning_rate": 0.29256835764438427,
+      "subsample": 0.9742670603549972,
+      "colsample_bytree": 0.8195551947088143,
+      "min_child_weight": 4,
+      "reg_lambda": 6.572800560125009,
+      "reg_alpha": 3.1354684513503006,
+      "gamma": 0.7277601306682531
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -63,8 +63,8 @@
   },
   "very_low_confidence": false,
   "data_fingerprint": {
-    "feature_date_min": "2021-09-16 00:00:00",
+    "feature_date_min": "2021-09-17 00:00:00",
     "feature_date_max": "2026-04-30 00:00:00",
-    "row_hash": 12334908437589597657
+    "row_hash": 2736411696064564936
   }
 }

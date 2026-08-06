@@ -1,51 +1,51 @@
 {
   "ticker": "HDFCLIFE.NS",
-  "f1_macro": 0.4017776393176433,
+  "f1_macro": 0.3666185666185666,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.34328358208955223,
-      "recall": 0.34328358208955223,
-      "f1": 0.34328358208955223,
+      "precision": 0.3076923076923077,
+      "recall": 0.29850746268656714,
+      "f1": 0.30303030303030304,
       "support": 67
     },
     "HOLD": {
-      "precision": 0.4936708860759494,
-      "recall": 0.42857142857142855,
-      "f1": 0.4588235294117647,
+      "precision": 0.43037974683544306,
+      "recall": 0.37362637362637363,
+      "f1": 0.4,
       "support": 91
     },
     "BUY": {
-      "precision": 0.36764705882352944,
+      "precision": 0.35714285714285715,
       "recall": 0.44642857142857145,
-      "f1": 0.4032258064516129,
+      "f1": 0.3968253968253968,
       "support": 56
     }
   },
-  "train_size": 856,
+  "train_size": 855,
   "test_size": 214,
-  "total_rows_after_features": 1070,
+  "total_rows_after_features": 1069,
   "label_distribution": {
-    "0": 333,
+    "0": 332,
     "1": 409,
     "2": 328
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5274354219436646,
-    "mean_top2_margin": 0.22585703432559967,
-    "f1_macro": 0.4017776393176433
+    "mean_max_proba": 0.5317778587341309,
+    "mean_top2_margin": 0.23697781562805176,
+    "f1_macro": 0.3666185666185666
   },
   "optuna": {
-    "best_value": 0.30631585678638273,
+    "best_value": 0.2987045734155679,
     "best_params": {
-      "n_estimators": 409,
+      "n_estimators": 310,
       "max_depth": 5,
-      "learning_rate": 0.2284423444331335,
-      "subsample": 0.6873766030502,
-      "colsample_bytree": 0.8512868909449348,
-      "min_child_weight": 15,
-      "reg_lambda": 3.634509284131043,
-      "reg_alpha": 2.5344102731859763,
-      "gamma": 1.8925247335748094
+      "learning_rate": 0.10680771494394682,
+      "subsample": 0.6939007210991649,
+      "colsample_bytree": 0.7104342503078191,
+      "min_child_weight": 6,
+      "reg_lambda": 8.860519347227722,
+      "reg_alpha": 2.94092647509145,
+      "gamma": 0.5882634994448112
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -59,8 +59,8 @@
   "threshold_calibration": null,
   "very_low_confidence": false,
   "data_fingerprint": {
-    "feature_date_min": "2021-09-16 00:00:00",
+    "feature_date_min": "2021-09-17 00:00:00",
     "feature_date_max": "2026-04-30 00:00:00",
-    "row_hash": 9676971218728013640
+    "row_hash": 13639591735939341746
   }
 }

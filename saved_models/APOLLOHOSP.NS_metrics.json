@@ -1,51 +1,51 @@
 {
   "ticker": "APOLLOHOSP.NS",
-  "f1_macro": 0.3009907011061876,
+  "f1_macro": 0.30604376875401945,
   "per_class_metrics": {
     "SELL": {
-      "precision": 0.375,
+      "precision": 0.3333333333333333,
       "recall": 0.09090909090909091,
-      "f1": 0.14634146341463414,
+      "f1": 0.14285714285714285,
       "support": 66
     },
     "HOLD": {
-      "precision": 0.3333333333333333,
-      "recall": 0.49382716049382713,
-      "f1": 0.39800995024875624,
+      "precision": 0.373015873015873,
+      "recall": 0.5802469135802469,
+      "f1": 0.45410628019323673,
       "support": 81
     },
     "BUY": {
-      "precision": 0.3333333333333333,
-      "recall": 0.3880597014925373,
-      "f1": 0.3586206896551724,
+      "precision": 0.3142857142857143,
+      "recall": 0.3283582089552239,
+      "f1": 0.32116788321167883,
       "support": 67
     }
   },
-  "train_size": 856,
+  "train_size": 855,
   "test_size": 214,
-  "total_rows_after_features": 1070,
+  "total_rows_after_features": 1069,
   "label_distribution": {
-    "0": 263,
+    "0": 262,
     "1": 446,
     "2": 361
   },
   "confidence_stats": {
-    "mean_max_proba": 0.5869837999343872,
-    "mean_top2_margin": 0.28968873620033264,
-    "f1_macro": 0.3009907011061876
+    "mean_max_proba": 0.5592518448829651,
+    "mean_top2_margin": 0.2567678689956665,
+    "f1_macro": 0.30604376875401945
   },
   "optuna": {
-    "best_value": 0.3050093804031702,
+    "best_value": 0.30232700676079693,
     "best_params": {
-      "n_estimators": 241,
-      "max_depth": 4,
-      "learning_rate": 0.13118371906057677,
-      "subsample": 0.9867788062469144,
-      "colsample_bytree": 0.8159438920823558,
-      "min_child_weight": 6,
-      "reg_lambda": 8.418666078913798,
-      "reg_alpha": 1.6932720901811609,
-      "gamma": 0.20087824890447803
+      "n_estimators": 171,
+      "max_depth": 7,
+      "learning_rate": 0.27742582358363427,
+      "subsample": 0.788310137665707,
+      "colsample_bytree": 0.9645745121643899,
+      "min_child_weight": 9,
+      "reg_lambda": 4.582573853711948,
+      "reg_alpha": 0.6127468054323452,
+      "gamma": 1.8909032898598432
     },
     "n_trials": 75,
     "cv_splits": 5,
@@ -63,8 +63,8 @@
   },
   "very_low_confidence": false,
   "data_fingerprint": {
-    "feature_date_min": "2021-09-16 00:00:00",
+    "feature_date_min": "2021-09-17 00:00:00",
     "feature_date_max": "2026-04-30 00:00:00",
-    "row_hash": 2209525221896235289
+    "row_hash": 9716708754906652879
   }
 }

@@ -30,6 +30,7 @@ from src.features.engineering import (
     EVENT_DRIVEN_SECTORS_NO_INDEX,
     SECTOR_INDEX_DISABLED_TICKERS,
     TICKER_START_DATE_OVERRIDE,
+    TICKER_HORIZON_OVERRIDE,
     TREND_FOLLOWING_SECTORS,
     ALL_MACRO_COLS,
     SECTOR_MIN_PEERS,
@@ -505,16 +506,6 @@ VERY_LOW_CONFIDENCE_TICKERS = {
     "HCLTECH.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
     #"BRITANNIA.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
     "TCS.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
-}
-
-TICKER_HORIZON_OVERRIDE: dict[str, int] = {
-    "NTPC.NS":      5,
-    "POWERGRID.NS": 5,
-    "BAJAJFINSV.NS":5,
-    "INFY.NS":      5,   # ADD — 10d too noisy for IT earnings-driven stock
-    "WIPRO.NS":     5,   # ADD — same reasoning
-    "HCLTECH.NS":   5,   # ADD — same reasoning
-    "SBIN.NS":      5,   # ADD — same reasoning, persistent train/test disconnect
 }
 
 def train_model(df, ticker):

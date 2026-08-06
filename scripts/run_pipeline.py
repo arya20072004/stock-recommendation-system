@@ -2,11 +2,11 @@
 run_pipeline.py
 
 Wrapper that runs the full daily StockIntel pipeline in the correct order,
-with a time guard to prevent accidental intraday/pre-Bhavcopy runs.
+with safeguards against accidental intraday/pre-Bhavcopy execution.
 
-trainer.py's raw output is logged to disk:
-- A timestamped log for every training run
-- A rolling trainer_latest.log containing the most recent run
+trainer.py output is logged to:
+- A timestamped log for each training run
+- trainer_latest.log containing the most recent training run
 
 Pipeline order:
 
@@ -37,57 +37,125 @@ Usage:
 
     python -m scripts.run_pipeline --skip-collect
 
-        Skip collector, sector index builder, and PCR builder.
-        Run freshness verification, training, history generation,
-        and evaluation.
+        Skip collector, sector index builder and PCR builder.
+        Verify existing data, train models, generate prediction
+        history and evaluate eligible predictions.
 
     python -m scripts.run_pipeline --unattended
 
         Skip the manual confirmation after freshness validation.
         Intended for future Task Scheduler usage.
+
+IMPORTANT:
+
+The freshness validator currently understands:
+- Before the safe EOD cutoff → previous weekday is expected
+- After the safe EOD cutoff → current weekday is expected
+- Saturday/Sunday → previous Friday is expected
+
+It does NOT yet understand NSE exchange holidays.
+A proper NSE trading calendar should be added before fully
+unattended production scheduling.
 """
 
 import argparse
 import subprocess
 import sys
-from datetime import datetime
+
+from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 
-# ----------------------------------------------------------------------
+# ======================================================================
 # Configuration
-# ----------------------------------------------------------------------
+# ======================================================================
 
 IST = ZoneInfo("Asia/Kolkata")
 
 LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
 
-# Earliest IST hour at which the complete daily pipeline is considered safe.
+# Earliest IST hour at which each data source is considered safe.
 #
 # Collector:
-#   yfinance EOD close should already be synchronized.
+#   yfinance EOD prices should normally be synchronized by 18:00.
 #
 # PCR:
-#   NSE Bhavcopy should normally be available.
+#   NSE Bhavcopy should normally be available by 20:00.
 #
-# Since PCR is the later dependency, the full guarded pipeline waits until
-# MIN_HOUR_PCR.
-MIN_HOUR_COLLECTOR = 18  # 6:00 PM IST
-MIN_HOUR_PCR = 20        # 8:00 PM IST
+# Since PCR is the later dependency, the complete pipeline uses
+# MIN_HOUR_PCR as its guarded cutoff.
+MIN_HOUR_COLLECTOR = 18
+MIN_HOUR_PCR = 20
 
 
-# ----------------------------------------------------------------------
+# ======================================================================
+# Trading-session helpers
+# ======================================================================
+
+def get_expected_data_date(now_ist: datetime):
+    """
+    Determine the latest completed market-data date that should be
+    available to the pipeline.
+
+    Rules
+    -----
+    1. Before MIN_HOUR_PCR:
+       Today's complete EOD/PCR dataset is not expected yet, so start
+       from the previous calendar day.
+
+    2. At/after MIN_HOUR_PCR:
+       Today's dataset is expected when today is a weekday.
+
+    3. Saturday/Sunday:
+       Roll backward until Friday.
+
+    Examples
+    --------
+    Thursday 08:00
+        -> Wednesday
+
+    Thursday 21:00
+        -> Thursday
+
+    Saturday
+        -> Friday
+
+    Sunday
+        -> Friday
+
+    Monday 08:00
+        -> Friday
+
+    NOTE:
+    This helper does not yet understand NSE exchange holidays.
+    """
+
+    candidate = now_ist.date()
+
+    # Before today's safe EOD/PCR cutoff, today's completed market
+    # dataset should not yet be expected.
+    if now_ist.hour < MIN_HOUR_PCR:
+        candidate -= timedelta(days=1)
+
+    # Roll weekends backward.
+    while candidate.weekday() >= 5:
+        candidate -= timedelta(days=1)
+
+    return candidate
+
+
+# ======================================================================
 # Generic subprocess runner
-# ----------------------------------------------------------------------
+# ======================================================================
 
 def run_step(cmd: list[str], label: str) -> bool:
     """
-    Run one pipeline subprocess.
+    Execute a pipeline subprocess.
 
-    Returns True when the subprocess exits successfully,
-    otherwise prints an error and returns False.
+    Returns True when the process succeeds.
+    Returns False when the process exits with a non-zero status.
     """
 
     print(f"\n{'=' * 70}")
@@ -109,14 +177,17 @@ def run_step(cmd: list[str], label: str) -> bool:
     return True
 
 
-# ----------------------------------------------------------------------
+# ======================================================================
 # Trainer
-# ----------------------------------------------------------------------
+# ======================================================================
 
 def run_trainer_with_logging() -> bool:
     """
-    Run trainer.py while streaming output to the terminal and saving
-    the complete output to timestamped and rolling log files.
+    Run trainer.py while:
+
+    - displaying its output live
+    - writing a timestamped training log
+    - replacing trainer_latest.log with the newest run
     """
 
     now_ist = datetime.now(IST)
@@ -145,6 +216,7 @@ def run_trainer_with_logging() -> bool:
             f"=== Training run started "
             f"{now_ist.isoformat()} ===\n\n"
         )
+
         f.flush()
 
         process = subprocess.Popen(
@@ -161,10 +233,11 @@ def run_trainer_with_logging() -> bool:
 
         if process.stdout is not None:
             for line in process.stdout:
-                # Display trainer output live.
+
+                # Display output live.
                 print(line, end="")
 
-                # Also persist it to the log.
+                # Persist same output.
                 f.write(line)
 
         process.wait()
@@ -175,7 +248,7 @@ def run_trainer_with_logging() -> bool:
             f"(exit code {process.returncode}) ===\n"
         )
 
-    # Replace rolling log with this run.
+    # Keep one convenient rolling copy of the latest training run.
     latest_log.write_text(
         timestamped_log.read_text(encoding="utf-8"),
         encoding="utf-8",
@@ -187,21 +260,16 @@ def run_trainer_with_logging() -> bool:
     return process.returncode == 0
 
 
-# ----------------------------------------------------------------------
+# ======================================================================
 # Freshness validation
-# ----------------------------------------------------------------------
+# ======================================================================
 
 def validate_data_freshness(now_ist: datetime) -> bool:
     """
-    Run max_dates.py and verify that all reported max-date entries
-    contain today's IST date.
+    Run scripts.max_dates and verify that every reported
+    market-data max date matches the expected latest completed session.
 
-    NOTE:
-    This is intentionally a strict daily check for now.
-
-    Before fully unattended scheduling is enabled, this should eventually
-    become trading-calendar aware so weekends and exchange holidays are
-    handled correctly.
+    This prevents training against stale or inconsistent input data.
     """
 
     print(f"\n{'=' * 70}")
@@ -219,24 +287,56 @@ def validate_data_freshness(now_ist: datetime) -> bool:
         text=True,
     )
 
+    # Normalize captured output once.
     check_output = check_result.stdout or ""
 
     print(check_output)
 
+    # --------------------------------------------------------------
+    # Checker execution failure
+    # --------------------------------------------------------------
+
     if check_result.returncode != 0:
+
         print(
             "\n!!! max_dates.py FAILED "
-            f"(exit code {check_result.returncode}) — stopping pipeline."
+            f"(exit code {check_result.returncode}) "
+            "— stopping pipeline."
         )
+
         return False
 
-    today_str = now_ist.strftime("%Y-%m-%d")
+    # --------------------------------------------------------------
+    # Determine expected latest completed session
+    # --------------------------------------------------------------
 
-    # Only capture actual data rows such as:
+    expected_date = get_expected_data_date(now_ist)
+
+    expected_date_str = expected_date.strftime(
+        "%Y-%m-%d"
+    )
+
+    print(
+        f">>> Expected latest completed market-data session: "
+        f"{expected_date_str}"
+    )
+
+    # --------------------------------------------------------------
+    # Extract actual max-date records
+    # --------------------------------------------------------------
     #
-    # RELIANCE.NS  max date = 2026-08-05 00:00:00
+    # We intentionally require:
     #
-    # Do NOT match headings or explanatory text containing "max date".
+    #     "max date ="
+    #
+    # rather than merely:
+    #
+    #     "max date"
+    #
+    # because max_dates.py also prints headings/explanatory
+    # sentences containing the words "max date".
+    # --------------------------------------------------------------
+
     date_lines = [
         line.strip()
         for line in check_output.splitlines()
@@ -248,15 +348,20 @@ def validate_data_freshness(now_ist: datetime) -> bool:
         f"{len(date_lines)} max-date entries."
     )
 
+    # --------------------------------------------------------------
+    # No parseable date records
+    # --------------------------------------------------------------
+
     if not date_lines:
+
         msg = (
             "\n!!! FRESHNESS CHECK FAILED\n"
             "\n"
             "max_dates.py completed successfully, but no "
             "actual 'max date =' entries were detected.\n"
             "\n"
-            "Training has been aborted because data freshness "
-            "cannot be verified safely."
+            "Training has been aborted because input-data "
+            "freshness cannot be verified safely."
         )
 
         print(msg)
@@ -270,19 +375,29 @@ def validate_data_freshness(now_ist: datetime) -> bool:
         )
 
         aborted_log.write_text(
-            f"{msg}\n\nRaw checker output:\n\n{check_output}",
+            (
+                f"{msg}\n\n"
+                f"Expected session: {expected_date_str}\n\n"
+                f"Raw checker output:\n\n"
+                f"{check_output}"
+            ),
             encoding="utf-8",
         )
 
         return False
 
+    # --------------------------------------------------------------
+    # Detect stale/inconsistent records
+    # --------------------------------------------------------------
+
     stale_lines = [
         line
         for line in date_lines
-        if today_str not in line
+        if expected_date_str not in line
     ]
 
     if stale_lines:
+
         stale_details = "\n".join(
             f"  - {line}"
             for line in stale_lines
@@ -291,7 +406,8 @@ def validate_data_freshness(now_ist: datetime) -> bool:
         msg = (
             f"\n!!! STALE DATA DETECTED\n"
             f"\n"
-            f"Expected latest date: {today_str}\n"
+            f"Expected latest completed market-data date: "
+            f"{expected_date_str}\n"
             f"\n"
             f"The following max-date entries are not current:\n"
             f"{stale_details}\n"
@@ -311,26 +427,36 @@ def validate_data_freshness(now_ist: datetime) -> bool:
         )
 
         aborted_log.write_text(
-            f"{msg}\n\nRaw checker output:\n\n{check_output}",
+            (
+                f"{msg}\n\n"
+                f"Raw checker output:\n\n"
+                f"{check_output}"
+            ),
             encoding="utf-8",
         )
 
         return False
 
+    # --------------------------------------------------------------
+    # Success
+    # --------------------------------------------------------------
+
     print(
         f">>> Freshness check PASSED: "
         f"all {len(date_lines)} reported max-date entries "
-        f"match {today_str}."
+        f"match expected completed session "
+        f"{expected_date_str}."
     )
 
     return True
 
 
-# ----------------------------------------------------------------------
+# ======================================================================
 # Main pipeline
-# ----------------------------------------------------------------------
+# ======================================================================
 
 def main():
+
     parser = argparse.ArgumentParser(
         description="Run the StockIntel daily ML pipeline."
     )
@@ -338,7 +464,10 @@ def main():
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Skip the time-of-day guard.",
+        help=(
+            "Skip the time-of-day collection guard. "
+            "Collection itself still runs."
+        ),
     )
 
     parser.add_argument(
@@ -346,7 +475,8 @@ def main():
         action="store_true",
         help=(
             "Skip collector/sector/PCR steps and continue "
-            "with freshness verification and training."
+            "with freshness verification, training, prediction "
+            "history generation and evaluation."
         ),
     )
 
@@ -354,8 +484,8 @@ def main():
         "--unattended",
         action="store_true",
         help=(
-            "Skip the manual confirmation pause. "
-            "Intended for future Task Scheduler usage."
+            "Skip the manual confirmation pause after freshness "
+            "validation. Intended for future Task Scheduler usage."
         ),
     )
 
@@ -368,28 +498,43 @@ def main():
         f"{now_ist.strftime('%Y-%m-%d %H:%M:%S')}"
     )
 
-    # ------------------------------------------------------------------
-    # Step 1-3: Data collection
-    # ------------------------------------------------------------------
+    # ==================================================================
+    # Steps 1-3: Daily data collection
+    # ==================================================================
 
     if not args.skip_collect:
 
-        # --force bypasses ONLY the time guard.
-        # It must NOT bypass collection itself.
+        # --------------------------------------------------------------
+        # Time guard
+        # --------------------------------------------------------------
+        #
+        # --force bypasses ONLY this guard.
+        #
+        # It must NOT accidentally bypass collector/sector/PCR.
+        # --------------------------------------------------------------
+
         if not args.force:
+
             if now_ist.hour < MIN_HOUR_PCR:
+
                 print(
-                    f"\nBLOCKED: it's before {MIN_HOUR_PCR}:00 IST.\n"
+                    f"\nBLOCKED: it's before "
+                    f"{MIN_HOUR_PCR}:00 IST.\n"
                     f"\n"
-                    f"NSE Bhavcopy for today may not yet be published, "
-                    f"and running collector.py too early risks capturing "
-                    f"an intraday/partial market price.\n"
+                    f"NSE Bhavcopy for today may not yet be "
+                    f"published, and running collector.py too early "
+                    f"risks capturing an intraday/partial market "
+                    f"price.\n"
                     f"\n"
                     f"Run again after {MIN_HOUR_PCR}:00 IST, "
                     f"or pass --force to override the time guard."
                 )
 
                 sys.exit(1)
+
+        # --------------------------------------------------------------
+        # Collector
+        # --------------------------------------------------------------
 
         if not run_step(
             [
@@ -401,6 +546,10 @@ def main():
         ):
             sys.exit(1)
 
+        # --------------------------------------------------------------
+        # Sector indices
+        # --------------------------------------------------------------
+
         if not run_step(
             [
                 sys.executable,
@@ -410,6 +559,10 @@ def main():
             "sector_index_builder.py",
         ):
             sys.exit(1)
+
+        # --------------------------------------------------------------
+        # PCR / futures basis
+        # --------------------------------------------------------------
 
         if not run_step(
             [
@@ -422,21 +575,22 @@ def main():
             sys.exit(1)
 
     else:
+
         print(
             "\n>>> --skip-collect enabled: "
             "collector, sector index builder and PCR builder skipped."
         )
 
-    # ------------------------------------------------------------------
-    # Step 4: Verify freshness
-    # ------------------------------------------------------------------
+    # ==================================================================
+    # Step 4: Freshness validation
+    # ==================================================================
 
     if not validate_data_freshness(now_ist):
         sys.exit(1)
 
-    # ------------------------------------------------------------------
+    # ==================================================================
     # Manual safety confirmation
-    # ------------------------------------------------------------------
+    # ==================================================================
 
     if args.unattended:
 
@@ -457,13 +611,14 @@ def main():
 
         input()
 
-    # ------------------------------------------------------------------
-    # Step 5: Train models
-    # ------------------------------------------------------------------
+    # ==================================================================
+    # Step 5: Model training
+    # ==================================================================
 
     success = run_trainer_with_logging()
 
     if not success:
+
         print(
             "\n!!! trainer.py FAILED — "
             "prediction history will NOT be generated."
@@ -471,9 +626,9 @@ def main():
 
         sys.exit(1)
 
-    # ------------------------------------------------------------------
-    # Step 6: Generate immutable prediction history snapshots
-    # ------------------------------------------------------------------
+    # ==================================================================
+    # Step 6: Prediction-history generation
+    # ==================================================================
 
     print(
         "\n>>> Generating and persisting "
@@ -490,15 +645,16 @@ def main():
     )
 
     if not history_success:
+
         print(
             "\n!!! Prediction history generation failed."
         )
 
         sys.exit(1)
 
-    # ------------------------------------------------------------------
-    # Step 7: Evaluate eligible pending predictions
-    # ------------------------------------------------------------------
+    # ==================================================================
+    # Step 7: Evaluate eligible historical predictions
+    # ==================================================================
 
     print(
         "\n>>> Evaluating eligible pending predictions..."
@@ -514,15 +670,16 @@ def main():
     )
 
     if not evaluation_success:
+
         print(
             "\n!!! Prediction evaluation failed."
         )
 
         sys.exit(1)
 
-    # ------------------------------------------------------------------
-    # Complete
-    # ------------------------------------------------------------------
+    # ==================================================================
+    # Pipeline complete
+    # ==================================================================
 
     print(f"\n{'=' * 70}")
     print(">>> STOCKINTEL PIPELINE COMPLETED SUCCESSFULLY")
