@@ -1,0 +1,443 @@
+{
+  "repair_execution_timestamp": "20260807_155821",
+  "market_date": "2026-08-07",
+  "prediction_horizon": 10,
+  "targeted_symbols": [
+    "BAJAJFINSV.NS",
+    "BRITANNIA.NS",
+    "EICHERMOT.NS",
+    "GRASIM.NS",
+    "JSWSTEEL.NS",
+    "MAXHEALTH.NS",
+    "SHRIRAMFIN.NS",
+    "TECHM.NS",
+    "TITAN.NS",
+    "ULTRACEMCO.NS"
+  ],
+  "previous_model_versions": {
+    "BAJAJFINSV.NS": "42e499168dbd",
+    "BRITANNIA.NS": "8bd16f451f55",
+    "EICHERMOT.NS": "04ccf8cfd1a2",
+    "GRASIM.NS": "fc8857b054ff",
+    "JSWSTEEL.NS": "f67600febfc4",
+    "MAXHEALTH.NS": "e611520606f0",
+    "SHRIRAMFIN.NS": "00e607d07445",
+    "TECHM.NS": "b00d6071e92d",
+    "TITAN.NS": "46fbd6e0fca6",
+    "ULTRACEMCO.NS": "187657856f0d"
+  },
+  "current_model_versions": {
+    "BAJAJFINSV.NS": "de7ebc7f0d62",
+    "BRITANNIA.NS": "5526ead5742a",
+    "EICHERMOT.NS": "dc0f89e9948f",
+    "GRASIM.NS": "14a67a2fc289",
+    "JSWSTEEL.NS": "df620c3e0b7c",
+    "MAXHEALTH.NS": "4128a3a39a91",
+    "SHRIRAMFIN.NS": "b5c99317859a",
+    "TECHM.NS": "49efe71c92d5",
+    "TITAN.NS": "bd18d138d4d3",
+    "ULTRACEMCO.NS": "16c0d2dca3b6"
+  },
+  "documents": [
+    {
+      "_id": {
+        "$oid": "6a758ff069b11d47e02fef09"
+      },
+      "market_date": "2026-08-07",
+      "prediction_horizon": 10,
+      "symbol": "BAJAJFINSV.NS",
+      "actual_price": null,
+      "actual_return": null,
+      "confidence": 49.8,
+      "confidence_tier": "LOW",
+      "feature_snapshot": {
+        "quarter_end": 0.0,
+        "is_month_start": 0.0,
+        "month_cos": -0.5000000000000004,
+        "is_month_end": 1.0,
+        "macd_hist": 18.475709009032244,
+        "atr": 45.10010866537718,
+        "nifty_futures_basis_chg_5d": 0.002517241649743788,
+        "nasdaq_ret_5d": 0.0450780868507874,
+        "usdinr_ret_5d": -0.00680359397319219,
+        "copper_vol_10d": 0.010771464685050566,
+        "vix_chg_5d": 0.0,
+        "vix_vol_10d": 0.03997298051109057,
+        "bb_width": 0.05722163903142896,
+        "nifty_vol_10d": 0.0070306169023498085,
+        "nifty_ret_20d": 0.028093511476202426
+      },
+      "model_version": "42e499168dbd",
+      "outcome": "PENDING",
+      "prediction_correct": null,
+      "prediction_timestamp": {
+        "$date": "2026-08-07T07:57:35.636Z"
+      },
+      "price_at_prediction": 1992.4000244140625,
+      "raw_prediction": "HOLD",
+      "recommendation": "HOLD",
+      "status": "PENDING",
+      "threshold_pct": 0.3
+    },
+    {
+      "_id": {
+        "$oid": "6a758ff269b11d47e02fef0c"
+      },
+      "market_date": "2026-08-07",
+      "prediction_horizon": 10,
+      "symbol": "BRITANNIA.NS",
+      "actual_price": null,
+      "actual_return": null,
+      "confidence": 52.8,
+      "confidence_tier": "MEDIUM",
+      "feature_snapshot": {
+        "sentiment_30d_avg": 0.05888654987017314,
+        "quarter_end": 0.0,
+        "month_cos": -0.5000000000000004,
+        "gold_vol_10d": 0.014532874545064365,
+        "macd_hist": 4.965378708514081,
+        "market_regime": 0.0,
+        "vix_vol_10d": 0.03997298051109057,
+        "rsi": 55.30977107656346,
+        "atr_pct": 0.01832592663632544,
+        "nifty_vol_10d": 0.0070306169023498085,
+        "obv_deviation": -0.009698734596166698,
+        "in_earnings_season": 1.0,
+        "atr": 101.59893727178823,
+        "vix_level": 12.15999984741211,
+        "nasdaq_ret_20d": -0.011900573412766846
+      },
+      "model_version": "8bd16f451f55",
+      "outcome": "PENDING",
+      "prediction_correct": null,
+      "prediction_timestamp": {
+        "$date": "2026-08-07T07:57:37.672Z"
+      },
+      "price_at_prediction": 5544.0,
+      "raw_prediction": "HOLD",
+      "recommendation": "HOLD",
+      "status": "PENDING",
+      "threshold_pct": 0.35
+    },
+    {
+      "_id": {
+        "$oid": "6a758ff469b11d47e02fef13"
+      },
+      "market_date": "2026-08-07",
+      "prediction_horizon": 10,
+      "symbol": "EICHERMOT.NS",
+      "actual_price": null,
+      "actual_return": null,
+      "confidence": 48.8,
+      "confidence_tier": "MEDIUM",
+      "feature_snapshot": {
+        "month_cos": -0.5000000000000004,
+        "rsi": 65.86591959150859,
+        "market_regime": 0.0,
+        "gold_vol_10d": 0.014532874545064365,
+        "month_sin": -0.8660254037844385,
+        "vix_level": 12.15999984741211,
+        "nasdaq_ret_5d": 0.0450780868507874,
+        "atr_pct": 0.01981989286943049,
+        "obv_deviation": 0.04524891185252739,
+        "nifty_ret_20d": 0.028093511476202426,
+        "nifty_ret_10d": 0.03210780252568579,
+        "atr": 158.2023848837942,
+        "vwap_deviation": 0.044548583690739475,
+        "nifty_futures_basis": 0.004197109920441689,
+        "vix_vol_10d": 0.03997298051109057
+      },
+      "model_version": "04ccf8cfd1a2",
+      "outcome": "PENDING",
+      "prediction_correct": null,
+      "prediction_timestamp": {
+        "$date": "2026-08-07T07:57:40.179Z"
+      },
+      "price_at_prediction": 7982.0,
+      "raw_prediction": "BUY",
+      "recommendation": "BUY",
+      "status": "PENDING",
+      "threshold_pct": 0.33
+    },
+    {
+      "_id": {
+        "$oid": "6a758ff669b11d47e02fef15"
+      },
+      "market_date": "2026-08-07",
+      "prediction_horizon": 10,
+      "symbol": "GRASIM.NS",
+      "actual_price": null,
+      "actual_return": null,
+      "confidence": 83.5,
+      "confidence_tier": "LOW",
+      "feature_snapshot": {
+        "month_sin": -0.8660254037844385,
+        "month_cos": -0.5000000000000004,
+        "in_earnings_season": 1.0,
+        "atr_pct": 0.020094254849376502,
+        "vix_vol_10d": 0.03997298051109057,
+        "sector_momentum_5d": 0.024955754470003887,
+        "copper_vol_10d": 0.010771464685050566,
+        "gold_vol_10d": 0.014532874545064365,
+        "market_correlation": 0.6274994033232254,
+        "is_month_end": 1.0,
+        "copper_ret_5d": 0.03762895949832701,
+        "vix_level": 12.15999984741211,
+        "nifty_vol_10d": 0.0070306169023498085,
+        "macd_hist": 9.28858405649605,
+        "rsi": 57.27688679327901
+      },
+      "model_version": "fc8857b054ff",
+      "outcome": "PENDING",
+      "prediction_correct": null,
+      "prediction_timestamp": {
+        "$date": "2026-08-07T07:57:41.667Z"
+      },
+      "price_at_prediction": 3277.0,
+      "raw_prediction": "BUY",
+      "recommendation": "HOLD",
+      "status": "PENDING",
+      "threshold_pct": 0.33
+    },
+    {
+      "_id": {
+        "$oid": "6a75900169b11d47e02fef21"
+      },
+      "prediction_horizon": 10,
+      "symbol": "JSWSTEEL.NS",
+      "market_date": "2026-08-07",
+      "actual_price": null,
+      "actual_return": null,
+      "confidence": 49.6,
+      "confidence_tier": "LOW",
+      "feature_snapshot": {
+        "nifty_ret_5d": 0.013112128857743377,
+        "vix_vol_10d": 0.03997298051109057,
+        "copper_vol_10d": 0.010771464685050566,
+        "market_correlation": 0.5272449746826064,
+        "nifty_vol_10d": 0.0070306169023498085,
+        "rsi": 62.3658551272535,
+        "month_cos": -0.5000000000000004,
+        "month_sin": -0.8660254037844385,
+        "nasdaq_ret_20d": -0.011900573412766846,
+        "gold_vol_10d": 0.014532874545064365,
+        "macd_hist": 7.877701505961539,
+        "sector_momentum_5d": -0.012716165178308703,
+        "atr": 27.077978642191084,
+        "is_month_end": 1.0,
+        "nifty_ret_20d": 0.028093511476202426
+      },
+      "model_version": "f67600febfc4",
+      "outcome": "PENDING",
+      "prediction_correct": null,
+      "prediction_timestamp": {
+        "$date": "2026-08-07T07:57:53.118Z"
+      },
+      "price_at_prediction": 1295.800048828125,
+      "raw_prediction": "SELL",
+      "recommendation": "HOLD",
+      "status": "PENDING",
+      "threshold_pct": null
+    },
+    {
+      "_id": {
+        "$oid": "6a75900469b11d47e02fef26"
+      },
+      "market_date": "2026-08-07",
+      "prediction_horizon": 10,
+      "symbol": "MAXHEALTH.NS",
+      "actual_price": null,
+      "actual_return": null,
+      "confidence": 43.2,
+      "confidence_tier": "LOW",
+      "feature_snapshot": {
+        "rsi": 44.082889107661366,
+        "macd_hist": -4.987064349948582,
+        "vwap_deviation": -0.023085110570693092,
+        "nifty_ret_10d": 0.03210780252568579,
+        "market_correlation": 0.42138599400550764,
+        "vix_vol_10d": 0.03997298051109057,
+        "market_regime": 0.0,
+        "in_earnings_season": 1.0,
+        "copper_vol_10d": 0.010771464685050566,
+        "month_cos": -0.5000000000000004,
+        "nasdaq_ret_20d": -0.011900573412766846,
+        "nifty_pcr_chg_5d": -0.21269787787970418,
+        "month_sin": -0.8660254037844385,
+        "usdinr_ret_5d": -0.00680359397319219,
+        "nifty_vol_10d": 0.0070306169023498085
+      },
+      "model_version": "e611520606f0",
+      "outcome": "PENDING",
+      "prediction_correct": null,
+      "prediction_timestamp": {
+        "$date": "2026-08-07T07:57:56.195Z"
+      },
+      "price_at_prediction": 1073.199951171875,
+      "raw_prediction": "BUY",
+      "recommendation": "HOLD",
+      "status": "PENDING",
+      "threshold_pct": 0.38
+    },
+    {
+      "_id": {
+        "$oid": "6a75900a69b11d47e02fef31"
+      },
+      "market_date": "2026-08-07",
+      "prediction_horizon": 10,
+      "symbol": "SHRIRAMFIN.NS",
+      "actual_price": null,
+      "actual_return": null,
+      "confidence": 55.1,
+      "confidence_tier": "LOW",
+      "feature_snapshot": {
+        "sentiment_30d_avg": 0.061672856410344444,
+        "market_regime": 0.0,
+        "market_correlation": 0.6887440830366781,
+        "vix_vol_10d": 0.03997298051109057,
+        "atr": 30.448827206124875,
+        "usdinr_vol_10d": 0.0030864915315550177,
+        "vix_chg_5d": 0.0,
+        "month_cos": -0.5000000000000004,
+        "copper_vol_10d": 0.010771464685050566,
+        "banknifty_pcr_oi": 1.0190697757574945,
+        "nifty_vol_10d": 0.0070306169023498085,
+        "price_change_5d": 0.11078665716280156,
+        "obv_deviation": 0.028894868185071344,
+        "copper_ret_5d": 0.03762895949832701,
+        "month_sin": -0.8660254037844385
+      },
+      "model_version": "00e607d07445",
+      "outcome": "PENDING",
+      "prediction_correct": null,
+      "prediction_timestamp": {
+        "$date": "2026-08-07T07:58:01.405Z"
+      },
+      "price_at_prediction": 1114.800048828125,
+      "raw_prediction": "SELL",
+      "recommendation": "HOLD",
+      "status": "PENDING",
+      "threshold_pct": null
+    },
+    {
+      "_id": {
+        "$oid": "6a75900d69b11d47e02fef37"
+      },
+      "market_date": "2026-08-07",
+      "prediction_horizon": 10,
+      "symbol": "TECHM.NS",
+      "actual_price": null,
+      "actual_return": null,
+      "confidence": 42.9,
+      "confidence_tier": "LOW",
+      "feature_snapshot": {
+        "market_regime": 0.0,
+        "month_sin": -0.8660254037844385,
+        "atr_pct": 0.02555857152546123,
+        "month_cos": -0.5000000000000004,
+        "vix_vol_10d": 0.03997298051109057,
+        "atr": 42.020846821022246,
+        "sentiment_30d_avg": 0.0906072974205017,
+        "nifty_ret_20d": 0.028093511476202426,
+        "rsi": 66.09299148760559,
+        "obv_deviation": 0.010192002892767539,
+        "market_correlation": 0.3448063825551433,
+        "gold_vol_10d": 0.014532874545064365,
+        "vwap_deviation": 0.02692464072068087,
+        "copper_vol_10d": 0.010771464685050566,
+        "nifty_futures_basis": 0.004197109920441689
+      },
+      "model_version": "b00d6071e92d",
+      "outcome": "PENDING",
+      "prediction_correct": null,
+      "prediction_timestamp": {
+        "$date": "2026-08-07T07:58:04.439Z"
+      },
+      "price_at_prediction": 1644.0999755859375,
+      "raw_prediction": "BUY",
+      "recommendation": "HOLD",
+      "status": "PENDING",
+      "threshold_pct": null
+    },
+    {
+      "_id": {
+        "$oid": "6a75900d69b11d47e02fef38"
+      },
+      "market_date": "2026-08-07",
+      "prediction_horizon": 10,
+      "symbol": "TITAN.NS",
+      "actual_price": null,
+      "actual_return": null,
+      "confidence": 62.3,
+      "confidence_tier": "MEDIUM",
+      "feature_snapshot": {
+        "atr": 85.11172916586798,
+        "market_regime": 0.0,
+        "vix_level": 12.15999984741211,
+        "nifty_ret_10d": 0.03210780252568579,
+        "usdinr_vol_10d": 0.0030864915315550177,
+        "month_cos": -0.5000000000000004,
+        "gold_vol_10d": 0.014532874545064365,
+        "month_sin": -0.8660254037844385,
+        "atr_pct": 0.017093453933825265,
+        "vix_chg_5d": 0.0,
+        "copper_vol_10d": 0.010771464685050566,
+        "market_correlation": 0.3041693046599768,
+        "macd_hist": 12.368356055886807,
+        "nasdaq_ret_20d": -0.011900573412766846,
+        "vwap_deviation": 0.05038432602890561
+      },
+      "model_version": "46fbd6e0fca6",
+      "outcome": "PENDING",
+      "prediction_correct": null,
+      "prediction_timestamp": {
+        "$date": "2026-08-07T07:58:04.988Z"
+      },
+      "price_at_prediction": 4979.2001953125,
+      "raw_prediction": "SELL",
+      "recommendation": "SELL",
+      "status": "PENDING",
+      "threshold_pct": null
+    },
+    {
+      "_id": {
+        "$oid": "6a75900e69b11d47e02fef3a"
+      },
+      "prediction_horizon": 10,
+      "symbol": "ULTRACEMCO.NS",
+      "market_date": "2026-08-07",
+      "actual_price": null,
+      "actual_return": null,
+      "confidence": 48.3,
+      "confidence_tier": "LOW",
+      "feature_snapshot": {
+        "sentiment_7d_avg": 0.0,
+        "market_regime": 0.0,
+        "in_earnings_season": 1.0,
+        "sentiment_30d_avg": 0.029240620136260987,
+        "month_sin": -0.8660254037844385,
+        "month_cos": -0.5000000000000004,
+        "vix_vol_10d": 0.03997298051109057,
+        "market_correlation": 0.536637877614458,
+        "atr": 203.84785099565084,
+        "rsi": 65.11531657499407,
+        "copper_vol_10d": 0.010771464685050566,
+        "vwap_deviation": 0.032683654674883184,
+        "nifty_vol_10d": 0.0070306169023498085,
+        "macd_hist": 36.47392082065005,
+        "gold_vol_10d": 0.014532874545064365
+      },
+      "model_version": "187657856f0d",
+      "outcome": "PENDING",
+      "prediction_correct": null,
+      "prediction_timestamp": {
+        "$date": "2026-08-07T07:58:06.275Z"
+      },
+      "price_at_prediction": 12040.0,
+      "raw_prediction": "HOLD",
+      "recommendation": "HOLD",
+      "status": "PENDING",
+      "threshold_pct": null
+    }
+  ]
+}

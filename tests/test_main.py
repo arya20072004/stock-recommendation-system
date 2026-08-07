@@ -18,7 +18,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-TICKERS = ["INFY.NS"]
+TICKERS = ["BAJAJFINSV.NS", "BRITANNIA.NS", "EICHERMOT.NS", "GRASIM.NS", "JSWSTEEL.NS", "MAXHEALTH.NS", "SHRIRAMFIN.NS", "TECHM.NS", "TITAN.NS", "ULTRACEMCO.NS"]
 
 def run_single(ticker):
     client = MongoClient(MONGO_URI)

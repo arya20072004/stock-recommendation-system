@@ -39,6 +39,7 @@ from src.features.engineering import (
     build_feature_row,
     TICKER_CLASS_THRESHOLDS,
     apply_threshold_calibration,
+    get_target_return_threshold,
 )
 from src.ml.confidence import (
     compute_confidence_tier,
@@ -414,6 +415,44 @@ def generate_and_persist_predictions(client):
             )
 
             # ----------------------------------------------------------
+            # Return threshold for future outcome settlement
+            # ----------------------------------------------------------
+
+            if "atr_pct" not in computed_df.columns:
+
+                raise ValueError(
+                    f"{ticker}: build_feature_row() output "
+                    f"does not contain 'atr_pct'."
+                )
+
+            atr_pct_val = computed_df.loc[
+                market_date,
+                "atr_pct",
+            ]
+
+            if hasattr(atr_pct_val, "iloc"):
+
+                atr_pct_val = (
+                    atr_pct_val.iloc[-1]
+                )
+
+            atr_pct = float(atr_pct_val)
+
+            target_return_threshold = float(
+                get_target_return_threshold(
+                    ticker,
+                    atr_pct,
+                )
+            )
+
+            if not (target_return_threshold > 0):
+
+                raise ValueError(
+                    f"{ticker}: target_return_threshold "
+                    f"must be > 0. Got: {target_return_threshold}"
+                )
+
+            # ----------------------------------------------------------
             # Prepare inference vector
             # ----------------------------------------------------------
 
@@ -623,6 +662,10 @@ def generate_and_persist_predictions(client):
                     thresholds[1]
                     if thresholds
                     else None
+                ),
+
+                "target_return_threshold": (
+                    target_return_threshold
                 ),
 
                 "actual_price": None,

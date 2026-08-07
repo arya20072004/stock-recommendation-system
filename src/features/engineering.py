@@ -160,6 +160,19 @@ TICKER_ATR_THRESHOLD_SCALE: dict[str, float] = {
     "SHRIRAMFIN.NS": 0.75,
 }
 
+def get_target_return_threshold(ticker: str, atr_pct) -> float:
+    """
+    Canonical definition of the return threshold used to create the BUY/HOLD/SELL
+    target labels during training, and later used for outcome settlement.
+    """
+    atr_scale = TICKER_ATR_THRESHOLD_SCALE.get(ticker, 1.0)
+    # np.maximum handles both python floats and pandas Series
+    result = np.maximum(atr_scale * atr_pct, 0.01)
+    if isinstance(result, np.ndarray) or hasattr(result, "iloc"):
+        return result
+    return float(result)
+
+
 SECTOR_MIN_PEERS = 4
 
 EVENT_DRIVEN_SECTORS_NO_INDEX = {"Healthcare", "InformationTechnology"}

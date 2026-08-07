@@ -46,6 +46,7 @@ from src.features.engineering import (
     add_calendar_features,
     TICKER_CLASS_THRESHOLDS,
     apply_threshold_calibration,
+    get_target_return_threshold,
 )
 from src.ml.model_utils import get_model_version
 
@@ -197,8 +198,9 @@ def create_dataset(ticker, client):
 
     horizon = TICKER_HORIZON_OVERRIDE.get(ticker, 10)
     df["future_return"] = df["close"].shift(-horizon) / df["close"] - 1
-    atr_scale = TICKER_ATR_THRESHOLD_SCALE.get(ticker, 1.0)
-    threshold = np.maximum(atr_scale * df["atr_pct"], 0.01)
+    
+    threshold = get_target_return_threshold(ticker, df["atr_pct"])
+    
     df["target"] = 1
     df.loc[df["future_return"] > threshold, "target"] = 2
     df.loc[df["future_return"] < -threshold, "target"] = 0
