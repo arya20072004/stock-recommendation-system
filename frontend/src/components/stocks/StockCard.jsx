@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Card } from '../common/Card'
 import { RecommendationBadge } from '../recommendations/RecommendationBadge'
-import { directionForValue, formatCurrency, formatPercent } from '../../utils/formatters'
+import { directionForValue, formatCurrency, formatPercent, formatSectorName } from '../../utils/formatters'
 
 export function StockCard({ stock }) {
   const direction = directionForValue(stock.day_change_pct)
@@ -11,7 +11,7 @@ export function StockCard({ stock }) {
       <Card hoverable className="stock-card">
         <div className="stock-card__header">
           <strong className="stock-card__ticker">{stock.ticker}</strong>
-          <span className="stock-card__sector">{stock.sector || '—'}</span>
+          <span className="stock-card__sector" title={stock.sector ? formatSectorName(stock.sector) : ''}>{stock.sector ? formatSectorName(stock.sector) : '—'}</span>
         </div>
         <span className="stock-card__company">{stock.company_name}</span>
         <div className="stock-card__price-row">

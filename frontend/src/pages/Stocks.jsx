@@ -7,6 +7,7 @@ import { Select } from '../components/common/Select'
 import { PageHeader } from '../components/layout/PageHeader'
 import { StockCard } from '../components/stocks/StockCard'
 import { fetchStocksSummary } from '../api/stocks'
+import { formatSectorName } from '../utils/formatters'
 import './stocks-page.css'
 
 const sortOptions = [
@@ -50,7 +51,7 @@ export function Stocks() {
     return Array.from(s).sort()
   }, [stocks])
   
-  const sectorOptions = useMemo(() => [{ value: 'ALL', label: 'All Sectors' }, ...sectors.map(s => ({ value: s, label: s }))], [sectors])
+  const sectorOptions = useMemo(() => [{ value: 'ALL', label: 'All Sectors' }, ...sectors.map(s => ({ value: s, label: formatSectorName(s) }))], [sectors])
 
   const filtered = useMemo(() => {
     let result = stocks

@@ -3,10 +3,30 @@ import yfinance as yf
 from pymongo import MongoClient
 from pymongo import UpdateOne
 import os
+import math
 from dotenv import load_dotenv
 from src.data.nifty50 import TICKERS
 from src.data.equity_bhavcopy import fetch_equity_ohlcv_for_date
 from src.data.pcr_builder import TICKER_TO_FO_SYMBOL_OVERRIDES
+
+def validate_ohlcv_record(record):
+    for f in ['open', 'high', 'low', 'close']:
+        val = record.get(f)
+        if val is None or not isinstance(val, (int, float)) or not math.isfinite(val) or val <= 0:
+            return False, f"{f} is invalid"
+    
+    vol = record.get('volume')
+    if vol is None or not isinstance(vol, (int, float)) or not math.isfinite(vol) or vol < 0:
+        return False, "volume is invalid"
+    
+    high, low, open_p, close_p = record['high'], record['low'], record['open'], record['close']
+    if high < low: return False, "high < low"
+    if high < open_p: return False, "high < open"
+    if high < close_p: return False, "high < close"
+    if low > open_p: return False, "low > open"
+    if low > close_p: return False, "low > close"
+    
+    return True, ""
 
 def _get_trading_day_calendar(db, start_date, end_date):
     """
@@ -42,13 +62,18 @@ def _backfill_gap_dates(db, collection, ticker, gap_dates):
             print(f"  Bhavcopy fallback: no data found for {ticker} on {gap_date.date()} — leaving gap")
             continue
         for record in records:
+            is_valid, reason = validate_ohlcv_record(record)
+            if not is_valid:
+                print(f"  Bhavcopy fallback: validation failed for {ticker} on {gap_date.date()} - {reason}. DATA_UNAVAILABLE / INVALID_PROVIDER_DATA")
+                continue
             collection.update_one(
                 {'ticker': record['ticker'], 'date': record['date']},
                 {'$set': record},
                 upsert=True,
             )
             filled += 1
-        print(f"  Bhavcopy fallback: filled {ticker} for {gap_date.date()}")
+        if filled > 0:
+            print(f"  Bhavcopy fallback: filled {ticker} for {gap_date.date()}")
     return filled
 
 def run():
@@ -80,6 +105,8 @@ def run():
                 continue
 
             records_to_insert = []
+            yf_valid_dates = set()
+            invalid_count = 0
             for date, row in data.iterrows():
                 record = {
                     'ticker': ticker,
@@ -90,7 +117,13 @@ def run():
                     'close': float(row['Close']),
                     'volume': int(row['Volume'])
                 }
-                records_to_insert.append(record)
+                is_valid, reason = validate_ohlcv_record(record)
+                if is_valid:
+                    records_to_insert.append(record)
+                    yf_valid_dates.add(pd.Timestamp(date).normalize())
+                else:
+                    invalid_count += 1
+                    print(f"Validation failed for {ticker} on {date.date()}: {reason}")
 
             if records_to_insert:
                 # Remove old data to prevent duplicates
@@ -108,7 +141,7 @@ def run():
             # --- Gap detection: compare yfinance's returned dates against
             # the Bhavcopy-derived trading-day calendar, and backfill any
             # missing trading days directly from NSE equity Bhavcopy. ---
-            yf_dates = {pd.Timestamp(d).normalize() for d in data.index}
+            yf_dates = yf_valid_dates
             range_start = data.index.min()
             range_end = data.index.max()
             trading_calendar = _get_trading_day_calendar(db, range_start, range_end)

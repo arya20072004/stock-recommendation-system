@@ -1,6 +1,7 @@
 import hashlib
 import time
 import urllib.parse
+import calendar
 from datetime import datetime, timezone, timedelta
 from pymongo import MongoClient, UpdateOne
 from pymongo.errors import PyMongoError
@@ -15,6 +16,9 @@ from src.data.nifty50 import NIFTY50_TICKER_MAP, TICKERS
 # --- RSS SETUP ---
 load_dotenv()
 MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
+
+def get_utc_now():
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 GENERIC_PHRASES = [
     'taking stock', 'sensex', 'nifty50',
@@ -166,79 +170,100 @@ def fetch_google_news(ticker):
     url = f"https://news.google.com/rss/search?q={query}&hl=en-IN&gl=IN&ceid=IN:en"
     
     articles = []
+    malformed_count = 0
     try:
         feed = feedparser.parse(url)
         if feed.bozo and getattr(feed, 'bozo_exception', None):
-            print(f"  Google News parsing error for {ticker}: {feed.bozo_exception}")
+            # A bozo exception doesn't always mean the whole feed is invalid, but we log it.
+            pass
         
         entries = getattr(feed, 'entries', [])
         for entry in entries:
-            title = entry.get('title', '')
-            link = entry.get('link', '')
-            raw_summary = entry.get('summary', '') or entry.get('description', '') or ''
-            clean_summary = clean_html_description(raw_summary)
-            if not is_description_meaningful(clean_summary, title, source=entry.get('source', {}).get('title', 'Google News')):
-                clean_summary = None
-            
-            published_time = None
-            if hasattr(entry, 'published_parsed') and entry.published_parsed:
-                published_time = datetime.fromtimestamp(time.mktime(entry.published_parsed))
-            else:
-                published_time = datetime.utcnow()
+            try:
+                title = entry.get('title', '')
+                link = entry.get('link', '')
+                raw_summary = entry.get('summary', '') or entry.get('description', '') or ''
                 
-            source = entry.get('source', {}).get('title', 'Google News')
-            
-            articles.append({
-                'title': title,
-                'description': clean_summary,
-                'url': link,
-                'source': source,
-                'published_at': published_time,
-                'fetched_source': 'Google News'
-            })
+                source_dict = entry.get('source') or {}
+                source = source_dict.get('title', 'Google News') if isinstance(source_dict, dict) else 'Google News'
+                
+                clean_summary = clean_html_description(raw_summary)
+                if not is_description_meaningful(clean_summary, title, source=source):
+                    clean_summary = None
+                
+                published_time = None
+                if hasattr(entry, 'published_parsed') and entry.published_parsed:
+                    # Treat published_parsed as UTC, convert safely
+                    published_time = datetime.fromtimestamp(calendar.timegm(entry.published_parsed), timezone.utc).replace(tzinfo=None)
+                else:
+                    published_time = get_utc_now()
+                    
+                articles.append({
+                    'title': title,
+                    'description': clean_summary,
+                    'url': link,
+                    'source': source,
+                    'published_at': published_time,
+                    'fetched_source': 'Google News'
+                })
+            except Exception:
+                malformed_count += 1
     except Exception as e:
         print(f"  Google News exception for {ticker}: {e}")
+        return None, malformed_count
         
-    return articles
+    return articles, malformed_count
 
 def fetch_yahoo_finance(ticker):
     articles = []
+    malformed_count = 0
     try:
         tkr = yf.Ticker(ticker)
         news = tkr.news
         for item in news:
-            content = item.get('content', {})
-            if not content: continue
+            try:
+                content = item.get('content') or {}
+                if not content: continue
+                    
+                title = content.get('title', '')
                 
-            title = content.get('title', '')
-            link = content.get('clickThroughUrl', {}).get('url', '')
-            raw_summary = content.get('summary', '') or content.get('description', '') or ''
-            clean_summary = clean_html_description(raw_summary)
-            source = content.get('provider', {}).get('displayName', 'Yahoo Finance')
-            if not is_description_meaningful(clean_summary, title, source):
-                clean_summary = None
-            
-            pubDate = content.get('pubDate')
-            published_time = datetime.utcnow()
-            if pubDate:
-                try:
-                    published_time = datetime.fromisoformat(pubDate.replace('Z', '+00:00'))
-                    published_time = published_time.replace(tzinfo=None)
-                except:
-                    pass
-            
-            articles.append({
-                'title': title,
-                'description': clean_summary,
-                'url': link,
-                'source': source,
-                'published_at': published_time,
-                'fetched_source': 'Yahoo Finance'
-            })
+                # Defensive nested dictionary parsing
+                click_through = content.get('clickThroughUrl') or {}
+                link = click_through.get('url', '') if isinstance(click_through, dict) else ''
+                
+                raw_summary = content.get('summary', '') or content.get('description', '') or ''
+                clean_summary = clean_html_description(raw_summary)
+                
+                provider = content.get('provider') or {}
+                source = provider.get('displayName', 'Yahoo Finance') if isinstance(provider, dict) else 'Yahoo Finance'
+                
+                if not is_description_meaningful(clean_summary, title, source):
+                    clean_summary = None
+                
+                pubDate = content.get('pubDate')
+                published_time = get_utc_now()
+                if pubDate:
+                    try:
+                        published_time = datetime.fromisoformat(pubDate.replace('Z', '+00:00'))
+                        published_time = published_time.replace(tzinfo=None)
+                    except:
+                        pass
+                
+                articles.append({
+                    'title': title,
+                    'description': clean_summary,
+                    'url': link,
+                    'source': source,
+                    'published_at': published_time,
+                    'fetched_source': 'Yahoo Finance'
+                })
+            except Exception:
+                malformed_count += 1
     except Exception as e:
         print(f"  Yahoo Finance exception for {ticker}: {e}")
+        return None, malformed_count
         
-    return articles
+    return articles, malformed_count
 
 def run():
     client = MongoClient(MONGO_URI)
@@ -267,8 +292,32 @@ def run():
     }
     
     per_ticker_stats = {}
-    sources_status = {'Google News': {'attempted': 0, 'succeeded': 0}, 'Yahoo Finance': {'attempted': 0, 'succeeded': 0}}
+    sources_status = {
+        'Google News': {'attempted': 0, 'succeeded': 0, 'failed': 0, 'malformed': 0},
+        'Yahoo Finance': {'attempted': 0, 'succeeded': 0, 'failed': 0, 'malformed': 0}
+    }
     
+    fallback_metrics = {
+        'tickers_triggered': 0,
+        'articles_recovered': 0,
+        'tickers_failed': []
+    }
+    
+    ticker_coverage = {t: [] for t in TICKERS}
+    
+    def classify_freshness(dt):
+        now = get_utc_now()
+        age = now - dt
+        if age <= timedelta(days=1): return '<= 24h'
+        if age <= timedelta(days=3): return '<= 3d'
+        if age <= timedelta(days=7): return '<= 7d'
+        if age <= timedelta(days=30): return '<= 30d'
+        if age <= timedelta(days=90): return '<= 90d'
+        return '> 90d'
+
+    freshness_fetched = {'<= 24h': 0, '<= 3d': 0, '<= 7d': 0, '<= 30d': 0, '<= 90d': 0, '> 90d': 0}
+    freshness_inserted = {'<= 24h': 0, '<= 3d': 0, '<= 7d': 0, '<= 30d': 0, '<= 90d': 0, '> 90d': 0}
+
     for ticker in TICKERS:
         per_ticker_stats[ticker] = {
             'retrieved_articles': 0,
@@ -277,19 +326,33 @@ def run():
         }
         
         sources_status['Google News']['attempted'] += 1
-        articles = fetch_google_news(ticker)
-        if articles:
+        google_res, google_malformed = fetch_google_news(ticker)
+        
+        sources_status['Google News']['malformed'] += google_malformed
+        
+        if google_res is None:
+            sources_status['Google News']['failed'] += 1
+            articles = []
+        else:
             sources_status['Google News']['succeeded'] += 1
+            articles = google_res
             
-        recent_articles = [a for a in articles if a['published_at'] > datetime.utcnow() - timedelta(days=7)]
+        recent_articles = [a for a in articles if a['published_at'] > get_utc_now() - timedelta(days=7)]
         
         if not recent_articles:
-            # print(f"  {ticker}: Google News returned inadequate recent results. Falling back to Yahoo Finance.")
+            fallback_metrics['tickers_triggered'] += 1
             sources_status['Yahoo Finance']['attempted'] += 1
-            fallback_articles = fetch_yahoo_finance(ticker)
-            if fallback_articles:
+            yahoo_res, yahoo_malformed = fetch_yahoo_finance(ticker)
+            
+            sources_status['Yahoo Finance']['malformed'] += yahoo_malformed
+            
+            if yahoo_res is None:
+                sources_status['Yahoo Finance']['failed'] += 1
+                fallback_metrics['tickers_failed'].append(ticker)
+            else:
                 sources_status['Yahoo Finance']['succeeded'] += 1
-            articles.extend(fallback_articles)
+                articles.extend(yahoo_res)
+                fallback_metrics['articles_recovered'] += len(yahoo_res)
             
         stats['articles_fetched'] += len(articles)
         per_ticker_stats[ticker]['retrieved_articles'] += len(articles)
@@ -325,7 +388,7 @@ def run():
                     'source': article['source'],
                     'published_at': article['published_at'],
                     'fetched_source': article['fetched_source'],
-                    'collected_at': datetime.utcnow()
+                    'collected_at': get_utc_now()
                 }
                 
                 valid_records.append(record)
@@ -337,6 +400,9 @@ def run():
                 stats['articles_rejected'] += 1
 
         for record in valid_records:
+            freshness_fetched[classify_freshness(record['published_at'])] += 1
+            ticker_coverage[ticker].append(record['published_at'])
+            
             try:
                 result = collection.update_one(
                     {'article_id': record['article_id']},
@@ -359,6 +425,7 @@ def run():
                 )
                 if result.upserted_id:
                     stats['new_articles_inserted'] += 1
+                    freshness_inserted[classify_freshness(record['published_at'])] += 1
                 else:
                     stats['existing_articles_skipped'] += 1
             except PyMongoError as e:
@@ -366,30 +433,68 @@ def run():
 
         time.sleep(1.0)
         
-    stats['sources_attempted'] = sum(1 for v in sources_status.values() if v['attempted'] > 0)
-    stats['sources_succeeded'] = sum(1 for v in sources_status.values() if v['succeeded'] > 0)
-    stats['sources_failed'] = stats['sources_attempted'] - stats['sources_succeeded']
+    coverage_24h = [t for t, dates in ticker_coverage.items() if any(get_utc_now() - d <= timedelta(days=1) for d in dates)]
+    coverage_7d = [t for t, dates in ticker_coverage.items() if any(get_utc_now() - d <= timedelta(days=7) for d in dates)]
+    coverage_30d = [t for t, dates in ticker_coverage.items() if any(get_utc_now() - d <= timedelta(days=30) for d in dates)]
     
-    print(f"Sources attempted: {stats['sources_attempted']}")
-    print(f"Sources succeeded: {stats['sources_succeeded']}")
-    print(f"Sources failed: {stats['sources_failed']}\n")
-    print(f"Articles fetched: {stats['articles_fetched']}")
-    print(f"Articles normalized: {stats['articles_normalized']}")
-    print(f"Articles rejected: {stats['articles_rejected']}\n")
-    print(f"Articles matching active tickers: {stats['articles_matching_active']}")
-    print(f"Generic/unmatched articles: {stats['generic_unmatched']}\n")
-    print(f"New articles inserted: {stats['new_articles_inserted']}")
-    print(f"Existing articles skipped: {stats['existing_articles_skipped']}\n")
-    print(f"Newest fetched article:\n{stats['newest_fetched']}")
-    print(f"Oldest fetched article:\n{stats['oldest_fetched']}\n")
-    
-    newest_db = collection.find_one({}, sort=[("published_at", -1)])
-    if newest_db:
-        print(f"MongoDB newest article after run:\n{newest_db.get('published_at')}")
-    else:
-        print("MongoDB newest article after run:\nNone")
+    zero_7d = [t for t in TICKERS if t not in coverage_7d]
+    zero_30d = [t for t in TICKERS if t not in coverage_30d]
         
     print("=" * 50)
+    print("DIAGNOSTICS & HARDENING METRICS")
+    print("=" * 50)
+    
+    # Let's print out the required metrics
+    print("PROVIDER HEALTH:")
+    for provider, p_stats in sources_status.items():
+        print(f"  {provider}:")
+        print(f"    Requests Attempted: {p_stats['attempted']}")
+        print(f"    Requests Succeeded: {p_stats['succeeded']}")
+        print(f"    Requests Failed:    {p_stats['failed']}")
+        print(f"    Malformed Articles: {p_stats['malformed']}")
+        
+    print("\nFALLBACK DIAGNOSTICS:")
+    print(f"  Tickers triggering fallback: {fallback_metrics['tickers_triggered']}")
+    print(f"  Articles recovered: {fallback_metrics['articles_recovered']}")
+    if fallback_metrics['tickers_failed']:
+        print(f"  Failed Yahoo tickers: {', '.join(fallback_metrics['tickers_failed'])}")
+        
+    print(f"\nArticles fetched: {stats['articles_fetched']}")
+    print(f"Articles normalized: {stats['articles_normalized']}")
+    print(f"Articles rejected: {stats['articles_rejected']}")
+    print(f"Articles matching active tickers: {stats['articles_matching_active']}")
+    print(f"Generic/unmatched articles: {stats['generic_unmatched']}")
+    print(f"New articles inserted: {stats['new_articles_inserted']}")
+    print(f"Existing articles skipped: {stats['existing_articles_skipped']}\n")
+    print(f"Newest fetched article: {stats['newest_fetched']}")
+    print(f"Oldest fetched article: {stats['oldest_fetched']}\n")
+    
+    print("FRESHNESS DISTRIBUTION (ALL FETCHED/MATCHED):")
+    for k, v in freshness_fetched.items():
+        print(f"  {k}: {v}")
+        
+    print("\nFRESHNESS DISTRIBUTION (NEWLY INSERTED):")
+    for k, v in freshness_inserted.items():
+        print(f"  {k}: {v}")
+        
+    print(f"\nACTIVE TICKER COVERAGE (Universe size: {len(TICKERS)}):")
+    print(f"  24h coverage: {len(coverage_24h)} tickers with >= 1 article ({len(TICKERS) - len(coverage_24h)} with zero)")
+    print(f"  7d coverage:  {len(coverage_7d)} tickers with >= 1 article ({len(zero_7d)} with zero)")
+    print(f"  30d coverage: {len(coverage_30d)} tickers with >= 1 article ({len(zero_30d)} with zero)")
+    
+    if zero_7d:
+        print(f"\n  Zero-coverage (7d): {', '.join(zero_7d)}")
+    if zero_30d:
+        print(f"  Zero-coverage (30d): {', '.join(zero_30d)}")
+        
+    print("\nCANONICAL DEDUPLICATION:")
+    total_docs = collection.count_documents({'article_id': {'$exists': True}})
+    # PyMongo doesn't have a direct distinct count that scales perfectly if big, but distinct is fine here
+    unique_ids = len(collection.distinct('article_id'))
+    print(f"  Total canonical documents: {total_docs}")
+    print(f"  COUNT(DISTINCT article_id): {unique_ids}")
+    print(f"  Duplicate article_id count: {total_docs - unique_ids}")
+    
     client.close()
 
 if __name__ == '__main__':

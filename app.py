@@ -719,6 +719,7 @@ def get_news_detail(news_id):
         return jsonify(normalize_news_article(doc, deduplicated=True))
     except Exception as e:
         return jsonify({"error": "Invalid news ID or request"}), 400
+@app.route('/api/predictions/history')
 def get_prediction_history():
     from flask import request
     symbol = request.args.get('symbol')

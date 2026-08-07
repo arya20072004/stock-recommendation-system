@@ -232,19 +232,66 @@ def apply_threshold_calibration(proba, thresholds):
 # Data preparation functions (moved verbatim from ml_trainer.py)
 # ---------------------------------------------------------------------------
 
-def _prepare_nifty_data(start_date, end_date):
-    nifty_df = yf.download(
-        "^NSEI",
-        start=start_date,
-        end=end_date + timedelta(days=1),
-        progress=False,
-        auto_adjust=True,
-    )
-    if nifty_df.empty:
+_MACRO_CACHE = {}
+
+def _validate_macro_asset(df, asset_name, required_column="Close", min_valid_rows=10):
+    """
+    Validates externally downloaded macro data.
+    """
+    logger.info(f"MACRO DATA | {asset_name} | rows={len(df) if df is not None else 0}")
+    
+    if df is None or df.empty:
+        logger.warning(f"MACRO DATA | {asset_name} | status=INSUFFICIENT_DATA (Empty/None)")
+        return False, None
+        
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+        
+    if required_column not in df.columns:
+        logger.warning(f"MACRO DATA | {asset_name} | status=INSUFFICIENT_DATA (Missing {required_column})")
+        return False, df
+        
+    valid_close = df[required_column].dropna()
+    valid_count = len(valid_close)
+    
+    if valid_count < min_valid_rows:
+        logger.warning(f"MACRO DATA | {asset_name} | valid_close={valid_count} | status=INSUFFICIENT_DATA (Requires >= {min_valid_rows})")
+        return False, df
+        
+    first_valid = valid_close.index.min()
+    last_valid = valid_close.index.max()
+    logger.info(f"MACRO DATA | {asset_name} | valid_close={valid_count} | first={first_valid.date() if first_valid else 'N/A'} | last={last_valid.date() if last_valid else 'N/A'} | status=VALID")
+    
+    return True, df
+
+def _fetch_cached_macro(ticker, start_date, end_date):
+    """Fetches macro data using a run-local memory cache to prevent rate-limiting."""
+    cache_key = f"{ticker}_{start_date.date()}_{end_date.date()}"
+    if cache_key in _MACRO_CACHE:
+        return _MACRO_CACHE[cache_key].copy() if not _MACRO_CACHE[cache_key].empty else _MACRO_CACHE[cache_key]
+        
+    try:
+        df = yf.download(
+            ticker, 
+            start=start_date, 
+            end=end_date + timedelta(days=1), 
+            progress=False, 
+            auto_adjust=True,
+            timeout=10
+        )
+        _MACRO_CACHE[cache_key] = df
+        return df.copy() if not df.empty else df
+    except Exception as ex:
+        logger.warning(f"macro: {ticker} download failed — {ex}")
+        _MACRO_CACHE[cache_key] = pd.DataFrame()
         return pd.DataFrame()
 
-    if isinstance(nifty_df.columns, pd.MultiIndex):
-        nifty_df.columns = nifty_df.columns.get_level_values(0)
+def _prepare_nifty_data(start_date, end_date):
+    nifty_df = _fetch_cached_macro("^NSEI", start_date, end_date)
+    is_valid, nifty_df = _validate_macro_asset(nifty_df, "^NSEI", min_valid_rows=200)
+    
+    if not is_valid:
+        return pd.DataFrame()
 
     nifty_df = nifty_df.rename(columns={"Close": "nifty_close"})
     nifty_df = nifty_df[["nifty_close"]].copy()
@@ -258,163 +305,102 @@ def _prepare_nifty_data(start_date, end_date):
 def _prepare_macro_data(start_date, end_date, client):
     macro = pd.DataFrame()
 
-    try:
-        nifty = yf.download(
-            "^NSEI", start=start_date,
-            end=end_date + timedelta(days=1),
-            progress=False, auto_adjust=True,
-        )
-        if not nifty.empty:
-            if isinstance(nifty.columns, pd.MultiIndex):
-                nifty.columns = nifty.columns.get_level_values(0)
-            c = nifty["Close"]
-            nifty_ret_1d = c.pct_change(1)
-            macro["nifty_ret_1d"]  = nifty_ret_1d
-            macro["nifty_ret_5d"]  = c.pct_change(5)
-            macro["nifty_ret_10d"] = c.pct_change(10)
-            macro["nifty_ret_20d"] = c.pct_change(20)
-            macro["nifty_vol_10d"] = nifty_ret_1d.rolling(10).std()
-    except Exception as ex:
-        logger.warning("macro: Nifty download failed — %s", ex)
+    # NIFTY
+    nifty = _fetch_cached_macro("^NSEI", start_date, end_date)
+    is_valid, nifty = _validate_macro_asset(nifty, "^NSEI", min_valid_rows=20)
+    if is_valid:
+        c = nifty["Close"]
+        nifty_ret_1d = c.pct_change(1)
+        macro["nifty_ret_1d"]  = nifty_ret_1d
+        macro["nifty_ret_5d"]  = c.pct_change(5)
+        macro["nifty_ret_10d"] = c.pct_change(10)
+        macro["nifty_ret_20d"] = c.pct_change(20)
+        macro["nifty_vol_10d"] = nifty_ret_1d.rolling(10).std()
 
-    try:
-        usdinr = yf.download(
-            "INR=X", start=start_date,
-            end=end_date + timedelta(days=1),
-            progress=False, auto_adjust=True,
-        )
-        if not usdinr.empty:
-            if isinstance(usdinr.columns, pd.MultiIndex):
-                usdinr.columns = usdinr.columns.get_level_values(0)
-            c = usdinr["Close"]
-            usdinr_ret_1d = c.pct_change(1)
-            macro["usdinr_ret_1d"]  = usdinr_ret_1d
-            macro["usdinr_ret_5d"]  = c.pct_change(5)
-            macro["usdinr_vol_10d"] = usdinr_ret_1d.rolling(10).std()
-    except Exception as ex:
-        logger.warning("macro: USD/INR download failed — %s", ex)
+    # USDINR
+    usdinr = _fetch_cached_macro("INR=X", start_date, end_date)
+    is_valid, usdinr = _validate_macro_asset(usdinr, "INR=X", min_valid_rows=10)
+    if is_valid:
+        c = usdinr["Close"]
+        usdinr_ret_1d = c.pct_change(1)
+        macro["usdinr_ret_1d"]  = usdinr_ret_1d
+        macro["usdinr_ret_5d"]  = c.pct_change(5)
+        macro["usdinr_vol_10d"] = usdinr_ret_1d.rolling(10).std()
+    else:
+        logger.warning("WARNING: INR=X unavailable/insufficient. usdinr_ret_1d, usdinr_ret_5d and usdinr_vol_10d using neutral fallback 0.0.")
+        macro["usdinr_ret_1d"]  = 0.0
+        macro["usdinr_ret_5d"]  = 0.0
+        macro["usdinr_vol_10d"] = 0.0
 
-    try:
-        nasdaq = yf.download(
-            "^NDX", start=start_date,
-            end=end_date + timedelta(days=1),
-            progress=False, auto_adjust=True,
-        )
-        if not nasdaq.empty:
-            if isinstance(nasdaq.columns, pd.MultiIndex):
-                nasdaq.columns = nasdaq.columns.get_level_values(0)
-            c = nasdaq["Close"]
-            macro["nasdaq_ret_5d"]  = c.pct_change(5)
-            macro["nasdaq_ret_20d"] = c.pct_change(20)
-        else:
-            # Download succeeded but returned empty — zero-fill
-            logger.warning("macro: Nasdaq returned empty data — zeroing nasdaq features")
-            macro["nasdaq_ret_5d"]  = 0.0
-            macro["nasdaq_ret_20d"] = 0.0
-    except Exception as ex:
-        logger.warning("macro: Nasdaq download failed — %s", ex)
-        # Zero-fill so downstream code always sees these columns
+    # NASDAQ
+    nasdaq = _fetch_cached_macro("^NDX", start_date, end_date)
+    is_valid, nasdaq = _validate_macro_asset(nasdaq, "^NDX", min_valid_rows=20)
+    if is_valid:
+        c = nasdaq["Close"]
+        macro["nasdaq_ret_5d"]  = c.pct_change(5)
+        macro["nasdaq_ret_20d"] = c.pct_change(20)
+    else:
+        logger.warning("WARNING: ^NDX unavailable/insufficient. nasdaq_ret_5d, nasdaq_ret_20d using neutral fallback 0.0.")
         macro["nasdaq_ret_5d"]  = 0.0
         macro["nasdaq_ret_20d"] = 0.0
 
-    try:
-        crude = yf.download(
-            "BZ=F", start=start_date,
-            end=end_date + timedelta(days=1),
-            progress=False, auto_adjust=True,
-        )
-        if not crude.empty:
-            if isinstance(crude.columns, pd.MultiIndex):
-                crude.columns = crude.columns.get_level_values(0)
-            c = crude["Close"]
-            crude_ret_1d = c.pct_change(1)
-            macro["crude_ret_1d"]  = crude_ret_1d
-            macro["crude_ret_5d"]  = c.pct_change(5)
-            macro["crude_vol_10d"] = crude_ret_1d.rolling(10).std()
-        else:
-            logger.warning("macro: Crude returned empty data — zeroing crude features")
-            macro["crude_ret_1d"]  = 0.0
-            macro["crude_ret_5d"]  = 0.0
-            macro["crude_vol_10d"] = 0.0
-    except Exception as ex:
-        logger.warning("macro: Crude download failed — %s", ex)
+    # CRUDE
+    crude = _fetch_cached_macro("BZ=F", start_date, end_date)
+    is_valid, crude = _validate_macro_asset(crude, "BZ=F", min_valid_rows=10)
+    if is_valid:
+        c = crude["Close"]
+        crude_ret_1d = c.pct_change(1)
+        macro["crude_ret_1d"]  = crude_ret_1d
+        macro["crude_ret_5d"]  = c.pct_change(5)
+        macro["crude_vol_10d"] = crude_ret_1d.rolling(10).std()
+    else:
+        logger.warning("WARNING: BZ=F unavailable/insufficient. crude_ret_1d, crude_ret_5d and crude_vol_10d using neutral fallback 0.0.")
         macro["crude_ret_1d"]  = 0.0
         macro["crude_ret_5d"]  = 0.0
         macro["crude_vol_10d"] = 0.0
 
-    try:
-        gold = yf.download(
-            "GC=F", start=start_date,
-            end=end_date + timedelta(days=1),
-            progress=False, auto_adjust=True,
-        )
-        if not gold.empty:
-            if isinstance(gold.columns, pd.MultiIndex):
-                gold.columns = gold.columns.get_level_values(0)
-            c = gold["Close"]
-            gold_ret_1d = c.pct_change(1)
-            macro["gold_ret_1d"]  = gold_ret_1d
-            macro["gold_ret_5d"]  = c.pct_change(5)
-            macro["gold_vol_10d"] = gold_ret_1d.rolling(10).std()
-        else:
-            logger.warning("macro: Gold returned empty data — zeroing gold features")
-            macro["gold_ret_1d"]  = 0.0
-            macro["gold_ret_5d"]  = 0.0
-            macro["gold_vol_10d"] = 0.0
-    except Exception as ex:
-        logger.warning("macro: Gold download failed — %s", ex)
+    # GOLD
+    gold = _fetch_cached_macro("GC=F", start_date, end_date)
+    is_valid, gold = _validate_macro_asset(gold, "GC=F", min_valid_rows=10)
+    if is_valid:
+        c = gold["Close"]
+        gold_ret_1d = c.pct_change(1)
+        macro["gold_ret_1d"]  = gold_ret_1d
+        macro["gold_ret_5d"]  = c.pct_change(5)
+        macro["gold_vol_10d"] = gold_ret_1d.rolling(10).std()
+    else:
+        logger.warning("WARNING: GC=F unavailable/insufficient. gold_ret_1d, gold_ret_5d and gold_vol_10d using neutral fallback 0.0.")
         macro["gold_ret_1d"]  = 0.0
         macro["gold_ret_5d"]  = 0.0
         macro["gold_vol_10d"] = 0.0
 
-    try:
-        copper = yf.download(
-            "HG=F", start=start_date,
-            end=end_date + timedelta(days=1),
-            progress=False, auto_adjust=True,
-        )
-        if not copper.empty:
-            if isinstance(copper.columns, pd.MultiIndex):
-                copper.columns = copper.columns.get_level_values(0)
-            c = copper["Close"]
-            copper_ret_1d = c.pct_change(1)
-            macro["copper_ret_1d"]  = copper_ret_1d
-            macro["copper_ret_5d"]  = c.pct_change(5)
-            macro["copper_vol_10d"] = copper_ret_1d.rolling(10).std()
-        else:
-            logger.warning("macro: Copper returned empty data — zeroing copper features")
-            macro["copper_ret_1d"]  = 0.0
-            macro["copper_ret_5d"]  = 0.0
-            macro["copper_vol_10d"] = 0.0
-    except Exception as ex:
-        logger.warning("macro: Copper download failed — %s", ex)
+    # COPPER
+    copper = _fetch_cached_macro("HG=F", start_date, end_date)
+    is_valid, copper = _validate_macro_asset(copper, "HG=F", min_valid_rows=10)
+    if is_valid:
+        c = copper["Close"]
+        copper_ret_1d = c.pct_change(1)
+        macro["copper_ret_1d"]  = copper_ret_1d
+        macro["copper_ret_5d"]  = c.pct_change(5)
+        macro["copper_vol_10d"] = copper_ret_1d.rolling(10).std()
+    else:
+        logger.warning("WARNING: HG=F unavailable/insufficient. copper_ret_1d, copper_ret_5d and copper_vol_10d using neutral fallback 0.0.")
         macro["copper_ret_1d"]  = 0.0
         macro["copper_ret_5d"]  = 0.0
         macro["copper_vol_10d"] = 0.0
 
-    try:
-        india_vix = yf.download(
-            "^INDIAVIX", start=start_date,
-            end=end_date + timedelta(days=1),
-            progress=False, auto_adjust=True,
-        )
-        if not india_vix.empty:
-            if isinstance(india_vix.columns, pd.MultiIndex):
-                india_vix.columns = india_vix.columns.get_level_values(0)
-            c = india_vix["Close"]
-            vix_ret_1d = c.pct_change(1)
-            macro["vix_level"]   = c
-            macro["vix_ret_1d"]  = vix_ret_1d
-            macro["vix_chg_5d"]  = c.diff(5)
-            macro["vix_vol_10d"] = vix_ret_1d.rolling(10).std()
-        else:
-            logger.warning("macro: India VIX returned empty data — zeroing vix features")
-            macro["vix_level"]   = 0.0
-            macro["vix_ret_1d"]  = 0.0
-            macro["vix_chg_5d"]  = 0.0
-            macro["vix_vol_10d"] = 0.0
-    except Exception as ex:
-        logger.warning("macro: India VIX download failed — %s", ex)
+    # INDIA VIX
+    india_vix = _fetch_cached_macro("^INDIAVIX", start_date, end_date)
+    is_valid, india_vix = _validate_macro_asset(india_vix, "^INDIAVIX", min_valid_rows=10)
+    if is_valid:
+        c = india_vix["Close"]
+        vix_ret_1d = c.pct_change(1)
+        macro["vix_level"]   = c
+        macro["vix_ret_1d"]  = vix_ret_1d
+        macro["vix_chg_5d"]  = c.diff(5)
+        macro["vix_vol_10d"] = vix_ret_1d.rolling(10).std()
+    else:
+        logger.warning("WARNING: ^INDIAVIX unavailable/insufficient. vix_level, vix_ret_1d, vix_chg_5d and vix_vol_10d using neutral fallback 0.0.")
         macro["vix_level"]   = 0.0
         macro["vix_ret_1d"]  = 0.0
         macro["vix_chg_5d"]  = 0.0

@@ -9,9 +9,11 @@ import { LoadingState } from '../components/common/LoadingState'
 import { ConfidenceBar } from '../components/recommendations/ConfidenceBar'
 import { RecommendationBadge } from '../components/recommendations/RecommendationBadge'
 import { RiskBadge } from '../components/recommendations/RiskBadge'
+import { TradingViewAdvancedChart } from '../components/tradingview/TradingViewAdvancedChart'
 import { useWatchlist } from '../context/WatchlistContext'
 import { fetchStockDetails } from '../api/stocks'
-import { directionForValue, formatCurrency, formatPercent } from '../utils/formatters'
+import { directionForValue, formatCurrency, formatPercent, formatSectorName } from '../utils/formatters'
+import '../components/tradingview/tradingview.css'
 import './stock-details.css'
 
 const PriceChart = lazy(() => import('../components/charts/PriceChart').then(m => ({ default: m.PriceChart })))
@@ -22,13 +24,14 @@ export function StockDetails() {
   const { ticker } = useParams()
   const navigate = useNavigate()
   const decodedTicker = decodeURIComponent(ticker)
-  
+
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [range, setRange] = useState('1Y')
   const [chartLoading, setChartLoading] = useState(false)
   const [error, setError] = useState(null)
   const [notFound, setNotFound] = useState(false)
+  const [chartMode, setChartMode] = useState('stockintel') // 'stockintel' | 'tradingview'
 
   const { isInWatchlist, toggleWatchlist } = useWatchlist()
   const saved = isInWatchlist(decodedTicker)
@@ -107,7 +110,7 @@ export function StockDetails() {
   const { company, market, prediction, chartData } = data
   const direction = directionForValue(market.day_change_pct)
   const MovementIcon = direction === 'negative' ? ArrowDownRight : ArrowUpRight
-  
+
   const isPartial = !prediction
 
   return (
@@ -119,7 +122,7 @@ export function StockDetails() {
         <div className="stock-header__identity">
           <div>
             <span className="eyebrow">{decodedTicker}</span>
-            <h1>{company.name} <span className="stock-header__exchange">{company.sector || 'Unknown Sector'}</span></h1>
+            <h1>{company.name} <span className="stock-header__exchange" title={company.sector ? formatSectorName(company.sector) : ''}>{company.sector ? formatSectorName(company.sector) : 'Unknown Sector'}</span></h1>
           </div>
           {isPartial ? <Badge tone="warning">Partial Data</Badge> : <Badge tone="positive">Live</Badge>}
         </div>
@@ -141,9 +144,35 @@ export function StockDetails() {
 
       {/* ── Chart + Signal (row 1) ── */}
       <div className="details-grid">
-        <Suspense fallback={<LoadingState label="Loading price chart" />}>
-          <PriceChart chartData={chartData} range={range} onRangeChange={handleRangeChange} loading={chartLoading} direction={direction} />
-        </Suspense>
+        <section aria-labelledby="chart-heading">
+          <div className="section-heading">
+            <h2 id="chart-heading">Price chart</h2>
+            <div className="chart-mode-toggle" role="radiogroup" aria-label="Chart data source">
+              <button
+                type="button"
+                className={`chart-mode-toggle__btn ${chartMode === 'stockintel' ? 'chart-mode-toggle__btn--active' : ''}`}
+                onClick={() => setChartMode('stockintel')}
+                role="radio"
+                aria-checked={chartMode === 'stockintel'}
+              >StockIntel Data</button>
+              <button
+                type="button"
+                className={`chart-mode-toggle__btn ${chartMode === 'tradingview' ? 'chart-mode-toggle__btn--active' : ''}`}
+                onClick={() => setChartMode('tradingview')}
+                role="radio"
+                aria-checked={chartMode === 'tradingview'}
+              >TradingView</button>
+            </div>
+          </div>
+
+          {chartMode === 'stockintel' ? (
+            <Suspense fallback={<LoadingState label="Loading price chart" />}>
+              <PriceChart chartData={chartData} range={range} onRangeChange={handleRangeChange} loading={chartLoading} direction={direction} />
+            </Suspense>
+          ) : (
+            <TradingViewAdvancedChart ticker={decodedTicker} />
+          )}
+        </section>
 
         <section aria-labelledby="signal-heading">
           <h2 id="signal-heading" className="section-label">Model signal</h2>

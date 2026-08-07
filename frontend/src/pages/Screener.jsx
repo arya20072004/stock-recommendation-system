@@ -12,7 +12,7 @@ import { ConfidenceBar } from '../components/recommendations/ConfidenceBar'
 import { RecommendationBadge } from '../components/recommendations/RecommendationBadge'
 import { RiskBadge } from '../components/recommendations/RiskBadge'
 import { fetchStocksSummary } from '../api/stocks'
-import { formatPercent } from '../utils/formatters'
+import { formatPercent, formatSectorName } from '../utils/formatters'
 import './screener-page.css'
 
 const signalTones = { BUY: 'positive', HOLD: 'warning', SELL: 'negative', UNCERTAIN: 'neutral' }
@@ -51,7 +51,7 @@ export function Screener() {
     return Array.from(s).sort()
   }, [stocks])
   
-  const sectorOptions = useMemo(() => [{ value: 'ALL', label: 'All Sectors' }, ...sectors.map(s => ({ value: s, label: s }))], [sectors])
+  const sectorOptions = useMemo(() => [{ value: 'ALL', label: 'All Sectors' }, ...sectors.map(s => ({ value: s, label: formatSectorName(s) }))], [sectors])
 
   // Draft state (edited but not applied)
   const [draft, setDraft] = useState({ ...DEFAULTS })
@@ -194,7 +194,7 @@ export function Screener() {
                   {results.map(stock => (
                     <Link key={stock.ticker} to={`/stocks/${encodeURIComponent(stock.ticker)}`} className="screener-table__row" role="row" aria-label={`${stock.ticker} — ${stock.recommendation}`}>
                       <span role="cell" className="screener-table__stock"><strong>{stock.ticker}</strong><span>{stock.company_name}</span></span>
-                      <span role="cell" className="screener-table__sector">{stock.sector || '—'}</span>
+                      <span role="cell" className="screener-table__sector" title={stock.sector ? formatSectorName(stock.sector) : ''}>{stock.sector ? formatSectorName(stock.sector) : '—'}</span>
                       <span role="cell"><RecommendationBadge signal={stock.recommendation} /></span>
                       <span role="cell" className={`mono ${stock.day_change_pct >= 0 ? 'metric-positive' : 'metric-negative'}`}>{stock.day_change_pct != null ? formatPercent(stock.day_change_pct) : '—'}</span>
                       <span role="cell"><ConfidenceBar value={stock.confidence} tone={signalTones[stock.recommendation] ?? 'positive'} compact /></span>
@@ -210,7 +210,7 @@ export function Screener() {
                   <Link key={stock.ticker} to={`/stocks/${encodeURIComponent(stock.ticker)}`} className="screener-card-link">
                     <Card hoverable className="screener-card">
                       <div className="screener-card__header"><strong>{stock.ticker}</strong><RecommendationBadge signal={stock.recommendation} /></div>
-                      <span className="screener-card__sector">{stock.sector || '—'}</span>
+                      <span className="screener-card__sector" title={stock.sector ? formatSectorName(stock.sector) : ''}>{stock.sector ? formatSectorName(stock.sector) : '—'}</span>
                       <div className="screener-card__metrics">
                         <div><span>Day Change</span><strong className={`mono ${stock.day_change_pct >= 0 ? 'metric-positive' : 'metric-negative'}`}>{stock.day_change_pct != null ? formatPercent(stock.day_change_pct) : '—'}</strong></div>
                         <div><span>Confidence</span><strong className="mono">{stock.confidence}%</strong></div>

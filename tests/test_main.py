@@ -18,7 +18,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-TICKERS = ["ADANIENT.NS", "ADANIPORTS.NS", "APOLLOHOSP.NS"]
+TICKERS = ["INFY.NS"]
 
 def run_single(ticker):
     client = MongoClient(MONGO_URI)
