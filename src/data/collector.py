@@ -93,7 +93,19 @@ def run():
 
     print("Starting data collection for all Nifty 50 stocks...")
 
+    results = {
+        "attempted": 0,
+        "successful": 0,
+        "failed": 0,
+        "failed_tickers": [],
+        "invalid_rows": 0,
+        "target_market_date": None
+    }
+
+    global_max_date = None
+
     for ticker in TICKERS:
+        results["attempted"] += 1
         try:
             # Fetch data for the last 5 years
             data = yf.download(ticker, period="5y", interval="1d", progress=False)
@@ -102,6 +114,8 @@ def run():
 
             if data.empty:
                 print(f"No data found for {ticker}, it may be delisted.")
+                results["failed"] += 1
+                results["failed_tickers"].append(ticker)
                 continue
 
             records_to_insert = []
@@ -123,6 +137,7 @@ def run():
                     yf_valid_dates.add(pd.Timestamp(date).normalize())
                 else:
                     invalid_count += 1
+                    results["invalid_rows"] += 1
                     print(f"Validation failed for {ticker} on {date.date()}: {reason}")
 
             if records_to_insert:
@@ -148,13 +163,35 @@ def run():
             gap_dates = trading_calendar - yf_dates
             if gap_dates:
                 print(f"  {ticker}: detected {len(gap_dates)} trading-day gap(s) vs Bhavcopy calendar — attempting fallback")
-                _backfill_gap_dates(db, collection, ticker, gap_dates)
+                filled = _backfill_gap_dates(db, collection, ticker, gap_dates)
+                if filled < len(gap_dates):
+                    results["failed"] += 1
+                    results["failed_tickers"].append(ticker)
+                    continue
+                    
+            if range_end is not None:
+                if global_max_date is None or range_end > global_max_date:
+                    global_max_date = range_end
+                    
+            results["successful"] += 1
 
         except Exception as e:
             print(f"An error occurred for {ticker}: {e}")
+            results["failed"] += 1
+            results["failed_tickers"].append(ticker)
+
+    if global_max_date is not None:
+        results["target_market_date"] = global_max_date.strftime("%Y-%m-%d")
 
     print("Data collection finished.")
     client.close()
+    
+    return results
 
 if __name__ == "__main__":
-    run()
+    import sys
+    result = run()
+    if result["failed"] > 0:
+        print(f"Collector failed for {result['failed']} tickers: {result['failed_tickers']}")
+        sys.exit(1)
+    sys.exit(0)

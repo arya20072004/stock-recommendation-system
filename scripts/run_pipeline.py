@@ -461,6 +461,17 @@ def validate_data_freshness(now_ist: datetime) -> bool:
 # ======================================================================
 
 def main():
+    print(
+        "\n" + "=" * 70 + "\n"
+        "!!! DEPRECATION WARNING !!!\n"
+        "This script represents the obsolete daily-training pipeline.\n"
+        "It is no longer the canonical production pipeline.\n"
+        "Please use the new canonical production orchestrator:\n\n"
+        "    python -m src.pipeline.daily\n\n"
+        "Execution of this legacy script will continue for now, but \n"
+        "it should be transitioned away from immediately.\n"
+        + "=" * 70 + "\n"
+    )
 
     parser = argparse.ArgumentParser(
         description="Run the StockIntel daily ML pipeline."
