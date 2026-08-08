@@ -50,31 +50,12 @@ FEATURES_DIR = "saved_features"
 
 for ticker in TICKERS:
     try:
-        ubj_path = os.path.join(MODELS_DIR, f"model_{ticker}.ubj")
-        joblib_path = os.path.join(MODELS_DIR, f"model_{ticker}.joblib")
-        features_path = os.path.join(FEATURES_DIR, f"features_{ticker}.json")
-        
-        if os.path.exists(features_path):
-            # Try to load from .ubj first (native format)
-            if os.path.exists(ubj_path):
-                print(f"Loading model and features for {ticker} (native format)...")
-                model = XGBClassifier()
-                model.load_model(ubj_path)
-                models[ticker] = model
-            # Fall back to .joblib if .ubj doesn't exist
-            elif os.path.exists(joblib_path):
-                print(f"Loading model and features for {ticker} (joblib format)...")
-                with warnings.catch_warnings():
-                    warnings.filterwarnings('ignore', category=UserWarning, message='.*pickle.*')
-                    models[ticker] = joblib.load(joblib_path)
-            else:
-                print(f"No model file found for {ticker}")
-                continue
-            
-            with open(features_path, 'r') as f:
-                feature_lists[ticker] = json.load(f)
+        from src.ml.history import load_active_bundle
+        model, feature_names, version = load_active_bundle(ticker)
+        models[ticker] = (model, version)
+        feature_lists[ticker] = feature_names
     except Exception as e:
-        print(f"Could not load model for {ticker}: {e}")
+        print(f"Could not load active model bundle for {ticker}: {e}")
 print("--- Model Loading Complete ---")
 
 
@@ -97,7 +78,25 @@ def get_latest_prediction(ticker):
     if computed_df.empty:
         raise ValueError(f"Feature engineering returned empty DataFrame for {ticker}")
 
-    model = models[ticker]
+    # Ensure cache is up to date
+    manifest_path = os.path.join(MODELS_DIR, f"{ticker}_active.json")
+    if os.path.exists(manifest_path):
+        with open(manifest_path, "r") as f:
+            manifest = json.load(f)
+        current_version = manifest.get("model_version")
+        cached = models.get(ticker)
+        cached_version = cached[1] if cached else None
+
+        if current_version != cached_version:
+            from src.ml.history import load_active_bundle
+            model, feature_names, version = load_active_bundle(ticker)
+            models[ticker] = (model, version)
+            feature_lists[ticker] = feature_names
+
+    if ticker not in models:
+        raise ValueError(f"Model for {ticker} not loaded.")
+
+    model = models[ticker][0]
     feature_names = feature_lists[ticker]
 
     # --- Safety check: detect feature columns missing from computed DataFrame ---
@@ -173,6 +172,20 @@ def get_stock_list():
     """Returns the list of available stocks."""
     return jsonify(sorted(list(models.keys())))
 
+@app.route('/api/models/<ticker>/versions')
+def get_model_versions(ticker):
+    """Returns the lifecycle history of models for a ticker."""
+    active_record = db.model_registry.find_one({"ticker": ticker, "status": "ACTIVE"}, {"_id": 0})
+    candidates = list(db.model_registry.find({"ticker": ticker, "status": "CANDIDATE"}, {"_id": 0}).sort("trained_at", -1))
+    retired = list(db.model_registry.find({"ticker": ticker, "status": "RETIRED"}, {"_id": 0}).sort("trained_at", -1))
+
+    return jsonify({
+        "ticker": ticker,
+        "active": active_record,
+        "candidates": candidates,
+        "retired": retired
+    })
+
 @app.route('/api/stocks/<ticker>')
 @cache.cached(timeout=900)
 def get_stock_data(ticker):
@@ -184,7 +197,7 @@ def get_stock_data(ticker):
 
     try:
         prediction_data = get_latest_prediction(ticker)
-        model = models[ticker]
+        model = models[ticker][0]
         features_list = feature_lists[ticker]
         importances = model.feature_importances_
         feature_importance_pairs = sorted(
@@ -196,18 +209,18 @@ def get_stock_data(ticker):
             {'feature': name, 'importance': round(float(score), 4)}
             for name, score in feature_importance_pairs
         ]
-        
+
         chart_df = pd.DataFrame(list(db.historical_data.find({'ticker': ticker}).sort('date', 1)))
-        
+
         # Drop rows with missing crucial price data so frontend doesn't calculate with nulls
         chart_df = chart_df.dropna(subset=['close', 'open'])
-        
+
         chart_df['prev_close'] = chart_df['close'].shift(1).fillna(chart_df['open'])
-        
+
         chart_data_list = [
             {
                 'time': row['date'].strftime('%Y-%m-%d'),
-                'open': row['open'], 
+                'open': row['open'],
                 'high': row.get('high') if pd.notna(row.get('high')) else row['open'],
                 'low': row.get('low') if pd.notna(row.get('low')) else row['open'],
                 'close': row['close'],
@@ -215,7 +228,7 @@ def get_stock_data(ticker):
                 'volume': row.get('volume', 0) if pd.notna(row.get('volume', 0)) else 0
             } for _, row in chart_df.iterrows()
         ]
-        
+
         return jsonify({
             'chartData': chart_data_list,
             'recommendation': prediction_data['recommendation'],
@@ -258,7 +271,7 @@ def get_portfolio():
             # Get latest valid data points for price stats
             latest_docs = list(db.historical_data.find({'ticker': ticker}).sort('date', -1).limit(5))
             latest_docs = [d for d in latest_docs if pd.notna(d.get('close')) and pd.notna(d.get('open'))]
-            
+
             if len(latest_docs) >= 1:
                 last_close = latest_docs[0].get('close', 0)
                 if len(latest_docs) >= 2:
@@ -290,10 +303,10 @@ def get_portfolio():
 
 def get_latest_predictions_snapshot(db, active_tickers):
     """
-    Finds the latest authoritative market_date and fetches predictions 
+    Finds the latest authoritative market_date and fetches predictions
     for all active tickers. Handles mixed-date snapshots if some tickers
     are missing from the latest date.
-    
+
     Returns: (predictions_list, meta_dict)
     """
     latest_doc = db.prediction_history.find_one({}, sort=[("market_date", -1)])
@@ -306,20 +319,20 @@ def get_latest_predictions_snapshot(db, active_tickers):
             "complete": False,
             "mixed_date": False
         }
-        
+
     latest_market_date = latest_doc['market_date']
-    
+
     # Check if we have predictions for all active tickers for this date
     predictions = list(db.prediction_history.find({
         "market_date": latest_market_date,
         "symbol": {"$in": active_tickers}
     }))
-    
+
     returned_symbols = {p['symbol'] for p in predictions}
     missing_symbols = set(active_tickers) - returned_symbols
-    
+
     mixed_date = False
-    
+
     # If missing tickers, fetch their latest valid prediction
     if missing_symbols:
         mixed_date = True
@@ -331,10 +344,10 @@ def get_latest_predictions_snapshot(db, active_tickers):
             if latest_ticker_doc:
                 predictions.append(latest_ticker_doc)
                 returned_symbols.add(ticker)
-                
+
         # Re-evaluate missing
         missing_symbols = set(active_tickers) - returned_symbols
-        
+
     meta = {
         "market_date": latest_market_date,
         "expected_tickers": len(active_tickers),
@@ -343,7 +356,7 @@ def get_latest_predictions_snapshot(db, active_tickers):
         "complete": len(missing_symbols) == 0,
         "mixed_date": mixed_date
     }
-    
+
     return predictions, meta
 
 @app.route('/api/recommendations')
@@ -351,20 +364,20 @@ def get_latest_predictions_snapshot(db, active_tickers):
 def get_recommendations():
     """Returns authoritative recommendation snapshots from prediction_history."""
     predictions, meta = get_latest_predictions_snapshot(db, TICKERS)
-    
+
     if not predictions:
         return jsonify({'error': 'No predictions available.'}), 404
-        
+
     data = []
-    
+
     for p in predictions:
         ticker = p['symbol']
-        
+
         # Get price data from historical_data
         # We need last_close and previous close for day_change_pct
         latest_docs = list(db.historical_data.find({'ticker': ticker}).sort('date', -1).limit(5))
         latest_docs = [d for d in latest_docs if pd.notna(d.get('close')) and pd.notna(d.get('open'))]
-        
+
         if len(latest_docs) >= 1:
             last_close = latest_docs[0].get('close', 0)
             if len(latest_docs) >= 2:
@@ -375,11 +388,11 @@ def get_recommendations():
         else:
             last_close = 0
             day_change_pct = 0
-            
+
         pred_ts = p.get('prediction_timestamp')
         if pred_ts and hasattr(pred_ts, 'isoformat'):
             pred_ts = pred_ts.isoformat()
-            
+
         data.append({
             "ticker": ticker,
             "market_date": p['market_date'],
@@ -392,11 +405,11 @@ def get_recommendations():
             "last_close": round(last_close, 2),
             "day_change_pct": day_change_pct
         })
-        
+
     # Sort data for consistent display (e.g., conviction order)
     order = {'BUY': 0, 'HOLD': 1, 'UNCERTAIN': 2, 'SELL': 3}
     data.sort(key=lambda x: (order.get(x['recommendation'], 4), -x['confidence']))
-    
+
     return jsonify({
         "data": data,
         "meta": meta,
@@ -408,10 +421,10 @@ def get_recommendations():
 def get_stocks_summary():
     """Shared authoritative endpoint for Stocks and Screener."""
     predictions, meta = get_latest_predictions_snapshot(db, TICKERS)
-    
+
     if not predictions:
         return jsonify({'error': 'No predictions available.'}), 404
-        
+
     # Batch price lookup
     pipeline = [
         {"$match": {"ticker": {"$in": TICKERS}}},
@@ -428,16 +441,16 @@ def get_stocks_summary():
         ticker = r["_id"]
         docs = r["docs"]
         valid_docs = [d for d in docs if pd.notna(d.get('close')) and pd.notna(d.get('open'))]
-        
+
         if len(valid_docs) >= 1:
             last_close = valid_docs[0].get('close')
             volume = valid_docs[0].get('volume')
-            
+
             if len(valid_docs) >= 2:
                 prev_close = valid_docs[1].get('close')
             else:
                 prev_close = valid_docs[0].get('open')
-            
+
             if pd.isna(prev_close) or prev_close == 0:
                 prev_close = None
                 day_change = None
@@ -445,7 +458,7 @@ def get_stocks_summary():
             else:
                 day_change = round(last_close - prev_close, 2)
                 day_change_pct = round(((last_close - prev_close) / prev_close) * 100, 2)
-                
+
             price_map[ticker] = {
                 "last_close": round(last_close, 2) if pd.notna(last_close) else None,
                 "previous_close": round(prev_close, 2) if pd.notna(prev_close) else None,
@@ -453,32 +466,32 @@ def get_stocks_summary():
                 "day_change_pct": day_change_pct,
                 "volume": volume if pd.notna(volume) else None
             }
-            
+
     data = []
-    
+
     for p in predictions:
         ticker = p['symbol']
         price_info = price_map.get(ticker, {})
-        
+
         data.append({
             "ticker": ticker,
             "company_name": NIFTY50_TICKER_MAP.get(ticker, ticker),
             "sector": TICKER_TO_SECTOR.get(ticker, None),
             "market_date": p['market_date'],
-            
+
             "last_close": price_info.get("last_close"),
             "previous_close": price_info.get("previous_close"),
             "day_change": price_info.get("day_change"),
             "day_change_pct": price_info.get("day_change_pct"),
             "volume": price_info.get("volume"),
-            
+
             "recommendation": p['recommendation'],
             "raw_prediction": p.get('raw_prediction', p['recommendation']),
             "confidence": p['confidence'],
             "confidence_tier": p.get('confidence_tier', 'UNKNOWN'),
             "model_version": p.get('model_version', 'unknown')
         })
-        
+
     return jsonify({
         "data": data,
         "meta": meta,
@@ -494,20 +507,20 @@ def get_stock_details_persisted(ticker):
     """
     if ticker not in TICKERS:
         return jsonify({'error': 'Ticker not supported'}), 404
-        
+
     range_param = request.args.get('range', '1Y')
     valid_ranges = {'1M', '3M', '6M', '1Y', '5Y'}
     if range_param not in valid_ranges:
         return jsonify({'error': 'Invalid range'}), 400
-        
+
     try:
         # Get latest market date to anchor the chart range
         latest_hist_doc = db.historical_data.find_one({"ticker": ticker}, sort=[("date", -1)])
         if not latest_hist_doc:
             return jsonify({'error': 'Historical data not found'}), 404
-            
+
         latest_market_date_obj = latest_hist_doc['date']
-        
+
         if range_param == '1M':
             start_date = latest_market_date_obj - relativedelta(months=1)
         elif range_param == '3M':
@@ -518,12 +531,12 @@ def get_stock_details_persisted(ticker):
             start_date = latest_market_date_obj - relativedelta(years=1)
         elif range_param == '5Y':
             start_date = latest_market_date_obj - relativedelta(years=5)
-            
+
         chart_cursor = db.historical_data.find({
             "ticker": ticker,
             "date": {"$gte": start_date, "$lte": latest_market_date_obj}
         }).sort("date", 1)
-        
+
         chart_data_list = []
         for row in chart_cursor:
             chart_data_list.append({
@@ -534,16 +547,16 @@ def get_stock_details_persisted(ticker):
                 'close': row.get('close'),
                 'volume': row.get('volume')
             })
-            
+
         latest_docs = list(db.historical_data.find({"ticker": ticker}).sort("date", -1).limit(2))
         latest_docs = [d for d in latest_docs if pd.notna(d.get('close')) and pd.notna(d.get('open'))]
-        
+
         market_stats = {
             "market_date": latest_market_date_obj.strftime('%Y-%m-%d'),
-            "open": None, "high": None, "low": None, "last_close": None, 
+            "open": None, "high": None, "low": None, "last_close": None,
             "previous_close": None, "day_change": None, "day_change_pct": None, "volume": None
         }
-        
+
         if len(latest_docs) >= 1:
             d0 = latest_docs[0]
             market_stats["open"] = d0.get('open')
@@ -551,14 +564,14 @@ def get_stock_details_persisted(ticker):
             market_stats["low"] = d0.get('low')
             market_stats["last_close"] = d0.get('close')
             market_stats["volume"] = d0.get('volume')
-            
+
             if len(latest_docs) >= 2:
                 prev_close = latest_docs[1].get('close')
             else:
                 prev_close = d0.get('open')
-                
+
             market_stats["previous_close"] = prev_close
-            
+
             if prev_close:
                 market_stats["day_change"] = round(d0.get('close') - prev_close, 2)
                 market_stats["day_change_pct"] = round(((d0.get('close') - prev_close) / prev_close) * 100, 2)
@@ -612,7 +625,7 @@ def normalize_news_article(doc):
         tickers = [doc.get("ticker")]
     # Some older docs don't have ticker populated if they were malformed, filter Nones
     tickers = [t for t in tickers if t]
-    
+
     return {
         "id": str(doc.get("_id", "")),
         "headline": doc.get("title", ""),
@@ -635,19 +648,19 @@ def get_news():
             limit = int(request.args.get('limit', 25))
         except ValueError:
             return jsonify({'error': 'Invalid page or limit'}), 400
-            
+
         if page < 1 or limit < 1 or limit > 100:
             return jsonify({'error': 'Page must be >= 1, limit must be between 1 and 100'}), 400
-            
+
         if ticker and ticker not in TICKERS:
             return jsonify({'error': 'Unsupported ticker'}), 400
-            
+
         if sentiment and sentiment not in ['POSITIVE', 'NEUTRAL', 'NEGATIVE']:
             return jsonify({'error': 'Unsupported sentiment'}), 400
-            
+
         offset = (page - 1) * limit
-        
-        
+
+
         # Freshness Check
         newest_doc = db.news_articles.find_one({}, sort=[("published_at", -1)])
         newest_article_at = newest_doc.get("published_at") if newest_doc else None
@@ -663,7 +676,7 @@ def get_news():
             query["$or"] = [{"tickers": ticker}, {"ticker": ticker}]
         if sentiment:
             query["label"] = sentiment.lower()
-            
+
         # Compute sentiment counts
         sentiment_pipeline = [
             {"$match": query},
@@ -681,7 +694,7 @@ def get_news():
 
         cursor = db.news_articles.find(query).sort("published_at", -1).skip(offset).limit(limit)
         data = [normalize_news_article(doc) for doc in cursor]
-            
+
         return jsonify({
             "data": data,
             "meta": {
@@ -707,7 +720,7 @@ def get_news_detail(news_id):
         doc = db.news_articles.find_one({"_id": ObjectId(news_id)})
         if not doc:
             return jsonify({"error": "Article not found"}), 404
-            
+
         # Fetch associated tickers (logical deduplication)
         title = doc.get("title")
         source = doc.get("source")
@@ -715,7 +728,7 @@ def get_news_detail(news_id):
             matching_docs = db.news_articles.find({"title": title, "source": source}, {"ticker": 1})
             tickers = list(set(d.get("ticker") for d in matching_docs if d.get("ticker")))
             doc["tickers"] = tickers
-            
+
         return jsonify(normalize_news_article(doc, deduplicated=True))
     except Exception as e:
         return jsonify({"error": "Invalid news ID or request"}), 400
@@ -728,7 +741,7 @@ def get_prediction_history():
     model_version = request.args.get('model_version')
     limit = int(request.args.get('limit', 50))
     offset = int(request.args.get('offset', 0))
-    
+
     query = {}
     if symbol:
         import re
@@ -736,11 +749,11 @@ def get_prediction_history():
     if recommendation: query['recommendation'] = recommendation
     if outcome: query['outcome'] = outcome
     if model_version: query['model_version'] = model_version
-        
+
     total_count = db.prediction_history.count_documents(query)
-    
+
     cursor = db.prediction_history.find(query).sort('market_date', -1).skip(offset).limit(limit)
-    
+
     results = []
     for doc in cursor:
         doc['_id'] = str(doc['_id'])
@@ -751,7 +764,7 @@ def get_prediction_history():
         if 'feature_snapshot' in doc:
             del doc['feature_snapshot']
         results.append(doc)
-        
+
     return jsonify({
         'total': total_count,
         'limit': limit,
@@ -765,12 +778,12 @@ def get_prediction_detail(prediction_id):
         doc = db.prediction_history.find_one({'_id': ObjectId(prediction_id)})
         if not doc:
             return jsonify({'error': 'Prediction not found'}), 404
-            
+
         doc['_id'] = str(doc['_id'])
         doc['prediction_timestamp'] = doc['prediction_timestamp'].isoformat() if doc.get('prediction_timestamp') else None
         if 'evaluation_timestamp' in doc and doc['evaluation_timestamp']:
             doc['evaluation_timestamp'] = doc['evaluation_timestamp'].isoformat()
-            
+
         return jsonify(doc)
     except Exception as e:
         return jsonify({'error': str(e)}), 400
@@ -782,26 +795,26 @@ from src.ml.monitoring import get_system_health, get_ticker_performance, fetch_e
 def get_prediction_performance():
     ticker = request.args.get('ticker')
     model_version = request.args.get('model_version')
-    
+
     query = {}
     if ticker: query["symbol"] = ticker
     if model_version: query["model_version"] = model_version
-    
+
     try:
         preds = fetch_evaluated_predictions(db, query)
         perf = analyze_performance(preds)
-        
+
         # Add basic count stats for backward compatibility
         total_predictions = db.prediction_history.count_documents(query)
         evaluated_predictions = len(preds)
         pending_query = {"status": "PENDING"}
         if ticker: pending_query["symbol"] = ticker
         pending_predictions = db.prediction_history.count_documents(pending_query)
-        
+
         perf["total_predictions"] = total_predictions
         perf["evaluated_predictions"] = evaluated_predictions
         perf["pending_predictions"] = pending_predictions
-        
+
         return jsonify(perf)
     except Exception as e:
         logger.error(f"Error in /api/predictions/performance: {e}")
@@ -833,7 +846,7 @@ def get_models():
     """Return a list of available models and their high-level metadata."""
     MODELS_DIR = "saved_models"
     models_data = []
-    
+
     if os.path.exists(MODELS_DIR):
         for filename in os.listdir(MODELS_DIR):
             if filename.endswith("_metrics.json"):
@@ -842,7 +855,7 @@ def get_models():
                 try:
                     with open(filepath, "r", encoding="utf-8") as f:
                         data = json.load(f)
-                    
+
                     model_metadata = data.get("model_metadata", {})
                     models_data.append({
                         "ticker": ticker,
@@ -853,7 +866,7 @@ def get_models():
                     })
                 except Exception as e:
                     print(f"Error reading {filename}: {e}")
-                    
+
     return jsonify({
         "data": models_data,
         "total": len(models_data)
@@ -864,14 +877,14 @@ def get_model_intelligence(ticker):
     """Return complete Model Intelligence payload for a specific ticker."""
     MODELS_DIR = "saved_models"
     metrics_path = os.path.join(MODELS_DIR, f"{ticker}_metrics.json")
-    
+
     if not os.path.exists(metrics_path):
         return jsonify({"error": "Metrics artifact not found"}), 404
-        
+
     try:
         with open(metrics_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-            
+
         # Structure the payload as requested
         payload = {
             "ticker": ticker,
@@ -900,7 +913,7 @@ def get_model_intelligence(ticker):
                 "threshold_calibration": data.get("threshold_calibration")
             }
         }
-        
+
         # Normalize numeric keys in training_labels to strings ("0" -> "SELL", etc.)
         class_map = {"0": "SELL", "1": "HOLD", "2": "BUY"}
         if payload["distributions"]["training_labels"]:
@@ -908,9 +921,9 @@ def get_model_intelligence(ticker):
             for k, v in payload["distributions"]["training_labels"].items():
                 normalized_labels[class_map.get(k, k)] = v
             payload["distributions"]["training_labels"] = normalized_labels
-            
+
         return jsonify(payload)
-        
+
     except Exception as e:
         return jsonify({"error": f"Error reading metrics for {ticker}: {str(e)}"}), 500
 

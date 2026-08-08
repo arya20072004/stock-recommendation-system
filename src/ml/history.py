@@ -45,7 +45,6 @@ from src.ml.confidence import (
     compute_confidence_tier,
     get_display_signal,
 )
-from src.ml.model_utils import get_model_version
 
 
 # ======================================================================
@@ -69,88 +68,64 @@ DEFAULT_PREDICTION_HORIZON = 10
 # Model loading
 # ======================================================================
 
-def load_model_for_ticker(ticker: str):
+def load_active_bundle(ticker: str):
     """
-    Load the trained model for a ticker.
-
-    UBJ is preferred.
-    joblib is retained as a fallback for older model artifacts.
+    Load the explicitly versioned model and feature contract for a ticker based on the active manifest.
+    Fails closed if the manifest is missing, malformed, or if hashes do not match.
     """
+    manifest_path = os.path.join(MODELS_DIR, f"{ticker}_active.json")
+    if not os.path.exists(manifest_path):
+        raise FileNotFoundError(f"Active manifest missing for {ticker}. Failing closed.")
 
-    ubj_path = os.path.join(
-        MODELS_DIR,
-        f"model_{ticker}.ubj",
-    )
+    with open(manifest_path, "r", encoding="utf-8") as f:
+        manifest = json.load(f)
 
-    joblib_path = os.path.join(
-        MODELS_DIR,
-        f"model_{ticker}.joblib",
-    )
+    version = manifest.get("model_version")
+    expected_model_hash = manifest.get("model_hash")
+    expected_feature_hash = manifest.get("feature_hash")
 
-    if os.path.exists(ubj_path):
+    if not version or not expected_model_hash or not expected_feature_hash:
+        raise ValueError(f"Malformed active manifest for {ticker}. Failing closed.")
 
-        model = XGBClassifier()
-        model.load_model(ubj_path)
+    # Verify Model
+    model_path = os.path.join(MODELS_DIR, f"model_{ticker}_{version}.joblib")
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"Model artifact missing for {ticker} version {version}")
 
-        return model
+    sha256_model = hashlib.sha256()
+    with open(model_path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            sha256_model.update(chunk)
+    actual_model_hash = sha256_model.hexdigest()[:12]
 
-    if os.path.exists(joblib_path):
+    if actual_model_hash != expected_model_hash:
+        raise ValueError(f"Model hash mismatch for {ticker}. Expected {expected_model_hash}, got {actual_model_hash}. Failing closed.")
 
-        with warnings.catch_warnings():
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning, message=".*pickle.*")
+        model = joblib.load(model_path)
 
-            warnings.filterwarnings(
-                "ignore",
-                category=UserWarning,
-                message=".*pickle.*",
-            )
-
-            return joblib.load(joblib_path)
-
-    raise FileNotFoundError(
-        f"No trained model artifact found for {ticker}"
-    )
-
-
-# ======================================================================
-# Feature loading
-# ======================================================================
-
-def load_feature_names(ticker: str) -> list[str]:
-    """
-    Load the exact feature list used when training the ticker model.
-    """
-
-    features_path = os.path.join(
-        FEATURES_DIR,
-        f"features_{ticker}.json",
-    )
-
+    # Verify Features
+    features_path = os.path.join(FEATURES_DIR, f"features_{ticker}_{version}.json")
     if not os.path.exists(features_path):
+        raise FileNotFoundError(f"Feature artifact missing for {ticker} version {version}")
 
-        raise FileNotFoundError(
-            f"Feature definition missing for {ticker}: "
-            f"{features_path}"
-        )
+    sha256_features = hashlib.sha256()
+    with open(features_path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            sha256_features.update(chunk)
+    actual_feature_hash = sha256_features.hexdigest()[:64]
 
-    with open(
-        features_path,
-        "r",
-        encoding="utf-8",
-    ) as f:
+    if actual_feature_hash != expected_feature_hash:
+        raise ValueError(f"Feature hash mismatch for {ticker}. Expected {expected_feature_hash}, got {actual_feature_hash}. Failing closed.")
 
+    with open(features_path, "r", encoding="utf-8") as f:
         feature_names = json.load(f)
 
-    if not isinstance(feature_names, list):
-        raise ValueError(
-            f"Feature file for {ticker} does not contain a list."
-        )
+    if not isinstance(feature_names, list) or not feature_names:
+        raise ValueError(f"Invalid feature list format in artifact for {ticker}")
 
-    if not feature_names:
-        raise ValueError(
-            f"Feature list for {ticker} is empty."
-        )
-
-    return feature_names
+    return model, feature_names, version
 
 
 # ======================================================================
@@ -350,11 +325,7 @@ def generate_and_persist_predictions(client):
             # Load model + training feature contract
             # ----------------------------------------------------------
 
-            model = load_model_for_ticker(
-                ticker
-            )
-
-            feature_names = load_feature_names(
+            model, feature_names, loaded_version = load_active_bundle(
                 ticker
             )
 
@@ -599,21 +570,7 @@ def generate_and_persist_predictions(client):
             # Model version
             # ----------------------------------------------------------
 
-            model_version = (
-                get_model_version(
-                    ticker
-                )
-            )
-
-            if model_version in {
-                "unknown",
-                "error",
-            }:
-
-                raise ValueError(
-                    f"{ticker}: unable to determine "
-                    f"model version."
-                )
+            model_version = loaded_version
 
             # ----------------------------------------------------------
             # MongoDB record

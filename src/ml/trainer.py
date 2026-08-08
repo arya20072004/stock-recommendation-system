@@ -545,7 +545,7 @@ VERY_LOW_CONFIDENCE_TICKERS = {
     "TCS.NS",  # 3 consecutive sub-0.30 runs, no recoverable pattern
 }
 
-def train_model(df, ticker):
+def train_model(df, ticker, client=None):
     """
     Tunes with Optuna + TimeSeriesSplit (SMOTE inside fold), trains final model,
     and saves model, feature list, and metrics.
@@ -730,13 +730,27 @@ def train_model(df, ticker):
     )
     logger.info("\n%s", classification_report(y_test, y_pred, target_names=["SELL", "HOLD", "BUY"], zero_division=0))
 
-    model_filename    = os.path.join(MODELS_DIR, f"model_{ticker}.joblib")
-    features_filename = os.path.join(FEATURES_DIR, f"features_{ticker}.json")
-    metrics_filename  = os.path.join(MODELS_DIR, f"{ticker}_metrics.json")
+    import uuid
+    from src.ml.model_registry import register_candidate, hash_file_sha256
 
-    joblib.dump(best_model, model_filename)
-    with open(features_filename, "w", encoding="utf-8") as feat_file:
+    temp_id = uuid.uuid4().hex
+    temp_model_filename = os.path.join(MODELS_DIR, f"model_{ticker}_temp_{temp_id}.joblib")
+    temp_features_filename = os.path.join(FEATURES_DIR, f"features_{ticker}_temp_{temp_id}.json")
+    
+    joblib.dump(best_model, temp_model_filename)
+    with open(temp_features_filename, "w", encoding="utf-8") as feat_file:
         json.dump(features, feat_file)
+        
+    model_hash = hash_file_sha256(temp_model_filename, truncate_to=12)
+    feature_hash = hash_file_sha256(temp_features_filename, truncate_to=64)
+    model_version = model_hash
+    
+    model_filename = os.path.join(MODELS_DIR, f"model_{ticker}_{model_version}.joblib")
+    features_filename = os.path.join(FEATURES_DIR, f"features_{ticker}_{model_version}.json")
+    metrics_filename = os.path.join(MODELS_DIR, f"metrics_{ticker}_{model_version}.json")
+    
+    os.replace(temp_model_filename, model_filename)
+    os.replace(temp_features_filename, features_filename)
 
     y_proba        = best_model.predict_proba(X_test)
     max_probas     = y_proba.max(axis=1)
@@ -769,7 +783,7 @@ def train_model(df, ticker):
 
     # Model Intelligence: metadata
     trained_at = datetime.now(timezone.utc).isoformat()
-    model_version = get_model_version(ticker)
+    # model_version already computed above
     prediction_horizon = TICKER_HORIZON_OVERRIDE.get(ticker, 10)
 
     metrics_payload = {
@@ -819,12 +833,23 @@ def train_model(df, ticker):
             "row_identity_hash": hashlib.sha256(''.join(X.index.to_series().dt.strftime('%Y-%m-%d')).encode('utf-8')).hexdigest(),
             "train_row_identity_hash": hashlib.sha256(''.join(X_train.index.to_series().dt.strftime('%Y-%m-%d')).encode('utf-8')).hexdigest(),
             "test_row_identity_hash": hashlib.sha256(''.join(X_test.index.to_series().dt.strftime('%Y-%m-%d')).encode('utf-8')).hexdigest(),
-            "row_hash": pd.util.hash_pandas_object(X, index=True).sum(),
+            "row_hash": str(pd.util.hash_pandas_object(X, index=True).sum()),
         },
     }
     safe_metrics_payload = _to_json_safe(metrics_payload)
-    with open(metrics_filename, "w", encoding="utf-8") as metrics_file:
+    # Add hashes to metrics payload
+    safe_metrics_payload["model_hash"] = model_hash
+    safe_metrics_payload["feature_hash"] = feature_hash
+
+    temp_metrics_filename = os.path.join(MODELS_DIR, f"metrics_{ticker}_temp_{temp_id}.json")
+    with open(temp_metrics_filename, "w", encoding="utf-8") as metrics_file:
         json.dump(safe_metrics_payload, metrics_file, indent=2)
+    
+    os.replace(temp_metrics_filename, metrics_filename)
+
+    if client:
+        db = client["stock_market_db"]
+        register_candidate(db, ticker, model_version, model_hash, feature_hash, safe_metrics_payload)
 
     logger.info("%s: model saved to %s", ticker, model_filename)
     logger.info("%s: features saved to %s", ticker, features_filename)
@@ -844,7 +869,7 @@ def run(tickers_to_process):
             if dataset.empty:
                 logger.warning("%s: dataset creation failed or returned empty; skipping", ticker)
                 continue
-            train_model(dataset, ticker)
+            train_model(dataset, ticker, client)
     finally:
         client.close()
         logger.info("Training run complete")
