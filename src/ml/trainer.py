@@ -198,16 +198,27 @@ def create_dataset(ticker, client):
 
     horizon = TICKER_HORIZON_OVERRIDE.get(ticker, 10)
     df["future_return"] = df["close"].shift(-horizon) / df["close"] - 1
-    
+
+    # Canonical ticker-specific target threshold.
     threshold = get_target_return_threshold(ticker, df["atr_pct"])
-    
+
     df["target"] = 1
     df.loc[df["future_return"] > threshold, "target"] = 2
     df.loc[df["future_return"] < -threshold, "target"] = 0
+
+    # Diagnostic only — report the threshold actually used rather than relying
+    # on the obsolete atr_scale variable.
+    if isinstance(threshold, pd.Series):
+        threshold_median = float(threshold.dropna().median())
+    else:
+        threshold_median = float(threshold)
+
     logger.info(
-        "%s: label threshold scale = %.2f× ATR (BUY=%d, HOLD=%d, SELL=%d)",
+        "%s: target threshold median = %.4f%% | horizon=%d sessions "
+        "(BUY=%d, HOLD=%d, SELL=%d)",
         ticker,
-        atr_scale,
+        threshold_median * 100.0,
+        horizon,
         (df["target"] == 2).sum(),
         (df["target"] == 1).sum(),
         (df["target"] == 0).sum(),

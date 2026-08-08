@@ -775,44 +775,58 @@ def get_prediction_detail(prediction_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
+from src.ml.monitoring import get_system_health, get_ticker_performance, fetch_evaluated_predictions, analyze_performance
+
 @app.route('/api/predictions/performance')
-@cache.cached(timeout=900)
+@cache.cached(timeout=900, query_string=True)
 def get_prediction_performance():
-    total_predictions = db.prediction_history.count_documents({})
-    evaluated_predictions = db.prediction_history.count_documents({"status": "EVALUATED"})
-    pending_predictions = db.prediction_history.count_documents({"status": "PENDING"})
+    ticker = request.args.get('ticker')
+    model_version = request.args.get('model_version')
     
-    correct_predictions = db.prediction_history.count_documents({"outcome": "CORRECT"})
+    query = {}
+    if ticker: query["symbol"] = ticker
+    if model_version: query["model_version"] = model_version
     
-    accuracy = (correct_predictions / evaluated_predictions) if evaluated_predictions > 0 else 0
-    
-    buy_eval = db.prediction_history.count_documents({"recommendation": "BUY", "status": "EVALUATED"})
-    buy_correct = db.prediction_history.count_documents({"recommendation": "BUY", "outcome": "CORRECT"})
-    buy_accuracy = (buy_correct / buy_eval) if buy_eval > 0 else 0
-    
-    hold_eval = db.prediction_history.count_documents({"recommendation": "HOLD", "status": "EVALUATED"})
-    hold_correct = db.prediction_history.count_documents({"recommendation": "HOLD", "outcome": "CORRECT"})
-    hold_accuracy = (hold_correct / hold_eval) if hold_eval > 0 else 0
-    
-    sell_eval = db.prediction_history.count_documents({"recommendation": "SELL", "status": "EVALUATED"})
-    sell_correct = db.prediction_history.count_documents({"recommendation": "SELL", "outcome": "CORRECT"})
-    sell_accuracy = (sell_correct / sell_eval) if sell_eval > 0 else 0
-    
-    # Avg confidence
-    pipeline = [{"$group": {"_id": None, "avg_confidence": {"$avg": "$confidence"}}}]
-    result = list(db.prediction_history.aggregate(pipeline))
-    avg_confidence = result[0]['avg_confidence'] if result else 0
-    
-    return jsonify({
-        "total_predictions": total_predictions,
-        "evaluated_predictions": evaluated_predictions,
-        "pending_predictions": pending_predictions,
-        "accuracy": round(accuracy, 3),
-        "buy_accuracy": round(buy_accuracy, 3),
-        "hold_accuracy": round(hold_accuracy, 3),
-        "sell_accuracy": round(sell_accuracy, 3),
-        "average_confidence": round(avg_confidence, 1) if avg_confidence else 0
-    })
+    try:
+        preds = fetch_evaluated_predictions(db, query)
+        perf = analyze_performance(preds)
+        
+        # Add basic count stats for backward compatibility
+        total_predictions = db.prediction_history.count_documents(query)
+        evaluated_predictions = len(preds)
+        pending_query = {"status": "PENDING"}
+        if ticker: pending_query["symbol"] = ticker
+        pending_predictions = db.prediction_history.count_documents(pending_query)
+        
+        perf["total_predictions"] = total_predictions
+        perf["evaluated_predictions"] = evaluated_predictions
+        perf["pending_predictions"] = pending_predictions
+        
+        return jsonify(perf)
+    except Exception as e:
+        logger.error(f"Error in /api/predictions/performance: {e}")
+        return jsonify({'error': 'Monitoring aggregation degraded', 'state': 'DEGRADED'}), 503
+
+@app.route('/api/models/health')
+@cache.cached(timeout=900)
+def get_models_health():
+    try:
+        health_data = get_system_health(db)
+        return jsonify(health_data)
+    except Exception as e:
+        logger.error(f"Error in /api/models/health: {e}")
+        return jsonify({'error': 'Monitoring aggregation degraded', 'state': 'DEGRADED'}), 503
+
+@app.route('/api/models/<ticker>/performance')
+@cache.cached(timeout=900, query_string=True)
+def get_ticker_model_performance(ticker):
+    model_version = request.args.get('model_version')
+    try:
+        perf = get_ticker_performance(db, ticker, model_version)
+        return jsonify(perf)
+    except Exception as e:
+        logger.error(f"Error in /api/models/<ticker>/performance: {e}")
+        return jsonify({'error': 'Monitoring aggregation degraded', 'state': 'DEGRADED'}), 503
 
 @app.route('/api/models')
 def get_models():
