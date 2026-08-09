@@ -22,32 +22,35 @@ from sklearn.metrics import (
 from sklearn.model_selection import TimeSeriesSplit
 from xgboost import XGBClassifier
 
-from src.features.engineering import (
-    HISTORY_YEARS,
-    SECTOR_MAP,
-    SECTOR_INDEX_NAME_MAP,
-    TICKER_HISTORY_OVERRIDE,
-    TICKER_ATR_THRESHOLD_SCALE,
-    EVENT_DRIVEN_SECTORS_NO_INDEX,
-    SECTOR_INDEX_DISABLED_TICKERS,
-    TICKER_START_DATE_OVERRIDE,
-    TICKER_HORIZON_OVERRIDE,
-    TREND_FOLLOWING_SECTORS,
-    ALL_MACRO_COLS,
-    SECTOR_MIN_PEERS,
-    IT_MACRO_DISABLED_TICKERS,
-    _prepare_nifty_data,
-    _prepare_macro_data,
-    _prepare_sentiment_data,
-    _prepare_sector_data,
-    _find_col,
-    add_technical_indicators,
-    add_derived_features,
-    add_calendar_features,
-    TICKER_CLASS_THRESHOLDS,
-    apply_threshold_calibration,
-    get_target_return_threshold,
-)
+from src.features.router import resolve_feature_pipeline, get_feature_pipeline_hash
+
+FEATURE_PIPELINE_VERSION = os.getenv("FEATURE_PIPELINE_VERSION", "v1")
+feature_module = resolve_feature_pipeline(FEATURE_PIPELINE_VERSION)
+
+HISTORY_YEARS = feature_module.HISTORY_YEARS
+SECTOR_MAP = feature_module.SECTOR_MAP
+SECTOR_INDEX_NAME_MAP = feature_module.SECTOR_INDEX_NAME_MAP
+TICKER_HISTORY_OVERRIDE = feature_module.TICKER_HISTORY_OVERRIDE
+TICKER_ATR_THRESHOLD_SCALE = feature_module.TICKER_ATR_THRESHOLD_SCALE
+EVENT_DRIVEN_SECTORS_NO_INDEX = feature_module.EVENT_DRIVEN_SECTORS_NO_INDEX
+SECTOR_INDEX_DISABLED_TICKERS = feature_module.SECTOR_INDEX_DISABLED_TICKERS
+TICKER_START_DATE_OVERRIDE = feature_module.TICKER_START_DATE_OVERRIDE
+TICKER_HORIZON_OVERRIDE = feature_module.TICKER_HORIZON_OVERRIDE
+TREND_FOLLOWING_SECTORS = feature_module.TREND_FOLLOWING_SECTORS
+ALL_MACRO_COLS = feature_module.ALL_MACRO_COLS
+SECTOR_MIN_PEERS = feature_module.SECTOR_MIN_PEERS
+IT_MACRO_DISABLED_TICKERS = feature_module.IT_MACRO_DISABLED_TICKERS
+_prepare_nifty_data = feature_module._prepare_nifty_data
+_prepare_macro_data = feature_module._prepare_macro_data
+_prepare_sentiment_data = feature_module._prepare_sentiment_data
+_prepare_sector_data = feature_module._prepare_sector_data
+_find_col = feature_module._find_col
+add_technical_indicators = feature_module.add_technical_indicators
+add_derived_features = feature_module.add_derived_features
+add_calendar_features = feature_module.add_calendar_features
+TICKER_CLASS_THRESHOLDS = feature_module.TICKER_CLASS_THRESHOLDS
+apply_threshold_calibration = feature_module.apply_threshold_calibration
+get_target_return_threshold = feature_module.get_target_return_threshold
 from src.ml.model_utils import get_model_version
 
 
@@ -736,21 +739,30 @@ def train_model(df, ticker, client=None):
     temp_id = uuid.uuid4().hex
     temp_model_filename = os.path.join(MODELS_DIR, f"model_{ticker}_temp_{temp_id}.joblib")
     temp_features_filename = os.path.join(FEATURES_DIR, f"features_{ticker}_temp_{temp_id}.json")
+    temp_dataset_filename = os.path.join(FEATURES_DIR, f"dataset_{ticker}_temp_{temp_id}.parquet")
     
     joblib.dump(best_model, temp_model_filename)
     with open(temp_features_filename, "w", encoding="utf-8") as feat_file:
         json.dump(features, feat_file)
         
+    # Archive the exact pre-split training matrix
+    training_matrix = df[features + ["target"]].copy()
+    training_matrix.to_parquet(temp_dataset_filename, engine="pyarrow")
+        
     model_hash = hash_file_sha256(temp_model_filename, truncate_to=12)
     feature_hash = hash_file_sha256(temp_features_filename, truncate_to=64)
+    dataset_hash = hash_file_sha256(temp_dataset_filename, truncate_to=64)
     model_version = model_hash
+    feature_pipeline_hash = get_feature_pipeline_hash(FEATURE_PIPELINE_VERSION)
     
     model_filename = os.path.join(MODELS_DIR, f"model_{ticker}_{model_version}.joblib")
     features_filename = os.path.join(FEATURES_DIR, f"features_{ticker}_{model_version}.json")
+    dataset_filename = os.path.join(FEATURES_DIR, f"dataset_{ticker}_{model_version}.parquet")
     metrics_filename = os.path.join(MODELS_DIR, f"metrics_{ticker}_{model_version}.json")
     
     os.replace(temp_model_filename, model_filename)
     os.replace(temp_features_filename, features_filename)
+    os.replace(temp_dataset_filename, dataset_filename)
 
     y_proba        = best_model.predict_proba(X_test)
     max_probas     = y_proba.max(axis=1)
@@ -835,6 +847,14 @@ def train_model(df, ticker, client=None):
             "test_row_identity_hash": hashlib.sha256(''.join(X_test.index.to_series().dt.strftime('%Y-%m-%d')).encode('utf-8')).hexdigest(),
             "row_hash": str(pd.util.hash_pandas_object(X, index=True).sum()),
         },
+        "feature_pipeline_version": FEATURE_PIPELINE_VERSION,
+        "feature_pipeline_hash": feature_pipeline_hash,
+        "dataset_hash": dataset_hash,
+        "dataset_row_count": len(training_matrix),
+        "dataset_date_start": str(training_matrix.index.min()),
+        "dataset_date_end": str(training_matrix.index.max()),
+        "target_definition": ["SELL", "HOLD", "BUY"],
+        "provenance_status": "COMPLETE",
     }
     safe_metrics_payload = _to_json_safe(metrics_payload)
     # Add hashes to metrics payload

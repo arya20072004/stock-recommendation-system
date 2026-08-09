@@ -13,6 +13,7 @@ import mongomock
 # The module under test
 import src.ml.trainer as trainer
 from src.ml.trainer import train_model
+from src.features.router import get_feature_pipeline_hash
 
 @pytest.fixture
 def mock_db():
@@ -62,6 +63,10 @@ def test_trainer_lifecycle_safe_registration(mock_xgb, mock_optuna, mock_db, iso
         "model_version": old_version,
         "model_hash": old_model_hash,
         "feature_hash": old_feature_hash,
+        "feature_pipeline_version": "v1",
+        "feature_pipeline_hash": get_feature_pipeline_hash("v1"),
+        "dataset_hash": "LEGACY_UNAVAILABLE",
+        "provenance_status": "LEGACY_UNAVAILABLE",
         "promoted_at": datetime.now(timezone.utc).isoformat()
     }
     with open(manifest_path, "w") as f:
@@ -72,7 +77,11 @@ def test_trainer_lifecycle_safe_registration(mock_xgb, mock_optuna, mock_db, iso
         "version": old_version,
         "status": "ACTIVE",
         "model_hash": old_model_hash,
-        "feature_hash": old_feature_hash
+        "feature_hash": old_feature_hash,
+        "feature_pipeline_version": "v1",
+        "feature_pipeline_hash": get_feature_pipeline_hash("v1"),
+        "dataset_hash": "LEGACY_UNAVAILABLE",
+        "provenance_status": "LEGACY_UNAVAILABLE"
     })
     
     # 2. Mock external training dependencies

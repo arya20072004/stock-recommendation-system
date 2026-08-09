@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 from xgboost import XGBClassifier
 from src.data.nifty50 import TICKERS, NIFTY50_TICKER_MAP
 from src.ml.confidence import compute_confidence_tier, get_display_signal
-from src.features.engineering import build_feature_row, TICKER_CLASS_THRESHOLDS, apply_threshold_calibration
+from src.features.router import resolve_feature_pipeline, get_feature_pipeline_hash
 from src.data.sector_index_builder import NIFTY500_SECTOR_MAP
 
 logger = logging.getLogger(__name__)
@@ -68,21 +68,36 @@ def get_latest_prediction(ticker):
 
     Returns a dict with recommendation, confidence, and timestamp.
     """
-    # Build the full feature DataFrame using the shared pipeline.
-    # build_feature_row fetches HISTORY_YEARS of data (or overridden
-    # amount for tickers in TICKER_HISTORY_OVERRIDE) — enough to
-    # satisfy all rolling windows (200-day Nifty SMA, 30-day
-    # correlation, 20-day OBV/VWAP, 5-day sector momentum).
+    manifest_path = os.path.join(MODELS_DIR, f"{ticker}_active.json")
+    if not os.path.exists(manifest_path):
+        raise ValueError(f"No active manifest found for {ticker}")
+    with open(manifest_path, "r") as f:
+        manifest = json.load(f)
+    feature_pipeline_version = manifest.get("feature_pipeline_version")
+    if not feature_pipeline_version:
+        raise RuntimeError(f"Feature pipeline version missing in manifest for {ticker}")
+    feature_pipeline_hash = manifest.get("feature_pipeline_hash")
+    # Check 1: Route the pipeline
+    try:
+        engineering_module = resolve_feature_pipeline(feature_pipeline_version)
+    except RuntimeError as e:
+        raise RuntimeError(f"Feature pipeline version '{feature_pipeline_version}' is unavailable.") from e
+    # Check 2: Verify hash
+    current_hash = get_feature_pipeline_hash(feature_pipeline_version)
+    if feature_pipeline_hash and current_hash != feature_pipeline_hash:
+        raise RuntimeError(f"Feature pipeline hash mismatch for {ticker}. Expected {feature_pipeline_hash}, got {current_hash}")
+
+    build_feature_row = engineering_module.build_feature_row
+    TICKER_CLASS_THRESHOLDS = engineering_module.TICKER_CLASS_THRESHOLDS
+    apply_threshold_calibration = engineering_module.apply_threshold_calibration
+
     computed_df = build_feature_row(ticker, client, db)
 
     if computed_df.empty:
         raise ValueError(f"Feature engineering returned empty DataFrame for {ticker}")
 
     # Ensure cache is up to date
-    manifest_path = os.path.join(MODELS_DIR, f"{ticker}_active.json")
-    if os.path.exists(manifest_path):
-        with open(manifest_path, "r") as f:
-            manifest = json.load(f)
+    if True:
         current_version = manifest.get("model_version")
         cached = models.get(ticker)
         cached_version = cached[1] if cached else None

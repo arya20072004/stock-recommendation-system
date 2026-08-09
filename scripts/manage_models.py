@@ -64,11 +64,17 @@ def do_status(args):
     print(f"\n--- Status for {args.ticker} ---")
     if manifest:
         print(f"Manifest Active Version: {manifest.get('model_version')}")
+        print(f"Manifest Pipeline Version: {manifest.get('feature_pipeline_version', 'UNKNOWN')}")
+        print(f"Manifest Dataset Hash: {manifest.get('dataset_hash', 'LEGACY_UNAVAILABLE')}")
+        print(f"Manifest Provenance: {manifest.get('provenance_status', 'LEGACY_UNAVAILABLE')}")
     else:
         print("Manifest: MISSING")
         
     if registry_active:
         print(f"Registry Active Version: {registry_active.get('version')}")
+        print(f"Registry Pipeline Version: {registry_active.get('feature_pipeline_version', 'UNKNOWN')}")
+        print(f"Registry Dataset Hash: {registry_active.get('dataset_hash', 'LEGACY_UNAVAILABLE')}")
+        print(f"Registry Provenance: {registry_active.get('provenance_status', 'LEGACY_UNAVAILABLE')}")
     else:
         print("Registry Active Version: NONE")
         

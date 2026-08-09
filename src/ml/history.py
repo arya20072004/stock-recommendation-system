@@ -35,11 +35,9 @@ from pymongo import MongoClient
 from xgboost import XGBClassifier
 
 from src.data.nifty50 import TICKERS
-from src.features.engineering import (
-    build_feature_row,
-    TICKER_CLASS_THRESHOLDS,
-    apply_threshold_calibration,
-    get_target_return_threshold,
+from src.features.router import (
+    resolve_feature_pipeline,
+    get_feature_pipeline_hash,
 )
 from src.ml.confidence import (
     compute_confidence_tier,
@@ -83,9 +81,22 @@ def load_active_bundle(ticker: str):
     version = manifest.get("model_version")
     expected_model_hash = manifest.get("model_hash")
     expected_feature_hash = manifest.get("feature_hash")
+    expected_pipeline_version = manifest.get("feature_pipeline_version")
+    expected_pipeline_hash = manifest.get("feature_pipeline_hash")
 
-    if not version or not expected_model_hash or not expected_feature_hash:
+    if not version or not expected_model_hash or not expected_feature_hash or not expected_pipeline_version:
         raise ValueError(f"Malformed active manifest for {ticker}. Failing closed.")
+
+    # Check 1: Route the pipeline
+    try:
+        engineering_module = resolve_feature_pipeline(expected_pipeline_version)
+    except RuntimeError as e:
+        raise RuntimeError(f"Feature pipeline version '{expected_pipeline_version}' is unavailable.") from e
+        
+    # Check 2: Verify pipeline hash
+    actual_pipeline_hash = get_feature_pipeline_hash(expected_pipeline_version)
+    if expected_pipeline_hash and actual_pipeline_hash != expected_pipeline_hash:
+        raise RuntimeError(f"Feature pipeline hash mismatch for {ticker}. Expected {expected_pipeline_hash}, got {actual_pipeline_hash}. Failing closed.")
 
     # Verify Model
     model_path = os.path.join(MODELS_DIR, f"model_{ticker}_{version}.joblib")
@@ -125,7 +136,7 @@ def load_active_bundle(ticker: str):
     if not isinstance(feature_names, list) or not feature_names:
         raise ValueError(f"Invalid feature list format in artifact for {ticker}")
 
-    return model, feature_names, version
+    return model, feature_names, version, engineering_module
 
 
 # ======================================================================
@@ -325,9 +336,14 @@ def generate_and_persist_predictions(client):
             # Load model + training feature contract
             # ----------------------------------------------------------
 
-            model, feature_names, loaded_version = load_active_bundle(
+            model, feature_names, loaded_version, engineering_module = load_active_bundle(
                 ticker
             )
+            
+            build_feature_row = engineering_module.build_feature_row
+            TICKER_CLASS_THRESHOLDS = engineering_module.TICKER_CLASS_THRESHOLDS
+            apply_threshold_calibration = engineering_module.apply_threshold_calibration
+            get_target_return_threshold = engineering_module.get_target_return_threshold
 
             # ----------------------------------------------------------
             # Rebuild features

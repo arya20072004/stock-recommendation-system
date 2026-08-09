@@ -5,7 +5,9 @@ from pytest import approx
 from unittest.mock import MagicMock, patch
 
 from src.ml.settlement import evaluate_predictions
-from src.features.engineering import get_target_return_threshold
+from src.features.router import resolve_feature_pipeline
+
+get_target_return_threshold = resolve_feature_pipeline("v1").get_target_return_threshold
 
 def test_canonical_target_threshold():
     """Test get_target_return_threshold works correctly with floats and Series"""

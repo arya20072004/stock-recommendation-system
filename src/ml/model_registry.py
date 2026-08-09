@@ -86,6 +86,14 @@ def register_candidate(db, ticker: str, version: str, model_hash: str, feature_h
             "status": "CANDIDATE",
             "model_hash": model_hash,
             "feature_hash": feature_hash,
+            "feature_pipeline_version": metrics.get("feature_pipeline_version"),
+            "feature_pipeline_hash": metrics.get("feature_pipeline_hash"),
+            "dataset_hash": metrics.get("dataset_hash"),
+            "dataset_row_count": metrics.get("dataset_row_count"),
+            "dataset_date_start": metrics.get("dataset_date_start"),
+            "dataset_date_end": metrics.get("dataset_date_end"),
+            "target_definition": metrics.get("target_definition"),
+            "provenance_status": metrics.get("provenance_status", "LEGACY_UNAVAILABLE"),
             "metrics": metrics,
             "trained_at": now
         })
@@ -154,6 +162,14 @@ def promote_model(db, ticker: str, version: str) -> bool:
         "model_version": version,
         "model_hash": target_record["model_hash"],
         "feature_hash": target_record["feature_hash"],
+        "feature_pipeline_version": target_record.get("feature_pipeline_version", "v1"),
+        "feature_pipeline_hash": target_record.get("feature_pipeline_hash"),
+        "dataset_hash": target_record.get("dataset_hash", "LEGACY_UNAVAILABLE"),
+        "dataset_row_count": target_record.get("dataset_row_count"),
+        "dataset_date_start": target_record.get("dataset_date_start"),
+        "dataset_date_end": target_record.get("dataset_date_end"),
+        "target_definition": target_record.get("target_definition"),
+        "provenance_status": target_record.get("provenance_status", "LEGACY_UNAVAILABLE"),
         "promoted_at": now
     }
     
@@ -191,6 +207,14 @@ def sync_manifest(db, ticker: str):
         "model_version": version,
         "model_hash": active_record["model_hash"],
         "feature_hash": active_record["feature_hash"],
+        "feature_pipeline_version": active_record.get("feature_pipeline_version", "v1"),
+        "feature_pipeline_hash": active_record.get("feature_pipeline_hash"),
+        "dataset_hash": active_record.get("dataset_hash", "LEGACY_UNAVAILABLE"),
+        "dataset_row_count": active_record.get("dataset_row_count"),
+        "dataset_date_start": active_record.get("dataset_date_start"),
+        "dataset_date_end": active_record.get("dataset_date_end"),
+        "target_definition": active_record.get("target_definition"),
+        "provenance_status": active_record.get("provenance_status", "LEGACY_UNAVAILABLE"),
         "promoted_at": active_record.get("promoted_at", datetime.now(timezone.utc).isoformat())
     }
     
