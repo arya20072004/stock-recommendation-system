@@ -29,6 +29,7 @@ import warnings
 from datetime import datetime, timezone
 
 import joblib
+import pandas as pd
 import pymongo
 
 from pymongo import MongoClient
@@ -136,7 +137,7 @@ def load_active_bundle(ticker: str):
     if not isinstance(feature_names, list) or not feature_names:
         raise ValueError(f"Invalid feature list format in artifact for {ticker}")
 
-    return model, feature_names, version, engineering_module
+    return model, feature_names, version, engineering_module, expected_pipeline_version, expected_pipeline_hash
 
 
 # ======================================================================
@@ -305,6 +306,15 @@ def generate_and_persist_predictions(client):
         "prediction_timestamp"
     )
 
+    db.prediction_provenance.create_index(
+        [
+            ("symbol", pymongo.ASCENDING),
+            ("market_date", pymongo.DESCENDING),
+            ("prediction_horizon", pymongo.ASCENDING),
+        ],
+        unique=True,
+    )
+
     # ==================================================================
     # Counters
     # ==================================================================
@@ -336,7 +346,7 @@ def generate_and_persist_predictions(client):
             # Load model + training feature contract
             # ----------------------------------------------------------
 
-            model, feature_names, loaded_version, engineering_module = load_active_bundle(
+            model, feature_names, loaded_version, engineering_module, pipeline_version, pipeline_hash = load_active_bundle(
                 ticker
             )
             
@@ -658,30 +668,97 @@ def generate_and_persist_predictions(client):
                 ),
 
                 "status": "PENDING",
+
+                "provenance_hash": None, # Will be updated below
+                "provenance_status": "COMPLETE",
             }
 
             # ----------------------------------------------------------
-            # Idempotent persistence
+            # Provenance Payload
             # ----------------------------------------------------------
+            
+            full_latest_row = computed_df.loc[market_date]
+            if hasattr(full_latest_row, "ndim") and full_latest_row.ndim > 1:
+                full_latest_row = full_latest_row.iloc[-1]
 
-            result = (
-                db.prediction_history
-                .update_one(
-                    {
-                        "symbol": ticker,
-                        "market_date": (
-                            market_date_str
-                        ),
-                        "prediction_horizon": (
-                            horizon
-                        ),
-                    },
-                    {
-                        "$setOnInsert": record
-                    },
-                    upsert=True,
-                )
-            )
+            raw_inputs = {
+                str(k): float(v) if pd.api.types.is_numeric_dtype(type(v)) else v 
+                for k, v in full_latest_row.items() if k not in set(feature_names)
+            }
+            
+            features_dict = {
+                str(k): float(v) if pd.api.types.is_numeric_dtype(type(v)) else v 
+                for k, v in latest_row.items() if k in set(feature_names)
+            }
+            
+            provenance_payload = {
+                "symbol": ticker,
+                "market_date": market_date_str,
+                "prediction_horizon": horizon,
+                "model_version": model_version,
+                "feature_pipeline_version": pipeline_version,
+                "feature_pipeline_hash": pipeline_hash,
+                "feature_columns": feature_names,
+                "raw_inputs": raw_inputs,
+                "features": features_dict
+            }
+            
+            from src.ml.model_utils import compute_provenance_hash
+            provenance_hash = compute_provenance_hash(provenance_payload)
+            
+            record["provenance_hash"] = provenance_hash
+            provenance_payload["provenance_hash"] = provenance_hash
+            provenance_payload["created_at"] = datetime.now(timezone.utc)
+
+            # ----------------------------------------------------------
+            # Idempotent persistence with Transaction
+            # ----------------------------------------------------------
+            # Phase 15 Atomic write
+            try:
+                with client.start_session() as session:
+                    with session.start_transaction():
+                        # Write prediction_history
+                        history_result = db.prediction_history.update_one(
+                            {
+                                "symbol": ticker,
+                                "market_date": market_date_str,
+                                "prediction_horizon": horizon,
+                            },
+                            {
+                                "$setOnInsert": record
+                            },
+                            upsert=True,
+                            session=session
+                        )
+                        
+                        # Write prediction_provenance
+                        # Only insert if history was inserted or if we are verifying idempotency
+                        # Actually, if history exists but provenance doesn't, that's an inconsistent state
+                        # We use update_one with $setOnInsert for idempotency as well.
+                        
+                        # But wait: "identical payload -> idempotent success. conflicting payload -> raise integrity error"
+                        existing_prov = db.prediction_provenance.find_one({
+                            "symbol": ticker,
+                            "market_date": market_date_str,
+                            "prediction_horizon": horizon,
+                        }, session=session)
+                        
+                        if existing_prov:
+                            if existing_prov.get("provenance_hash") != provenance_hash:
+                                raise pymongo.errors.OperationFailure(
+                                    f"Integrity Error: Provenance collision for {ticker} on {market_date_str}. "
+                                    f"Existing hash {existing_prov.get('provenance_hash')} != New hash {provenance_hash}"
+                                )
+                        else:
+                            db.prediction_provenance.insert_one(provenance_payload, session=session)
+                            
+                        result = history_result
+
+            except pymongo.errors.OperationFailure as e:
+                # If transaction support is missing, PyMongo raises OperationFailure on start_transaction() or commit
+                if "TransactionSupport" in str(e) or "transaction" in str(e).lower() or "replica set" in str(e).lower():
+                     raise RuntimeError(f"MongoDB transaction support unavailable. Failing closed. Details: {e}")
+                raise e
 
             if result.upserted_id:
 

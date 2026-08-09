@@ -111,7 +111,7 @@ def test_b1_valid_pipeline(mock_directories, monkeypatch):
     import joblib
     monkeypatch.setattr(joblib, "load", lambda p: "mock_model")
     
-    model, features, ver, eng_mod = load_active_bundle(ticker)
+    model, features, ver, eng_mod, p_ver, p_hash = load_active_bundle(ticker)
     assert model == "mock_model"
     assert features == ["f1", "f2"]
     assert ver == version
@@ -197,7 +197,7 @@ def test_b4_mongodb_independence(mock_directories, monkeypatch):
     monkeypatch.setattr(joblib, "load", lambda p: "mock_model")
     
     # This should succeed completely independent of Mongo
-    model, features, ver, eng_mod = load_active_bundle(ticker)
+    model, features, ver, eng_mod, p_ver, p_hash = load_active_bundle(ticker)
     assert model == "mock_model"
 
 # ---------------------------------------------------------

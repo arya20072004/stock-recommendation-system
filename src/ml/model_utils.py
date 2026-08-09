@@ -1,6 +1,8 @@
+import json
 import hashlib
 import logging
 import os
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -39,3 +41,32 @@ def get_model_version(ticker: str) -> str:
     except Exception as exc:
         logger.exception("Error hashing model for %s: %s", ticker, exc)
         return "error"
+
+def _normalize_value(val):
+    if isinstance(val, (np.integer, int)):
+        return int(val)
+    elif isinstance(val, (np.floating, float)):
+        if np.isnan(val):
+            return None
+        if np.isinf(val):
+            return "Infinity" if val > 0 else "-Infinity"
+        return float(val)
+    elif isinstance(val, dict):
+        return {str(k): _normalize_value(v) for k, v in val.items()}
+    elif isinstance(val, (list, tuple, np.ndarray)):
+        return [_normalize_value(v) for v in val]
+    return val
+
+def compute_provenance_hash(payload: dict) -> str:
+    """
+    Computes a deterministic SHA-256 hash for a provenance payload.
+    Ensures stable sorting, explicit numpy/float conversion, and handles NaNs.
+    """
+    normalized = _normalize_value(payload)
+    canonical_json = json.dumps(
+        normalized,
+        sort_keys=True,
+        separators=(',', ':'),
+        ensure_ascii=True
+    )
+    return hashlib.sha256(canonical_json.encode('utf-8')).hexdigest()
