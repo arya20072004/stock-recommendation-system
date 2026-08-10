@@ -108,3 +108,32 @@ def reconstruct_canonical_payload(doc: dict) -> dict:
         return canonical
 
     return canonical
+
+def reconstruct_settlement_payload(record: dict) -> dict:
+    """
+    Extracts the canonical fields for Phase 19 settlement verification.
+    """
+    payload = {}
+    keys = [
+        "provenance_hash", "settlement_market_date", "actual_price",
+        "actual_return", "actual_class", "recommendation_correct",
+        "raw_prediction_correct"
+    ]
+    for k in keys:
+        if k in record:
+            payload[k] = record[k]
+    return payload
+
+def compute_settlement_hash(payload: dict) -> str:
+    """
+    Computes a deterministic SHA-256 hash for a settlement payload.
+    Uses the same normalization as prediction provenance.
+    """
+    normalized = _normalize_value(payload)
+    canonical_json = json.dumps(
+        normalized,
+        sort_keys=True,
+        separators=(',', ':'),
+        ensure_ascii=True
+    )
+    return hashlib.sha256(canonical_json.encode('utf-8')).hexdigest()

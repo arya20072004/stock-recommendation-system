@@ -165,6 +165,19 @@ def evaluate_predictions(client, apply=False):
                 "settlement_market_date": settlement_market_date
             }
 
+            # Phase 19: Compute settlement hash
+            from src.ml.model_utils import compute_settlement_hash, reconstruct_settlement_payload
+
+            # Combine record's provenance hash with the new settlement fields
+            settlement_hash_input = {
+                "provenance_hash": provenance_hash,
+                **update_payload
+            }
+            canonical_settlement = reconstruct_settlement_payload(settlement_hash_input)
+            settlement_hash = compute_settlement_hash(canonical_settlement)
+
+            update_payload["settlement_hash"] = settlement_hash
+
             if not apply:
                 logger.info(
                     f"[DRY-RUN READY_TO_SETTLE] {ticker} | "
