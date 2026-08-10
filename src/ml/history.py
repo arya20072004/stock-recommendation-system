@@ -93,7 +93,7 @@ def load_active_bundle(ticker: str):
         engineering_module = resolve_feature_pipeline(expected_pipeline_version)
     except RuntimeError as e:
         raise RuntimeError(f"Feature pipeline version '{expected_pipeline_version}' is unavailable.") from e
-        
+
     # Check 2: Verify pipeline hash
     actual_pipeline_hash = get_feature_pipeline_hash(expected_pipeline_version)
     if expected_pipeline_hash and actual_pipeline_hash != expected_pipeline_hash:
@@ -137,7 +137,9 @@ def load_active_bundle(ticker: str):
     if not isinstance(feature_names, list) or not feature_names:
         raise ValueError(f"Invalid feature list format in artifact for {ticker}")
 
-    return model, feature_names, version, engineering_module, expected_pipeline_version, expected_pipeline_hash
+    f1_macro = manifest.get("f1_macro", 0.0)
+
+    return model, feature_names, version, engineering_module, expected_pipeline_version, expected_pipeline_hash, f1_macro
 
 
 # ======================================================================
@@ -348,10 +350,17 @@ def generate_and_persist_predictions(client, target_market_date: date):
             # Load model + training feature contract
             # ----------------------------------------------------------
 
-            model, feature_names, loaded_version, engineering_module, pipeline_version, pipeline_hash = load_active_bundle(
-                ticker
-            )
-            
+            try:
+                bundle = load_active_bundle(ticker)
+                if not bundle:
+                    logger.warning(f"No active bundle found for {ticker}")
+                    result["errors"].append(f"{ticker}: No active bundle")
+                    continue
+                model, feature_names, loaded_version, engineering_module, pipeline_version, pipeline_hash, f1_macro = bundle
+            except Exception as e:
+                logger.error(f"Error loading bundle for {ticker}: {e}")
+                raise
+
             build_feature_row = engineering_module.build_feature_row
             TICKER_CLASS_THRESHOLDS = engineering_module.TICKER_CLASS_THRESHOLDS
             apply_threshold_calibration = engineering_module.apply_threshold_calibration
@@ -381,7 +390,7 @@ def generate_and_persist_predictions(client, target_market_date: date):
             )
 
             market_date_obj = market_date.date() if hasattr(market_date, "date") else market_date
-            
+
             if market_date_obj < target_market_date:
                 logger.warning(
                     "%s: STALE DATA. Latest valid date %s < target %s. Skipping prediction.",
@@ -392,7 +401,7 @@ def generate_and_persist_predictions(client, target_market_date: date):
                 stale_tickers.append(ticker)
                 skipped_count += 1
                 continue
-                
+
             if market_date_obj > target_market_date:
                 raise ValueError(
                     f"Future market data detected for {ticker}: "
@@ -488,6 +497,8 @@ def generate_and_persist_predictions(client, target_market_date: date):
                 latest_features
             )[0]
 
+            model_probabilities = [float(p) for p in proba]
+
             # ----------------------------------------------------------
             # Threshold calibration
             # ----------------------------------------------------------
@@ -497,6 +508,8 @@ def generate_and_persist_predictions(client, target_market_date: date):
                     ticker
                 )
             )
+
+            decision_thresholds = {str(k): float(v) for k, v in thresholds.items()} if thresholds else {}
 
             predicted_class_idx = (
                 apply_threshold_calibration(
@@ -539,7 +552,14 @@ def generate_and_persist_predictions(client, target_market_date: date):
                 ticker=ticker,
                 max_proba=max_proba,
                 top2_margin=top2_margin,
+                f1_macro=f1_macro,
             )
+
+            confidence_metrics = {
+                "f1_macro": f1_macro,
+                "max_proba": max_proba,
+                "top2_margin": top2_margin
+            }
 
             # ----------------------------------------------------------
             # User-facing recommendation
@@ -697,22 +717,23 @@ def generate_and_persist_predictions(client, target_market_date: date):
             # ----------------------------------------------------------
             # Provenance Payload
             # ----------------------------------------------------------
-            
+
             full_latest_row = computed_df.loc[market_date]
             if hasattr(full_latest_row, "ndim") and full_latest_row.ndim > 1:
                 full_latest_row = full_latest_row.iloc[-1]
 
             raw_inputs = {
-                str(k): float(v) if pd.api.types.is_numeric_dtype(type(v)) else v 
+                str(k): float(v) if pd.api.types.is_numeric_dtype(type(v)) else v
                 for k, v in full_latest_row.items() if k not in set(feature_names)
             }
-            
+
             features_dict = {
-                str(k): float(v) if pd.api.types.is_numeric_dtype(type(v)) else v 
+                str(k): float(v) if pd.api.types.is_numeric_dtype(type(v)) else v
                 for k, v in latest_row.items() if k in set(feature_names)
             }
-            
+
             provenance_payload = {
+                "provenance_schema_version": "v2",
                 "symbol": ticker,
                 "market_date": market_date_str,
                 "prediction_horizon": horizon,
@@ -721,12 +742,15 @@ def generate_and_persist_predictions(client, target_market_date: date):
                 "feature_pipeline_hash": pipeline_hash,
                 "feature_columns": feature_names,
                 "raw_inputs": raw_inputs,
-                "features": features_dict
+                "features": features_dict,
+                "model_probabilities": model_probabilities,
+                "decision_thresholds": decision_thresholds,
+                "confidence_metrics": confidence_metrics
             }
-            
+
             from src.ml.model_utils import compute_provenance_hash
             provenance_hash = compute_provenance_hash(provenance_payload)
-            
+
             record["provenance_hash"] = provenance_hash
             provenance_payload["provenance_hash"] = provenance_hash
             provenance_payload["created_at"] = datetime.now(timezone.utc)
@@ -751,19 +775,19 @@ def generate_and_persist_predictions(client, target_market_date: date):
                             upsert=True,
                             session=session
                         )
-                        
+
                         # Write prediction_provenance
                         # Only insert if history was inserted or if we are verifying idempotency
                         # Actually, if history exists but provenance doesn't, that's an inconsistent state
                         # We use update_one with $setOnInsert for idempotency as well.
-                        
+
                         # But wait: "identical payload -> idempotent success. conflicting payload -> raise integrity error"
                         existing_prov = db.prediction_provenance.find_one({
                             "symbol": ticker,
                             "market_date": market_date_str,
                             "prediction_horizon": horizon,
                         }, session=session)
-                        
+
                         if existing_prov:
                             if existing_prov.get("provenance_hash") != provenance_hash:
                                 raise pymongo.errors.OperationFailure(
@@ -772,7 +796,7 @@ def generate_and_persist_predictions(client, target_market_date: date):
                                 )
                         else:
                             db.prediction_provenance.insert_one(provenance_payload, session=session)
-                            
+
                         result = history_result
 
             except pymongo.errors.OperationFailure as e:

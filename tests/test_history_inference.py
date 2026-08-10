@@ -96,8 +96,10 @@ def test_valid_bundle(mock_directories, monkeypatch):
     import joblib
     monkeypatch.setattr(joblib, "load", lambda p: "mock_model")
     
-    model, features, ver, eng_mod, p_ver, p_hash = load_active_bundle(ticker)
+    model, features, ver, eng_mod, p_ver, p_hash, f1_macro = load_active_bundle(ticker)
     assert model == "mock_model"
     assert features == ["f1", "f2"]
     assert ver == version
+    assert p_ver == "v1"
+    assert f1_macro == 0.0
     assert hasattr(eng_mod, "build_feature_row")

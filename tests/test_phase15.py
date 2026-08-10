@@ -64,8 +64,9 @@ def test_atomicity(mongo_client, monkeypatch):
     
     # Attempt to generate predictions, should raise RuntimeError wrapping the failure
     # because mongomock doesn't support transactions
+    from datetime import date
     with pytest.raises((RuntimeError, pymongo.errors.OperationFailure)):
-        generate_and_persist_predictions(mongo_client)
+        generate_and_persist_predictions(mongo_client, target_market_date=date(2026, 8, 10))
         
     # Verify no half-pair exists
     assert db.prediction_history.count_documents({}) == 0
@@ -124,11 +125,11 @@ def test_provenance_integration(mongo_client, monkeypatch):
         def build_feature_row(ticker, client, db):
             df = pd.DataFrame({
                 "f1": [1.0], "f2": [2.0], "close": [100.0], "atr_pct": [0.05]
-            }, index=pd.DatetimeIndex(["2026-08-01"]))
+            }, index=pd.DatetimeIndex(["2026-08-10"]))
             return df
 
     def mock_load(ticker):
-        return MockModel(), ["f1", "f2"], "test_ver", MockEngineering(), "v1", "hash1"
+        return MockModel(), ["f1", "f2"], "test_ver", MockEngineering(), "v1", "hash1", 0.45
         
     import src.ml.history
     monkeypatch.setattr(src.ml.history, "load_active_bundle", mock_load)
@@ -169,7 +170,8 @@ def test_provenance_integration(mongo_client, monkeypatch):
     
     monkeypatch.setattr(mongo_client, "start_session", lambda *args, **kwargs: MockSession())
     
-    generate_and_persist_predictions(mongo_client)
+    from datetime import date
+    generate_and_persist_predictions(mongo_client, target_market_date=date(2026, 8, 10))
         
     hist_docs = list(db.prediction_history.find({"symbol": "RELIANCE.NS"}))
     assert len(hist_docs) == 1
@@ -196,7 +198,7 @@ def test_provenance_integration(mongo_client, monkeypatch):
     
     # D - Immutability and Idempotency
     # Retrying should succeed idempotently
-    generate_and_persist_predictions(mongo_client)
+    generate_and_persist_predictions(mongo_client, target_market_date=date(2026, 8, 10))
     assert db.prediction_history.count_documents({"symbol": "RELIANCE.NS"}) == 1
     
     # Modifying hash should cause integrity error
@@ -206,6 +208,6 @@ def test_provenance_integration(mongo_client, monkeypatch):
     )
     
     with pytest.raises(RuntimeError) as excinfo:
-        generate_and_persist_predictions(mongo_client)
+        generate_and_persist_predictions(mongo_client, target_market_date=date(2026, 8, 10))
     
     assert "Prediction history generation failed" in str(excinfo.value)

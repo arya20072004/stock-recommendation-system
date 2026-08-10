@@ -67,6 +67,7 @@ def compute_confidence_tier(
     ticker: str,
     max_proba: float,
     top2_margin: float,
+    f1_macro: float = 0.0,
 ) -> dict:
     """
     Returns confidence tier and metadata for a single prediction.
@@ -76,20 +77,13 @@ def compute_confidence_tier(
     ticker      : e.g. "AXISBANK.NS"
     max_proba   : highest class probability from model.predict_proba()
     top2_margin : difference between top-2 class probabilities
+    f1_macro    : F1 macro score of the active model
 
     Returns
     -------
     dict with keys: tier, tier_rank, f1_macro, max_proba,
                     top2_margin, actionable
     """
-    # Load stored f1_macro from metrics file
-    metrics_path = os.path.join(MODELS_DIR, f"{ticker}_metrics.json")
-    f1_macro = 0.0
-    if os.path.exists(metrics_path):
-        with open(metrics_path, "r", encoding="utf-8") as f:
-            metrics = json.load(f)
-        f1_macro = metrics.get("f1_macro", 0.0)
-
     # Each signal independently assigns a tier rank
     f1_rank     = TIER_RANK[_classify(f1_macro,    F1_TIERS)]
     proba_rank  = TIER_RANK[_classify(max_proba,   PROBA_TIERS)]
@@ -110,7 +104,6 @@ def compute_confidence_tier(
         "top2_margin": round(top2_margin, 4),
         "actionable":  actionable,
     }
-
 
 def get_display_signal(prediction: str, confidence: dict) -> str:
     """

@@ -19,12 +19,12 @@ def mock_history_dependencies(monkeypatch):
         feature_names = ["f1", "f2"]
         version = "v1"
         
-        engineering_module = MagicMock()
-        engineering_module.TICKER_CLASS_THRESHOLDS = {}
-        engineering_module.apply_threshold_calibration.return_value = 2 # BUY
-        engineering_module.get_target_return_threshold.return_value = 0.05
+        mock_engineering = MagicMock()
+        mock_engineering.TICKER_CLASS_THRESHOLDS = {}
+        mock_engineering.apply_threshold_calibration.return_value = 2 # BUY
+        mock_engineering.get_target_return_threshold.return_value = 0.05
         
-        return model, feature_names, version, engineering_module, "v1", "hash"
+        return model, feature_names, "v1", mock_engineering, "v1", "hash_xyz", 0.45
         
     monkeypatch.setattr("src.ml.history.load_active_bundle", mock_load_active_bundle)
     

@@ -170,6 +170,7 @@ def promote_model(db, ticker: str, version: str) -> bool:
         "dataset_date_end": target_record.get("dataset_date_end"),
         "target_definition": target_record.get("target_definition"),
         "provenance_status": target_record.get("provenance_status", "LEGACY_UNAVAILABLE"),
+        "f1_macro": target_record.get("metrics", {}).get("f1_macro", 0.0),
         "promoted_at": now
     }
     
@@ -215,6 +216,7 @@ def sync_manifest(db, ticker: str):
         "dataset_date_end": active_record.get("dataset_date_end"),
         "target_definition": active_record.get("target_definition"),
         "provenance_status": active_record.get("provenance_status", "LEGACY_UNAVAILABLE"),
+        "f1_macro": active_record.get("metrics", {}).get("f1_macro", 0.0),
         "promoted_at": active_record.get("promoted_at", datetime.now(timezone.utc).isoformat())
     }
     
