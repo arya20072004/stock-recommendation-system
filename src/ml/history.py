@@ -26,7 +26,7 @@ import logging
 import os
 import warnings
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 
 import joblib
 import pandas as pd
@@ -264,7 +264,7 @@ def get_latest_valid_feature_row(
 # Prediction generation
 # ======================================================================
 
-def generate_and_persist_predictions(client):
+def generate_and_persist_predictions(client, target_market_date: date):
     """
     Generate and persist one immutable daily prediction snapshot for
     every configured ticker.
@@ -322,7 +322,9 @@ def generate_and_persist_predictions(client):
     generated_count = 0
     skipped_count = 0
     error_count = 0
+    existing_count = 0
 
+    stale_tickers = []
     errors = []
 
     logger.info(
@@ -377,6 +379,25 @@ def generate_and_persist_predictions(client):
                 computed_df,
                 feature_names,
             )
+
+            market_date_obj = market_date.date() if hasattr(market_date, "date") else market_date
+            
+            if market_date_obj < target_market_date:
+                logger.warning(
+                    "%s: STALE DATA. Latest valid date %s < target %s. Skipping prediction.",
+                    ticker,
+                    market_date_obj,
+                    target_market_date
+                )
+                stale_tickers.append(ticker)
+                skipped_count += 1
+                continue
+                
+            if market_date_obj > target_market_date:
+                raise ValueError(
+                    f"Future market data detected for {ticker}: "
+                    f"{market_date_obj} > {target_market_date}"
+                )
 
             market_date_str = (
                 market_date.strftime(
@@ -775,11 +796,11 @@ def generate_and_persist_predictions(client):
 
             else:
 
-                skipped_count += 1
+                existing_count += 1
 
                 logger.info(
                     "%s: prediction already exists "
-                    "for market_date=%s, horizon=%s — skipped.",
+                    "for market_date=%s, horizon=%s — idempotent.",
                     ticker,
                     market_date_str,
                     horizon,
@@ -809,9 +830,10 @@ def generate_and_persist_predictions(client):
 
     logger.info(
         "Prediction history generation finished: "
-        "%d new, %d skipped, %d errors.",
+        "%d new, %d skipped (stale), %d existing (idempotent), %d errors.",
         generated_count,
         skipped_count,
+        existing_count,
         error_count,
     )
 
@@ -847,7 +869,9 @@ def generate_and_persist_predictions(client):
     return {
         "generated": generated_count,
         "skipped": skipped_count,
-        "errors": error_count,
+        "stale": stale_tickers,
+        "existing": existing_count,
+        "errors": errors,
     }
 
 
@@ -857,7 +881,13 @@ def generate_and_persist_predictions(client):
 
 if __name__ == "__main__":
 
+    import argparse
     from dotenv import load_dotenv
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--date", type=str, required=True, help="Target market date YYYY-MM-DD")
+    args = parser.parse_args()
+    target_date = datetime.strptime(args.date, "%Y-%m-%d").date()
 
     load_dotenv()
 
@@ -874,7 +904,8 @@ if __name__ == "__main__":
 
         result = (
             generate_and_persist_predictions(
-                client
+                client,
+                target_date
             )
         )
 
@@ -882,10 +913,12 @@ if __name__ == "__main__":
             "Final result: "
             "%d generated, "
             "%d skipped, "
+            "%d stale, "
             "%d errors.",
             result["generated"],
             result["skipped"],
-            result["errors"],
+            len(result.get("stale", [])),
+            len(result.get("errors", [])),
         )
 
     finally:

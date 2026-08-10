@@ -5,8 +5,11 @@ import uuid
 import warnings
 import threading
 import time
+import math
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
+
+MIN_PREDICTION_COVERAGE_RATIO = 0.90
 
 import pandas as pd
 from pymongo import MongoClient, ReturnDocument
@@ -512,8 +515,13 @@ class DailyPipeline:
             
         try:
             from src.ml.history import generate_and_persist_predictions
-            result = generate_and_persist_predictions(self.client)
-            self._log_stage("PREDICTION_GENERATION", "SUCCESS", metrics=result)
+            result = generate_and_persist_predictions(self.client, target_market_date=self.target_market_date)
+            
+            stale_list = result.get("stale", [])
+            if stale_list:
+                self._log_stage("PREDICTION_GENERATION", "DEGRADED", f"{len(stale_list)} tickers skipped due to stale data", metrics=result)
+            else:
+                self._log_stage("PREDICTION_GENERATION", "SUCCESS", metrics=result)
         except Exception as e:
             self._log_stage("PREDICTION_GENERATION", "FAILED", str(e))
             raise
@@ -536,9 +544,26 @@ class DailyPipeline:
         missing = set(TICKERS) - set(found_tickers)
         
         if missing:
-            msg = f"Missing predictions for {missing}"
-            self._log_stage("PREDICTION_VALIDATION", "FAILED", msg)
-            raise RuntimeError(msg)
+            generation_metrics = self.stages.get("PREDICTION_GENERATION", {}).get("metrics", {})
+            stale_tickers = set(generation_metrics.get("stale", []))
+            unexplained = missing - stale_tickers
+            
+            if unexplained:
+                msg = f"Unexplained missing predictions: {unexplained}"
+                self._log_stage("PREDICTION_VALIDATION", "FAILED", msg)
+                raise RuntimeError(msg)
+                
+            required_predictions = math.ceil(len(TICKERS) * MIN_PREDICTION_COVERAGE_RATIO)
+            generated_count = len(found_tickers)
+            
+            if generated_count < required_predictions:
+                msg = f"Prediction coverage failure. Generated {generated_count} < required {required_predictions}. Stale tickers: {stale_tickers}"
+                self._log_stage("PREDICTION_VALIDATION", "FAILED", msg)
+                raise RuntimeError(msg)
+                
+            msg = f"Missing predictions safely explained by explicitly skipped stale tickers: {stale_tickers}"
+            logger.warning(msg)
+            self._log_stage("PREDICTION_VALIDATION", "DEGRADED", msg)
             
         import collections
         dups = [item for item, count in collections.Counter(found_tickers).items() if count > 1]
@@ -572,7 +597,9 @@ class DailyPipeline:
                 self._log_stage("PREDICTION_VALIDATION", "FAILED", msg)
                 raise RuntimeError(msg)
 
-        self._log_stage("PREDICTION_VALIDATION", "SUCCESS")
+        current_status = self.stages.get("PREDICTION_VALIDATION", {}).get("status")
+        if current_status != "DEGRADED":
+            self._log_stage("PREDICTION_VALIDATION", "SUCCESS")
 
     def run_api_health_check(self):
         self._verify_ownership()
