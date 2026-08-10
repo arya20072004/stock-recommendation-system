@@ -70,3 +70,41 @@ def compute_provenance_hash(payload: dict) -> str:
         ensure_ascii=True
     )
     return hashlib.sha256(canonical_json.encode('utf-8')).hexdigest()
+
+def reconstruct_canonical_payload(doc: dict) -> dict:
+    """
+    Extracts the canonical fields for schema-aware hashing verification.
+    Filters out database metadata (_id, created_at, provenance_hash).
+    """
+    schema = doc.get("provenance_schema_version", "v1")
+
+    canonical = {}
+
+    # Base fields present in v1/v2/legacy
+    base_keys = [
+        "symbol", "market_date", "prediction_horizon", "model_version",
+        "feature_pipeline_version", "feature_pipeline_hash", "feature_columns",
+        "raw_inputs", "features", "model_probabilities", "decision_thresholds",
+        "confidence_metrics"
+    ]
+    for k in base_keys:
+        if k in doc:
+            canonical[k] = doc[k]
+
+    if schema in ["v1", "v2"]:
+        if "provenance_schema_version" in doc:
+            canonical["provenance_schema_version"] = schema
+        return canonical
+
+    if schema == "v3":
+        canonical["provenance_schema_version"] = "v3"
+        v3_keys = [
+            "recommendation", "confidence_tier", "target_return_threshold",
+            "class_mapping", "confidence_tier_boundaries", "decision_context"
+        ]
+        for k in v3_keys:
+            if k in doc:
+                canonical[k] = doc[k]
+        return canonical
+
+    return canonical

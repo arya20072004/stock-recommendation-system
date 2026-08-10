@@ -114,3 +114,15 @@ def get_display_signal(prediction: str, confidence: dict) -> str:
     if not confidence["actionable"]:
         return "HOLD"
     return prediction
+
+def get_confidence_boundaries() -> dict:
+    """
+    Returns the exact boundary mappings used by compute_confidence_tier().
+    This ensures that historical confidence logic is captured in the provenance.
+    """
+    return {
+        "F1_TIERS": {k: v for k, v in F1_TIERS},
+        "PROBA_TIERS": {k: v for k, v in PROBA_TIERS},
+        "MARGIN_TIERS": {k: v for k, v in MARGIN_TIERS},
+        "ACTIONABLE_MIN_RANK": TIER_RANK["MEDIUM"],
+    }

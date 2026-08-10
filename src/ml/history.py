@@ -43,6 +43,7 @@ from src.features.router import (
 from src.ml.confidence import (
     compute_confidence_tier,
     get_display_signal,
+    get_confidence_boundaries,
 )
 
 
@@ -733,7 +734,7 @@ def generate_and_persist_predictions(client, target_market_date: date):
             }
 
             provenance_payload = {
-                "provenance_schema_version": "v2",
+                "provenance_schema_version": "v3",
                 "symbol": ticker,
                 "market_date": market_date_str,
                 "prediction_horizon": horizon,
@@ -745,7 +746,16 @@ def generate_and_persist_predictions(client, target_market_date: date):
                 "features": features_dict,
                 "model_probabilities": model_probabilities,
                 "decision_thresholds": decision_thresholds,
-                "confidence_metrics": confidence_metrics
+                "confidence_metrics": confidence_metrics,
+                "recommendation": display_signal,
+                "confidence_tier": confidence["tier"],
+                "target_return_threshold": target_return_threshold,
+                "class_mapping": {"0": "SELL", "1": "HOLD", "2": "BUY"},
+                "confidence_tier_boundaries": get_confidence_boundaries(),
+                "decision_context": {
+                    "actionable": confidence["actionable"],
+                    "f1_macro_used": confidence["f1_macro"]
+                }
             }
 
             from src.ml.model_utils import compute_provenance_hash
