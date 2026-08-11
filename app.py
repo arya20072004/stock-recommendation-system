@@ -106,30 +106,13 @@ def get_latest_predictions_snapshot(db, active_tickers):
     returned_symbols = {p['symbol'] for p in predictions}
     missing_symbols = set(active_tickers) - returned_symbols
 
-    mixed_date = False
-
-    # If missing tickers, fetch their latest valid prediction
-    if missing_symbols:
-        mixed_date = True
-        for ticker in missing_symbols:
-            latest_ticker_doc = db.prediction_history.find_one(
-                {"symbol": ticker},
-                sort=[("market_date", -1)]
-            )
-            if latest_ticker_doc:
-                predictions.append(latest_ticker_doc)
-                returned_symbols.add(ticker)
-
-        # Re-evaluate missing
-        missing_symbols = set(active_tickers) - returned_symbols
-
     meta = {
         "market_date": latest_market_date,
         "expected_tickers": len(active_tickers),
         "returned_tickers": len(returned_symbols),
         "missing_tickers": list(missing_symbols),
         "complete": len(missing_symbols) == 0,
-        "mixed_date": mixed_date
+        "mixed_date": False
     }
 
     return predictions, meta
