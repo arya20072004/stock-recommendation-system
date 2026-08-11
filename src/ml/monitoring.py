@@ -152,16 +152,28 @@ def fetch_evaluated_predictions(db, match_query: Dict[str, Any], limit: Optional
     from src.ml.model_utils import compute_settlement_hash, reconstruct_settlement_payload
 
     for record in cursor:
-        if "settlement_hash" in record:
-            stored_hash = record["settlement_hash"]
+        if "settlement_hash" not in record:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Missing settlement_hash for EVALUATED record {record.get('_id')}")
+            continue
+
+        stored_hash = record["settlement_hash"]
+
+        try:
             canonical = reconstruct_settlement_payload(record)
             computed_hash = compute_settlement_hash(canonical)
+        except (TypeError, ValueError) as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Hash Computation Failure for {record.get('_id')}: {e}")
+            continue
 
-            if computed_hash != stored_hash:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"Tampered Record Detected: settlement_hash mismatch for {record.get('_id')}")
-                continue
+        if computed_hash != stored_hash:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Tampered Record Detected: settlement_hash mismatch for {record.get('_id')}")
+            continue
 
         valid_predictions.append(record)
 
