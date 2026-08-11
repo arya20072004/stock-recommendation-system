@@ -379,10 +379,10 @@
     async function fetchPortfolio(){
         showLoading();
         try {
-            const r = await fetch('/api/portfolio');
+            const r = await fetch('/api/stocks/summary');
             const data = await r.json();
             if(data.error) throw new Error(data.error);
-            allStocks = data.portfolio || [];
+            allStocks = data.data || [];
             renderKPIs(allStocks);
             renderCards();
             document.getElementById('lastUpdated').textContent =

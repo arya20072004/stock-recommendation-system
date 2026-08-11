@@ -521,7 +521,7 @@
                 <div class="confidence-track"><div class="confidence-fill" id="confBar" style="width:0%"></div></div>
                 <span class="confidence-label">${data.confidence}%</span>
             </div>
-            <div class="signal-time">As of ${data.predicted_at}</div>
+            <div class="signal-time">As of ${data.predicted_at || 'N/A'}</div>
         </div>
         ${featuresHTML}
         <div class="disclaimer">For research purposes only. Not financial advice.</div>`;
@@ -609,11 +609,18 @@
         document.getElementById('chartTicker').textContent = ticker;
         showSkeleton();
         try{
-            const r = await fetch(API+'/api/stocks/'+encodeURIComponent(ticker));
-            const data = await r.json();
-            if(data.error) throw new Error(data.error);
-            updateChart(data.chartData);
-            const latest = data.chartData[data.chartData.length-1];
+            const r = await fetch(API+'/api/stocks/'+encodeURIComponent(ticker)+'/details?range=5Y');
+            const res = await r.json();
+            if(res.error) throw new Error(res.error);
+            updateChart(res.chartData);
+            const latest = res.chartData[res.chartData.length-1];
+            // Map the canonical response to what the UI expects
+            const data = {
+                recommendation: res.prediction ? res.prediction.recommendation : 'UNCERTAIN',
+                confidence: res.prediction ? res.prediction.confidence : 0,
+                predicted_at: res.prediction ? res.prediction.market_date : 'N/A',
+                top_features: res.prediction ? res.prediction.top_features : []
+            };
             renderPanel(data, latest);
             document.getElementById('lastRefresh').textContent =
                 'Refreshed ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:false});
