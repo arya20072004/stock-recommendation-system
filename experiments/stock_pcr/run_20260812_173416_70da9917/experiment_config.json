@@ -1,0 +1,30 @@
+{
+  "experiment_timestamp": "2026-08-12T17:34:16.751041+00:00",
+  "cutoff_date": "2026-08-10",
+  "seed": 42,
+  "feature_pipeline_version": "v1",
+  "feature_pipeline_hash": "685cb3dbe63d7923126e44c597914c93a7bcebc83c6f6e42017dd1101f7d2c68",
+  "optuna_trials": 75,
+  "ticker_count": 1,
+  "included_tickers": [
+    "ADANIENT.NS"
+  ],
+  "excluded_tickers": [
+    "ETERNAL.NS",
+    "JIOFIN.NS",
+    "MAXHEALTH.NS",
+    "SHRIRAMFIN.NS"
+  ],
+  "pcr_feature_names": [
+    "stock_pcr_oi",
+    "stock_pcr_chg_5d"
+  ],
+  "training_configuration": {
+    "temporal_split": "first 80% train, final 20% test",
+    "n_splits": 5,
+    "objective": "trainer._optuna_objective (recency-weighted macro F1 with HOLD penalty)",
+    "smote": "trainer SMOTE floors/overrides and k-neighbor logic",
+    "threshold_calibration": "feature pipeline TICKER_CLASS_THRESHOLDS"
+  },
+  "read_only": true
+}
