@@ -105,8 +105,49 @@ def build_aligned_datasets(ticker, client, cutoff_date, feature_module):
     source_df = source_df.loc[source_df.index <= cutoff_date].sort_index()
     if source_df.empty:
         raise ValueError("No production feature rows remain at the requested cutoff.")
-    if source_df.index.max() > cutoff_date:
-        raise ValueError("Cutoff integrity failure: feature date exceeds cutoff.")
+
+    # --- TARGET LEAKAGE FIX ---
+    horizon = trainer.TICKER_HORIZON_OVERRIDE.get(ticker, 10)
+    db = client["stock_market_db"]
+    trading_dates_docs = list(db.historical_data.find(
+        {"ticker": ticker, "date": {"$lte": cutoff_date.to_pydatetime()}},
+        {"date": 1, "_id": 0}
+    ).sort("date", 1))
+    
+    if not trading_dates_docs:
+        raise ValueError("No historical data found in MongoDB up to the cutoff date.")
+        
+    trading_dates = [pd.to_datetime(doc["date"]).tz_localize(None) for doc in trading_dates_docs]
+    invalid_dates = set(trading_dates[-horizon:]) if horizon > 0 else set()
+    
+    original_rows_before_cutoff = len(source_df)
+    source_df = source_df.loc[~source_df.index.isin(invalid_dates)].copy()
+    rows_removed_for_cutoff = original_rows_before_cutoff - len(source_df)
+    
+    print(f"  [Leakage Fix] original_rows_before_cutoff={original_rows_before_cutoff}")
+    print(f"  [Leakage Fix] rows_removed_for_cutoff={rows_removed_for_cutoff}")
+    print(f"  [Leakage Fix] final_eligible_rows={len(source_df)}")
+    print(f"  [Leakage Fix] horizon={horizon}")
+    print(f"  [Leakage Fix] cutoff_date={cutoff_date.date()}")
+
+    if source_df.empty:
+        raise ValueError("No production feature rows remain after target-leakage cutoff enforcement.")
+        
+    final_feature_date_min = source_df.index.min().date()
+    final_feature_date_max = source_df.index.max().date()
+    print(f"  [Leakage Fix] final_feature_date_min={final_feature_date_min}")
+    print(f"  [Leakage Fix] final_feature_date_max={final_feature_date_max}")
+
+    # Verify no retained target depends on a price date > cutoff_date
+    date_to_idx = {d: i for i, d in enumerate(trading_dates)}
+    max_retained_idx = max(date_to_idx[d] for d in source_df.index)
+    required_future_idx = max_retained_idx + horizon
+    required_future_date = trading_dates[required_future_idx].date()
+    print(f"  [Leakage Fix] latest_required_future_date={required_future_date}")
+
+    assert final_feature_date_max <= cutoff_date.date(), "Retained feature date exceeds cutoff_date"
+    assert required_future_date <= cutoff_date.date(), f"Target requires future date {required_future_date} > {cutoff_date.date()}"
+    # --------------------------
 
     all_candidate_features = trainer._make_feature_list(source_df)
     control_features = [
