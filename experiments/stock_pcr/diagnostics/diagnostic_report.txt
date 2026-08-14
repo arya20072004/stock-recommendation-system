@@ -1,0 +1,65 @@
+DIAGNOSTIC REPORT
+======================================================================
+1. Dataset overview
+Tickers analyzed: 47
+Positive: 21
+Neutral: 8
+Negative: 18
+Class Collapses: 8
+
+2. Experiment validity assumptions
+Cutoff date of 2026-08-10 respected. No data fetched beyond this point. Target leakage logic respected matching historical execution via build_aligned_datasets.
+
+3. Strongest positive relationships
+(See coverage_relationships.csv for exact stats).
+
+4. Strongest negative relationships
+Prediction shift magnitude strongly associates with regressions and class collapses. When predictions shift dramatically, the model often loses baseline stability.
+
+5. PCR coverage findings
+Most tickers had HIGH_COVERAGE.
+
+6. PCR signal distribution findings
+PCR zero fractions and missing fractions were checked. Standard deviations vary wildly between tickers.
+
+7. Baseline weakness findings
+BUY correlation (baseline vs delta): -0.363
+SELL correlation (baseline vs delta): -0.289
+HOLD correlation (baseline vs delta): -0.348
+Negative correlations indicate PCR helps when the baseline class F1 is weaker.
+
+8. Class imbalance findings
+Collapses typically hit minority classes. See ticker_diagnostic_table for details.
+
+9. Prediction-shift findings
+Prediction shift is a key driver of class collapses.
+
+10. Sector findings
+See sector_analysis.csv.
+
+11. Horizon findings
+Default 10-session vs 5-session overrides showed differences in stability.
+
+12. Class-collapse findings
+8 class collapses occurred. They frequently associate with large prediction shifts on the minority class.
+
+13. CV-vs-test findings
+CV/Test discordance implies generalization instability in many PCR regressions.
+
+14. Multivariate exploratory findings
+R-squared: 0.197
+Params: {'usable_feature_coverage_pct': np.float64(0.0), 'control_f1_macro': np.float64(-0.27356605527205413), 'prediction_shift': np.float64(0.00011640210729035871), 'horizon': np.float64(-0.0003298300182346253), 'const': np.float64(0.09308299938437521)}
+Note: Only 47 observations. Highly susceptible to overfitting.
+
+15. Candidate hypotheses for PCR gating
+- Gate by baseline prediction stability.
+- Gate by PCR historical coverage/variance.
+
+16. Findings that are NOT statistically reliable
+Any p-value < 0.05 from D12 is not reliable due to N=47. Correlation implies no causation.
+
+17. Explicit limitations
+Small sample size (47 tickers).
+
+18. Final recommendation
+WEAK / INCONCLUSIVE evidence to universally enable PCR. Gating experiment may be viable if strictly bounded by structural constraints identified above.
