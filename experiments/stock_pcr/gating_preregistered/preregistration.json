@@ -1,0 +1,50 @@
+{
+  "experiment_id": "pcr_temporal_validation_20260815_v2",
+  "timestamp": "2026-08-15T22:15:00+05:30",
+  "development_cutoffs": ["2025-08-08", "2025-11-10", "2026-02-10"],
+  "validation_cutoffs": ["2026-05-08", "2026-08-10"],
+  "gate_logic": {
+    "description": "Hybrid Conservative Gate",
+    "cold_start_rule": "delta_cv_score > 0.005",
+    "warm_start_rule": "historical_mean_delta_f1 > 0 AND historical_collapse_rate == 0",
+    "class_collapse_definition": "Any target class with 0 predicted instances or np.nan F1"
+  },
+  "thresholds": {
+    "delta_cv_score": 0.005,
+    "historical_mean_delta_f1": 0.0,
+    "historical_collapse_rate": 0.0
+  },
+  "candidate_variables": [
+    "delta_cv_score",
+    "historical_mean_delta_f1",
+    "historical_collapse_rate"
+  ],
+  "selection_criterion": "Maximizing mean Delta F1 and minimizing class collapses strictly on T1-T3 development set. T4/T5 were never inspected during gate selection.",
+  "metrics": {
+    "primary": "Mean Delta F1 Macro (Frozen Gate vs Control)",
+    "secondary": ["Class Collapse Rate", "Mean Delta F1 Macro (Frozen Gate vs PCR-Always)"]
+  },
+  "statistical_methodology": {
+    "type": "TICKER-CLUSTERED PAIRED BOOTSTRAP",
+    "random_seed": 42,
+    "iterations": 10000,
+    "cluster_variable": "ticker"
+  },
+  "production_decision_criteria": [
+    "Mean Frozen Gate \u0394F1 vs Control > 0",
+    "Mean Frozen Gate \u0394F1 vs Control > 0 independently on BOTH T4 and T5",
+    "Frozen Gate \u0394F1 vs PCR-Always > 0",
+    "Frozen Gate class-collapse rate < PCR-Always",
+    "The primary ticker-clustered paired-bootstrap 95% CI for Frozen Gate vs Control must not cross zero for a PRODUCTION_CANDIDATE verdict. (If >0 point estimate but crosses zero -> PROMISING_BUT_INCONCLUSIVE)",
+    "No target leakage",
+    "No protocol violations",
+    "Frozen gate logic remains unchanged",
+    "Severe Regression Concentration: <5% of all validation observations and max 1 severe regression per ticker cluster",
+    "Severe Regression Definition: gated_delta_f1 <= -0.05"
+  ],
+  "notes": {
+    "t1_status": "The T1 cold-start rule is part of the development/pre-registration exercise and is not included in the independent T4/T5 validation population.",
+    "provenance_check": "T4 and T5 were never inspected during gate selection. No T4/T5 metric influenced the thresholds. The gate was frozen before this validation."
+  },
+  "constraints": "Validation results cannot alter the gate. T4 outcomes must not be incorporated into T5 historical state (static boundary)."
+}

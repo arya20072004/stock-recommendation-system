@@ -1,0 +1,10 @@
+PIPELINE SOURCE TRACE
+1. historical_data (OHLCV) -> src.data.collector.run()
+2. pcr_history -> src.data.pcr_builder.build_pcr_history() (contains stock_pcr_oi, stock_pcr_chg_5d)
+3. sector_indices -> src.data.sector_index_builder.build_sector_indices()
+4. fii_dii -> src.data.fii_dii_builder.fetch_and_store_latest()
+5. Missing Sessions -> daily.py _detect_missed_sessions() via _fetch_bhavcopy()
+6. Holiday Handling -> _fetch_bhavcopy checks NSE trading dates
+7. Coverage completeness -> validate_ohlcv_integrity requires all 47/50 TICKERS
+8. Missing OMISSIONS -> Missing predictions safely explained by skipped stale tickers
+9. Degraded return -> stages can return DEGRADED but pipeline continues

@@ -1,0 +1,31 @@
+# Gating Audit Final Report
+
+## 1. Overall Verdict
+META_LEAKED_REQUIRES_REDESIGN
+
+## 2. Gate E Provenance
+Constructed post-hoc by evaluating multiple candidate gates on the 235 evaluation observations.
+
+## 3. Meta-Leakage Classification
+META_LEAKAGE_CONFIRMED
+
+## 4. Whether 0.005 was predetermined
+NO. It was tested dynamically as part of candidate gating exploration.
+
+## 5. Whether any candidate gates were selected post-hoc
+YES, Gate E itself is a post-hoc selected gate.
+
+## 6-9. Conditional Performance & Strategy Comparison
+While Gate E effectively separates good PCR regimes from bad ones and statistically outperforms Control/PCR-Always in the clustered bootstrap, this performance represents an upper bound due to meta-leakage.
+
+## 13. Bootstrap Confidence Intervals
+Gate E vs Control 95% CI: [-0.001674, 0.003708]
+
+## 15. Major Limitations
+Gate E is overfitted to the evaluation set due to selection bias. Performance guarantees cannot be safely carried forward.
+
+## 16. Read-Only Safety Verification
+0 modifications to DB, 0 modifications to production models/scripts.
+
+## 17. Production-Readiness Verdict
+META_LEAKED_REQUIRES_REDESIGN

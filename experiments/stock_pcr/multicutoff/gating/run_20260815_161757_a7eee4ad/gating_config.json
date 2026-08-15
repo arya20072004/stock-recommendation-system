@@ -1,0 +1,10 @@
+{
+  "source_csv": "experiments/stock_pcr/multicutoff/run_20260814_084104_583c0e08/per_ticker_cutoff_results.csv",
+  "gates": {
+    "Gate_A": "historical_mean_delta_f1 > 0 (Default Control at T1)",
+    "Gate_B": "historical_mean_delta_f1 > 0 AND historical_collapse_rate == 0 (Default Control at T1)",
+    "Gate_C": "current_cutoff delta_cv_score > 0",
+    "Gate_D": "historical_mean_delta_f1 > 0 OR (T1 AND delta_cv_score > 0.005)"
+  },
+  "observation_count": 235
+}
