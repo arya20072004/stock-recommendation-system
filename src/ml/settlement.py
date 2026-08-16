@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+import math
 from datetime import datetime, timezone
 import pandas as pd
 
@@ -128,13 +129,38 @@ def evaluate_predictions(client, apply=False):
                     result = db.prediction_history.update_one({"_id": record["_id"]}, {"$set": {"status": "INVALID_PROVENANCE"}})
                     continue
 
-            stats["READY_TO_SETTLE"] += 1
+            # (READY_TO_SETTLE is incremented after all validations pass)
+
+            # Phase 23: Canonical Economic Price Basis
+            prediction_session = db.historical_data.find_one({
+                "ticker": ticker,
+                "date": market_date
+            })
+
+            if not prediction_session:
+                logger.error(f"Prediction date historical data missing for {ticker} on {market_date_str}")
+                stats["MISSING_MARKET_DATA"] += 1
+                continue
+
+            canonical_prediction_close = float(prediction_session.get("close", 0))
+
+            if not math.isfinite(canonical_prediction_close) or canonical_prediction_close <= 0:
+                logger.error(f"Invalid canonical historical close for {ticker} on {market_date_str}")
+                stats["MISSING_MARKET_DATA"] += 1
+                continue
 
             settlement_session = future_sessions[horizon - 1]
-            settlement_close = float(settlement_session["close"])
+            settlement_close = float(settlement_session.get("close", 0))
             settlement_market_date = settlement_session["date"].strftime("%Y-%m-%d")
 
-            actual_return = (settlement_close / price_at_prediction) - 1
+            if not math.isfinite(settlement_close) or settlement_close <= 0:
+                logger.error(f"Invalid canonical settlement close for {ticker} on {settlement_market_date}")
+                stats["MISSING_MARKET_DATA"] += 1
+                continue
+
+            stats["READY_TO_SETTLE"] += 1
+
+            actual_return = (settlement_close / canonical_prediction_close) - 1
 
             # Phase I: Actual Class
             if actual_return > target_return_threshold:

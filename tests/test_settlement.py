@@ -54,6 +54,16 @@ def create_mock_db(pending_preds, historical_data):
 
     db_mock.historical_data.find.side_effect = mock_historical_find
 
+    def mock_historical_find_one(query):
+        ticker = query.get("ticker")
+        date = query.get("date")
+        if ticker and date:
+            matches = [d for d in historical_data if d["ticker"] == ticker and d["date"] == date]
+            return matches[0] if matches else None
+        return None
+
+    db_mock.historical_data.find_one.side_effect = mock_historical_find_one
+
     # Setup update_one
     update_result = MagicMock()
     update_result.matched_count = 1
@@ -155,6 +165,10 @@ def test_settlement_maturity_and_classes():
 
     historical_data = []
 
+    # Add prediction date (day 0)
+    for ticker in ["TICKER1", "TICKER2", "TICKER3", "TICKER4", "TICKER5", "TICKER6", "TICKER8"]:
+        historical_data.append({"ticker": ticker, "date": market_date, "close": 100.0})
+
     # Generate 10 days of data for tickers 1-6
     for i in range(1, 11):
         dt = market_date + timedelta(days=i)
@@ -179,6 +193,7 @@ def test_settlement_maturity_and_classes():
     market_date_later = pd.to_datetime(market_date_later_str).to_pydatetime()
     pred7["market_date"] = market_date_later_str
     # Dates for pred7
+    historical_data.append({"ticker": "TICKER7", "date": market_date_later, "close": 100.0})
     for i in range(1, 6):
         dt = market_date_later + timedelta(days=i)
         historical_data.append({"ticker": "TICKER7", "date": dt, "close": 100.0})
@@ -234,3 +249,183 @@ def test_settlement_maturity_and_classes():
     t5_update = [u[0][1]["$set"] for u in updates if u[0][0]["_id"] == "p5"][0]
     assert round(t5_update["actual_return"], 2) == -0.05
     assert t5_update["actual_class"] == "HOLD" # exact match on -threshold = HOLD
+
+# --- PHASE 23 CANONICAL ECONOMIC PRICE BASIS TESTS ---
+
+def _create_prov_doc(p):
+    from src.ml.model_utils import compute_provenance_hash
+    p["model_version"] = "mock_ver"
+    fake_payload = {
+        "provenance_schema_version": "v2",
+        "symbol": p["symbol"],
+        "market_date": p["market_date"],
+        "prediction_horizon": p.get("prediction_horizon", 10),
+        "model_version": "mock_ver"
+    }
+    p["provenance_hash"] = compute_provenance_hash(fake_payload)
+    return p
+
+def test_phase23_normal_movement():
+    market_date_str = "2026-08-01"
+    market_date = pd.to_datetime(market_date_str).to_pydatetime()
+
+    pred = _create_prov_doc({
+        "_id": "t1", "symbol": "NORM", "market_date": market_date_str,
+        "prediction_horizon": 10, "target_return_threshold": 0.05,
+        "price_at_prediction": 100.0, "raw_prediction": "BUY", "recommendation": "BUY"
+    })
+
+    hist = [{"ticker": "NORM", "date": market_date, "close": 100.0}]
+    for i in range(1, 11):
+        hist.append({"ticker": "NORM", "date": market_date + timedelta(days=i), "close": 110.0 if i==10 else 100.0})
+
+    client_mock, db_mock = create_mock_db([pred], hist)
+    stats = evaluate_predictions(client_mock, apply=True)
+    assert stats["READY_TO_SETTLE"] == 1
+
+    update = db_mock.prediction_history.update_one.call_args[0][1]["$set"]
+    assert update["actual_return"] == approx(0.10)
+    assert update["actual_class"] == "BUY"
+    assert "settlement_hash" in update
+
+def test_phase23_stock_split_defect_reproduction():
+    market_date_str = "2026-08-01"
+    market_date = pd.to_datetime(market_date_str).to_pydatetime()
+
+    pred = _create_prov_doc({
+        "_id": "t2", "symbol": "SPLIT", "market_date": market_date_str,
+        "prediction_horizon": 10, "target_return_threshold": 0.05,
+        "price_at_prediction": 100.0, "raw_prediction": "BUY", "recommendation": "BUY"
+    })
+
+    # DB canonical historical value is 50. Immutable provenance is 100.
+    hist = [{"ticker": "SPLIT", "date": market_date, "close": 50.0}]
+    for i in range(1, 11):
+        hist.append({"ticker": "SPLIT", "date": market_date + timedelta(days=i), "close": 55.0 if i==10 else 50.0})
+
+    client_mock, db_mock = create_mock_db([pred], hist)
+    stats = evaluate_predictions(client_mock, apply=True)
+
+    update = db_mock.prediction_history.update_one.call_args[0][1]["$set"]
+    # If price_at_prediction was used, return would be 55/100 - 1 = -45%
+    # With canonical basis, return is 55/50 - 1 = +10%
+    assert update["actual_return"] == approx(0.10)
+    assert update["actual_class"] == "BUY"
+
+def test_phase23_prediction_provenance_immutability():
+    market_date_str = "2026-08-01"
+    market_date = pd.to_datetime(market_date_str).to_pydatetime()
+
+    pred = _create_prov_doc({
+        "_id": "t3", "symbol": "IMMUTE", "market_date": market_date_str,
+        "prediction_horizon": 10, "target_return_threshold": 0.05,
+        "price_at_prediction": 100.0, "raw_prediction": "BUY", "recommendation": "BUY"
+    })
+
+    hist = [{"ticker": "IMMUTE", "date": market_date, "close": 50.0}]
+    for i in range(1, 11):
+        hist.append({"ticker": "IMMUTE", "date": market_date + timedelta(days=i), "close": 50.0})
+
+    client_mock, db_mock = create_mock_db([pred], hist)
+    stats = evaluate_predictions(client_mock, apply=True)
+
+    update = db_mock.prediction_history.update_one.call_args[0][1]["$set"]
+    assert update["actual_return"] == approx(0.0)
+    assert "price_at_prediction" not in update # Not mutated
+
+def test_phase23_missing_prediction_date_history():
+    market_date_str = "2026-08-01"
+    market_date = pd.to_datetime(market_date_str).to_pydatetime()
+
+    pred = _create_prov_doc({
+        "_id": "t4", "symbol": "MISSING", "market_date": market_date_str,
+        "prediction_horizon": 10, "target_return_threshold": 0.05,
+        "price_at_prediction": 100.0, "raw_prediction": "BUY", "recommendation": "BUY"
+    })
+
+    # Missing prediction_date history entirely
+    hist = []
+    for i in range(1, 11):
+        hist.append({"ticker": "MISSING", "date": market_date + timedelta(days=i), "close": 110.0})
+
+    client_mock, db_mock = create_mock_db([pred], hist)
+    stats = evaluate_predictions(client_mock, apply=True)
+
+    assert stats["MISSING_MARKET_DATA"] == 1
+    assert stats["READY_TO_SETTLE"] == 0
+    db_mock.prediction_history.update_one.assert_not_called()
+
+def test_phase23_invalid_canonical_prediction_close():
+    market_date_str = "2026-08-01"
+    market_date = pd.to_datetime(market_date_str).to_pydatetime()
+
+    pred = _create_prov_doc({
+        "_id": "t5", "symbol": "INV", "market_date": market_date_str,
+        "prediction_horizon": 10, "target_return_threshold": 0.05,
+        "price_at_prediction": 100.0, "raw_prediction": "BUY", "recommendation": "BUY"
+    })
+
+    # Zero close
+    hist = [{"ticker": "INV", "date": market_date, "close": 0.0}]
+    for i in range(1, 11):
+        hist.append({"ticker": "INV", "date": market_date + timedelta(days=i), "close": 110.0})
+
+    client_mock, db_mock = create_mock_db([pred], hist)
+    stats = evaluate_predictions(client_mock, apply=True)
+
+    assert stats["MISSING_MARKET_DATA"] == 1
+    db_mock.prediction_history.update_one.assert_not_called()
+
+def test_phase23_already_evaluated_record():
+    client_mock, db_mock = create_mock_db([], [])
+    # Add a record that is already EVALUATED
+    cursor_mock = MagicMock()
+    cursor_mock.sort.return_value = [{"_id": "t7", "status": "EVALUATED"}]
+    db_mock.prediction_history.find.return_value = cursor_mock
+
+    # Evaluate predictions looks for PENDING, so this shouldn't even be processed, but let's test apply safely
+    stats = evaluate_predictions(client_mock, apply=True)
+    assert stats["READY_TO_SETTLE"] == 0
+
+def test_phase23_dividend_adjusted_canonical_series():
+    market_date_str = "2026-08-01"
+    market_date = pd.to_datetime(market_date_str).to_pydatetime()
+
+    pred = _create_prov_doc({
+        "_id": "t9", "symbol": "DIV", "market_date": market_date_str,
+        "prediction_horizon": 10, "target_return_threshold": 0.05,
+        "price_at_prediction": 100.0, "raw_prediction": "BUY", "recommendation": "BUY"
+    })
+
+    # Immutable price=100. Dividend happened, history adjusts down by 2.
+    hist = [{"ticker": "DIV", "date": market_date, "close": 98.0}]
+    for i in range(1, 11):
+        hist.append({"ticker": "DIV", "date": market_date + timedelta(days=i), "close": 107.8 if i==10 else 98.0})
+
+    client_mock, db_mock = create_mock_db([pred], hist)
+    evaluate_predictions(client_mock, apply=True)
+
+    update = db_mock.prediction_history.update_one.call_args[0][1]["$set"]
+    # 107.8 / 98.0 - 1 = +10%
+    assert update["actual_return"] == approx(0.10)
+
+def test_phase23_strong_adversarial_proof():
+    market_date_str = "2026-08-01"
+    market_date = pd.to_datetime(market_date_str).to_pydatetime()
+
+    pred = _create_prov_doc({
+        "_id": "t10", "symbol": "ADV", "market_date": market_date_str,
+        "prediction_horizon": 10, "target_return_threshold": 0.05,
+        "price_at_prediction": 100.0, "raw_prediction": "BUY", "recommendation": "BUY"
+    })
+
+    hist = [{"ticker": "ADV", "date": market_date, "close": 50.0}]
+    for i in range(1, 11):
+        hist.append({"ticker": "ADV", "date": market_date + timedelta(days=i), "close": 60.0 if i==10 else 50.0})
+
+    client_mock, db_mock = create_mock_db([pred], hist)
+    evaluate_predictions(client_mock, apply=True)
+
+    update = db_mock.prediction_history.update_one.call_args[0][1]["$set"]
+    # 60 / 50 - 1 = +20%
+    assert update["actual_return"] == approx(0.20)
