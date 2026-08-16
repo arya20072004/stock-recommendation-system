@@ -62,8 +62,34 @@ def test_hash_integrity():
 def test_atomicity(mongo_client, monkeypatch):
     db = mongo_client["stock_market_db"]
     
-    # Attempt to generate predictions, should raise RuntimeError wrapping the failure
-    # because mongomock doesn't support transactions
+    # Mock load_active_bundle to return mock components
+    class MockModel:
+        feature_importances_ = [0.5, 0.5]
+        def predict_proba(self, X):
+            return np.array([[0.1, 0.2, 0.7]])
+            
+    class MockEngineering:
+        TICKER_CLASS_THRESHOLDS = {"RELIANCE.NS": {0: 0.33, 1: 0.33, 2: 0.20}}
+        @staticmethod
+        def apply_threshold_calibration(proba, thresholds):
+            return 2
+        @staticmethod
+        def get_target_return_threshold(ticker, atr):
+            return 0.05
+        @staticmethod
+        def build_feature_row(ticker, client, db):
+            df = pd.DataFrame({
+                "f1": [1.0], "f2": [2.0], "close": [100.0], "atr_pct": [0.05]
+            }, index=pd.DatetimeIndex(["2026-08-10"]))
+            return df
+
+    def mock_load(ticker):
+        return MockModel(), ["f1", "f2"], "test_ver", MockEngineering(), "v1", "hash1", 0.45
+        
+    import src.ml.history
+    monkeypatch.setattr(src.ml.history, "load_active_bundle", mock_load)
+    monkeypatch.setattr(src.ml.history, "TICKERS", ["RELIANCE.NS"])
+    
     from datetime import date
     with pytest.raises((RuntimeError, pymongo.errors.OperationFailure)):
         generate_and_persist_predictions(mongo_client, target_market_date=date(2026, 8, 10))
@@ -207,7 +233,7 @@ def test_provenance_integration(mongo_client, monkeypatch):
         {"$set": {"provenance_hash": "CONFLICTING_HASH"}}
     )
     
-    with pytest.raises(RuntimeError) as excinfo:
+    with pytest.raises(pymongo.errors.OperationFailure) as excinfo:
         generate_and_persist_predictions(mongo_client, target_market_date=date(2026, 8, 10))
     
-    assert "Prediction history generation failed" in str(excinfo.value)
+    assert "Provenance collision" in str(excinfo.value)

@@ -64,6 +64,15 @@ FEATURES_DIR = "saved_features"
 DEFAULT_PREDICTION_HORIZON = 10
 
 
+class PredictionDataNotReadyError(Exception):
+    """
+    Raised when a ticker cannot safely receive a prediction because required
+    inference data is unavailable or not inference-ready (e.g. missing PCR).
+    This represents a recognized local prediction failure, not a systemic defect.
+    """
+    pass
+
+
 # ======================================================================
 # Model loading
 # ======================================================================
@@ -171,7 +180,7 @@ def get_latest_valid_feature_row(
 
     if computed_df.empty:
 
-        raise ValueError(
+        raise PredictionDataNotReadyError(
             f"Feature engineering returned an empty DataFrame "
             f"for {ticker}"
         )
@@ -202,7 +211,7 @@ def get_latest_valid_feature_row(
 
     if latest_market_date is None:
 
-        raise ValueError(
+        raise PredictionDataNotReadyError(
             f"{ticker}: could not determine latest market date."
         )
 
@@ -252,7 +261,7 @@ def get_latest_valid_feature_row(
         else:
             last_fully_valid_date = valid_history.index.max()
 
-        raise ValueError(
+        raise PredictionDataNotReadyError(
             f"{ticker}: latest market row is not inference-ready. "
             f"latest_market_date={latest_market_date}, "
             f"last_fully_valid_date={last_fully_valid_date}, "
@@ -328,6 +337,7 @@ def generate_and_persist_predictions(client, target_market_date: date):
     existing_count = 0
 
     stale_tickers = []
+    failed_tickers = []
     errors = []
 
     logger.info(
@@ -404,7 +414,8 @@ def generate_and_persist_predictions(client, target_market_date: date):
                 continue
 
             if market_date_obj > target_market_date:
-                raise ValueError(
+
+                raise PredictionDataNotReadyError(
                     f"Future market data detected for {ticker}: "
                     f"{market_date_obj} > {target_market_date}"
                 )
@@ -840,20 +851,21 @@ def generate_and_persist_predictions(client, target_market_date: date):
                     horizon,
                 )
 
-        except Exception as exc:
+        except (PredictionDataNotReadyError, FileNotFoundError) as exc:
 
             error_count += 1
+            failed_tickers.append(ticker)
 
             error_message = (
-                f"{ticker}: {exc}"
+                f"{ticker}: {exc.__class__.__name__} - {exc}"
             )
 
             errors.append(
                 error_message
             )
 
-            logger.error(
-                "Failed to generate prediction for %s: %s",
+            logger.warning(
+                "Recognized localized prediction failure for %s: %s",
                 ticker,
                 exc,
             )
@@ -871,33 +883,16 @@ def generate_and_persist_predictions(client, target_market_date: date):
         error_count,
     )
 
-    # ==================================================================
-    # Fail batch when ticker errors occurred
-    # ==================================================================
-
     if error_count > 0:
 
-        logger.error(
+        logger.warning(
             "Prediction history generation encountered "
-            "%d ticker errors:",
+            "%d localized ticker errors. See logs.",
             error_count,
         )
 
-        for error in errors:
-
-            logger.error(
-                "  - %s",
-                error,
-            )
-
-        raise RuntimeError(
-            "Prediction history generation failed for "
-            f"{error_count} ticker(s). "
-            "See errors above."
-        )
-
     logger.info(
-        "Prediction history generation completed successfully."
+        "Prediction history generation completed."
     )
 
     return {
@@ -905,6 +900,7 @@ def generate_and_persist_predictions(client, target_market_date: date):
         "skipped": skipped_count,
         "stale": stale_tickers,
         "existing": existing_count,
+        "failed": failed_tickers,
         "errors": errors,
     }
 

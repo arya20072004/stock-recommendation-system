@@ -518,7 +518,10 @@ class DailyPipeline:
             result = generate_and_persist_predictions(self.client, target_market_date=self.target_market_date)
             
             stale_list = result.get("stale", [])
-            if stale_list:
+            failed_list = result.get("failed", [])
+            if failed_list:
+                self._log_stage("PREDICTION_GENERATION", "DEGRADED", f"{len(failed_list)} tickers failed local generation", metrics=result)
+            elif stale_list:
                 self._log_stage("PREDICTION_GENERATION", "DEGRADED", f"{len(stale_list)} tickers skipped due to stale data", metrics=result)
             else:
                 self._log_stage("PREDICTION_GENERATION", "SUCCESS", metrics=result)
@@ -546,7 +549,10 @@ class DailyPipeline:
         if missing:
             generation_metrics = self.stages.get("PREDICTION_GENERATION", {}).get("metrics", {})
             stale_tickers = set(generation_metrics.get("stale", []))
-            unexplained = missing - stale_tickers
+            failed_tickers = set(generation_metrics.get("failed", []))
+            
+            explained_missing = stale_tickers | failed_tickers
+            unexplained = missing - explained_missing
             
             if unexplained:
                 msg = f"Unexplained missing predictions: {unexplained}"
@@ -557,13 +563,18 @@ class DailyPipeline:
             generated_count = len(found_tickers)
             
             if generated_count < required_predictions:
-                msg = f"Prediction coverage failure. Generated {generated_count} < required {required_predictions}. Stale tickers: {stale_tickers}"
+                msg = f"Prediction coverage failure. Generated {generated_count} < required {required_predictions}. Stale: {stale_tickers}, Failed: {failed_tickers}"
                 self._log_stage("PREDICTION_VALIDATION", "FAILED", msg)
                 raise RuntimeError(msg)
                 
-            msg = f"Missing predictions safely explained by explicitly skipped stale tickers: {stale_tickers}"
-            logger.warning(msg)
-            self._log_stage("PREDICTION_VALIDATION", "DEGRADED", msg)
+            if failed_tickers:
+                msg = f"Missing predictions safely explained by recognized localized failures: {failed_tickers}"
+                logger.warning(msg)
+                self._log_stage("PREDICTION_VALIDATION", "DEGRADED", msg)
+            elif stale_tickers:
+                msg = f"Missing predictions safely explained by explicitly skipped stale tickers: {stale_tickers}"
+                logger.warning(msg)
+                self._log_stage("PREDICTION_VALIDATION", "DEGRADED", msg)
             
         import collections
         dups = [item for item, count in collections.Counter(found_tickers).items() if count > 1]

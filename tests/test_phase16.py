@@ -129,8 +129,9 @@ def test_group_c_future_data(mock_history_dependencies, monkeypatch):
     monkeypatch.setattr("src.ml.history.load_active_bundle", customized_load)
     monkeypatch.setattr("src.ml.history.TICKERS", ["RELIANCE.NS"])
     
-    with pytest.raises(RuntimeError, match="Prediction history generation failed"):
-        generate_and_persist_predictions(client, target_market_date=target)
+    result = generate_and_persist_predictions(client, target_market_date=target)
+    assert len(result["failed"]) == 1
+    assert "RELIANCE.NS" in result["failed"]
         
     db = client["stock_market_db"]
     assert not db.prediction_history.update_one.called
