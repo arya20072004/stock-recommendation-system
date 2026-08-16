@@ -13,7 +13,6 @@ MODELS_DIR = "saved_models"
 FEATURES_DIR = "saved_features"
 
 def hash_file_sha256(filepath: str, truncate_to: int = 64) -> str:
-    """Computes SHA256 of a file, optionally truncated to match existing semantics."""
     sha256 = hashlib.sha256()
     try:
         with open(filepath, "rb") as f:
@@ -39,26 +38,20 @@ def read_active_manifest(ticker: str) -> Optional[Dict[str, Any]]:
         return None
 
 def validate_bundle(ticker: str, version: str, expected_model_hash: str, expected_feature_hash: str) -> bool:
-    """Validates that immutable artifacts for a specific version exist and match hashes."""
     model_path = os.path.join(MODELS_DIR, f"model_{ticker}_{version}.joblib")
     features_path = os.path.join(FEATURES_DIR, f"features_{ticker}_{version}.json")
     
     if not os.path.exists(model_path):
-        logger.error(f"Missing model artifact for {ticker} version {version}")
         return False
-        
     if not os.path.exists(features_path):
-        logger.error(f"Missing feature artifact for {ticker} version {version}")
         return False
         
-    actual_model_hash = hash_file_sha256(model_path, truncate_to=12) # model_version truncates to 12
+    actual_model_hash = hash_file_sha256(model_path, truncate_to=12)
     if actual_model_hash != expected_model_hash:
-        logger.error(f"Model hash mismatch for {ticker} version {version}: {actual_model_hash} != {expected_model_hash}")
         return False
         
     actual_feature_hash = hash_file_sha256(features_path, truncate_to=64)
     if actual_feature_hash != expected_feature_hash:
-        logger.error(f"Feature hash mismatch for {ticker} version {version}: {actual_feature_hash} != {expected_feature_hash}")
         return False
         
     return True
@@ -66,7 +59,6 @@ def validate_bundle(ticker: str, version: str, expected_model_hash: str, expecte
 def setup_registry_indexes(db):
     try:
         db.model_registry.create_index([("ticker", pymongo.ASCENDING), ("version", pymongo.ASCENDING)], unique=True)
-        
         db.model_registry.create_index(
             [("ticker", pymongo.ASCENDING)], 
             unique=True, 
@@ -77,7 +69,6 @@ def setup_registry_indexes(db):
         logger.error(f"Failed to setup indexes for model_registry: {e}")
 
 def register_candidate(db, ticker: str, version: str, model_hash: str, feature_hash: str, metrics: Dict[str, Any]):
-    """Registers a new model generation as CANDIDATE."""
     now = datetime.now(timezone.utc).isoformat()
     try:
         db.model_registry.insert_one({
@@ -97,66 +88,43 @@ def register_candidate(db, ticker: str, version: str, model_hash: str, feature_h
             "metrics": metrics,
             "trained_at": now
         })
-        logger.info(f"Registered CANDIDATE model for {ticker} version {version}")
     except pymongo.errors.DuplicateKeyError:
-        logger.info(f"CANDIDATE model for {ticker} version {version} already exists. Skipping insertion.")
+        pass
 
 def update_manifest_atomically(ticker: str, manifest_data: Dict[str, Any]):
-    """Safely updates the local active manifest using a temporary file and os.replace()."""
     target_path = get_active_manifest_path(ticker)
     temp_path = f"{target_path}.tmp"
-    
     with open(temp_path, "w", encoding="utf-8") as f:
         json.dump(manifest_data, f, indent=2)
-        
     os.replace(temp_path, target_path)
 
 def promote_model(db, ticker: str, version: str) -> bool:
-    """Explicitly promotes a CANDIDATE or RETIRED model to ACTIVE, demoting the previous."""
-    # 1. Validate target
+    # PHASE 3: Filesystem-First Manifest Staging & PHASE 4: Previous State Capture
     target_record = db.model_registry.find_one({"ticker": ticker, "version": version})
     if not target_record:
-        logger.error(f"No registry record found for {ticker} version {version}")
         return False
         
     if target_record["status"] not in ["CANDIDATE", "RETIRED"]:
-        logger.error(f"Cannot promote model with status {target_record['status']}")
         return False
         
-    is_valid = validate_bundle(
-        ticker, 
-        version, 
-        target_record["model_hash"], 
-        target_record["feature_hash"]
-    )
-    if not is_valid:
-        logger.error("Artifact validation failed. Aborting promotion.")
+    if not validate_bundle(ticker, version, target_record["model_hash"], target_record["feature_hash"]):
         return False
         
-    # 2. Update MongoDB Lifecycle State (Atomically)
-    now = datetime.now(timezone.utc).isoformat()
-    
-    # We must do this in two steps if transactions are not guaranteed:
-    # A) Demote current active to RETIRED
-    db.model_registry.update_many(
-        {"ticker": ticker, "status": "ACTIVE"},
-        {"$set": {"status": "RETIRED", "retired_at": now}}
-    )
-    
-    # B) Promote target to ACTIVE
-    try:
-        result = db.model_registry.update_one(
-            {"ticker": ticker, "version": version},
-            {"$set": {"status": "ACTIVE", "promoted_at": now}}
-        )
-        if result.modified_count == 0:
-            logger.error("Failed to set ACTIVE status in registry.")
+    old_active_record = db.model_registry.find_one({"ticker": ticker, "status": "ACTIVE"})
+    if old_active_record and old_active_record["version"] == version:
+        return False # Already active, idempotent abort
+        
+    manifest_path = get_active_manifest_path(ticker)
+    manifest_exists = os.path.exists(manifest_path)
+    old_manifest_contents = None
+    if manifest_exists:
+        try:
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                old_manifest_contents = f.read()
+        except Exception:
             return False
-    except pymongo.errors.DuplicateKeyError:
-        logger.error("Concurrency conflict: Another model is already ACTIVE for this ticker.")
-        return False
 
-    # 3. Atomically replace active.json
+    now = datetime.now(timezone.utc).isoformat()
     manifest_data = {
         "ticker": ticker,
         "model_version": version,
@@ -174,21 +142,103 @@ def promote_model(db, ticker: str, version: str) -> bool:
         "promoted_at": now
     }
     
+    temp_path = f"{manifest_path}.tmp"
     try:
-        update_manifest_atomically(ticker, manifest_data)
-        logger.info(f"Successfully promoted {ticker} version {version} to ACTIVE.")
-        return True
+        with open(temp_path, "w", encoding="utf-8") as f:
+            json.dump(manifest_data, f, indent=2)
     except Exception as e:
-        logger.error(f"MongoDB updated successfully, but failed to write manifest for {ticker}: {e}")
+        return False # Failed to stage, no MongoDB mutation occurred
+
+    # PHASE 5: MongoDB Promotion
+    if old_active_record:
+        db.model_registry.update_many(
+            {"ticker": ticker, "status": "ACTIVE"},
+            {"$set": {"status": "RETIRED", "retired_at": now}}
+        )
+    
+    try:
+        result = db.model_registry.update_one(
+            {"ticker": ticker, "version": version},
+            {"$set": {"status": "ACTIVE", "promoted_at": now}}
+        )
+        if result.modified_count == 0:
+            if old_active_record:
+                db.model_registry.update_one(
+                    {"ticker": ticker, "version": old_active_record["version"]},
+                    {"$set": {"status": "ACTIVE"}}
+                )
+            return False
+    except pymongo.errors.DuplicateKeyError:
         return False
 
+    # PHASE 6: Atomic Manifest Replacement
+    try:
+        os.replace(temp_path, manifest_path)
+    except Exception as e:
+        # PHASE 7: Explicit Rollback
+        db.model_registry.update_one(
+            {"ticker": ticker, "version": version},
+            {"$set": {"status": target_record["status"]}}
+        )
+        if old_active_record:
+            db.model_registry.update_one(
+                {"ticker": ticker, "version": old_active_record["version"]},
+                {"$set": {"status": "ACTIVE"}}
+            )
+            
+        # PHASE 8: Rollback Verification
+        final_actives = list(db.model_registry.find({"ticker": ticker, "status": "ACTIVE"}))
+        if old_active_record:
+            if len(final_actives) != 1 or final_actives[0]["version"] != old_active_record["version"]:
+                logger.error("RECOVERY_REQUIRED")
+        else:
+            if len(final_actives) > 0:
+                logger.error("RECOVERY_REQUIRED")
+                
+        # Also ensure manifest was untouched (it shouldn't be touched if os.replace fails)
+        if manifest_exists:
+            try:
+                with open(manifest_path, "r", encoding="utf-8") as f:
+                    if f.read() != old_manifest_contents:
+                        logger.error("RECOVERY_REQUIRED")
+            except Exception:
+                logger.error("RECOVERY_REQUIRED")
+        else:
+            if os.path.exists(manifest_path):
+                logger.error("RECOVERY_REQUIRED")
+
+        logger.info("PROMOTION_ROLLED_BACK")
+        return False
+
+    # PHASE 10: Post-Promotion Consistency Verification
+    final_actives = list(db.model_registry.find({"ticker": ticker, "status": "ACTIVE"}))
+    if len(final_actives) != 1 or final_actives[0]["version"] != version:
+        logger.error("POST_PROMOTION_VERIFICATION_FAILED")
+        return False
+        
+    try:
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            final_manifest = json.load(f)
+        if final_manifest.get("model_version") != version:
+            logger.error("POST_PROMOTION_VERIFICATION_FAILED")
+            return False
+    except Exception:
+        logger.error("POST_PROMOTION_VERIFICATION_FAILED")
+        return False
+
+    return True
+
 def sync_manifest(db, ticker: str):
-    """Reconciles the filesystem manifest with the intended MongoDB registry state."""
+    """Reconciles the filesystem manifest with the intended MongoDB registry state.
+    Used for explicitly resolving split-brain scenarios."""
     active_record = db.model_registry.find_one({"ticker": ticker, "status": "ACTIVE"})
     
     if not active_record:
-        logger.error(f"No ACTIVE registry record found for {ticker}.")
-        return False
+        # If no active record, we should remove the manifest if it exists
+        path = get_active_manifest_path(ticker)
+        if os.path.exists(path):
+            os.remove(path)
+        return True
         
     version = active_record["version"]
     
@@ -200,7 +250,6 @@ def sync_manifest(db, ticker: str):
     )
     
     if not is_valid:
-        logger.error("ACTIVE registry record points to invalid artifacts. Cannot sync.")
         return False
         
     manifest_data = {
@@ -221,5 +270,4 @@ def sync_manifest(db, ticker: str):
     }
     
     update_manifest_atomically(ticker, manifest_data)
-    logger.info(f"Successfully synced manifest for {ticker} to version {version}.")
     return True

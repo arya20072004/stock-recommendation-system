@@ -1,0 +1,38 @@
+FINAL REPORT
+1. Production Ticker Universe: 51 tickers
+2. PCR Ticker Universe: 47 tickers
+3. Artifact Coverage: 51
+4. Registry Coverage: 51
+5. ACTIVE Coverage: 1
+6. Manifest Coverage: 1
+7. Candidate Coverage: 51
+8. Lifecycle mismatches: 50
+
+9. migrate safety assessment:
+MIGRATE_SAFE_TO_RUN: NO
+Evidence: The `migrate` script looks for legacy unversioned files (model_{ticker}.joblib) and registers them as ACTIVE directly, modifying MongoDB and overwriting active manifests. If run, it could inadvertently reactivate stale legacy models. It is a one-time migration script, not a daily lifecycle operation.
+
+10. sync usefulness assessment:
+SYNC_USEFUL_FOR_MISSING_ACTIVE_REGISTRY: NO
+Evidence: `sync_manifest` fetches the ACTIVE record from MongoDB. If Registry Active Version = NONE, `sync` immediately fails and does not modify the manifest. It cannot repair missing ACTIVE records.
+
+11. RELIANCE ObjectId Defect:
+Classification: INDEPENDENT_SECONDARY_DEFECT
+Evidence: The `history.py` script extracts `raw_inputs` from `full_latest_row`. If `computed_df` from MongoDB retains the `_id` field (which is an ObjectId), `pd.api.types.is_numeric_dtype` evaluates to false, causing `_id` to be included in `raw_inputs` as an ObjectId. `json.dumps()` in the provenance hash computation or serialization then fails. RELIANCE.NS reaches this stage because it is the only ticker with a COMPLETE_ACTIVE lifecycle state, whereas other tickers fail earlier due to missing manifests.
+
+12. Production State Modified: NONE
+
+13. Recommended Next Action:
+Since tickers have CANDIDATE versions but no ACTIVE version and no manifest, the canonical safe operation is to PROMOTE the candidates to ACTIVE using `manage_models.py promote <ticker> <version>`. We should NOT run `migrate` or `sync` for missing registries.
+
+14. SAFE vs NOT SAFE Commands:
+SAFE:
+- python scripts/manage_models.py status <ticker>
+- python scripts/manage_models.py promote <ticker> <version>
+- python scripts/manage_models.py rollback <ticker> <version>
+NOT SAFE:
+- python scripts/manage_models.py migrate
+- python scripts/manage_models.py sync <ticker> (Useless when ACTIVE is missing)
+
+15. Final Verdict:
+REGISTRY_INCOMPLETE

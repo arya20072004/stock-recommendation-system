@@ -1,0 +1,45 @@
+{
+  "POLICY_NAME": "CANONICAL_CV_CHAMPION_V1",
+  "POLICY_VERSION": "CANONICAL_CV_CHAMPION_V1",
+  "POLICY_STATUS": "PREREGISTERED",
+  "creation_timestamp": "2026-08-16T05:08:54.599918+00:00",
+  "source_files_inspected": [
+    "src/ml/trainer.py",
+    "src/ml/model_registry.py",
+    "src/ml/model_utils.py",
+    "scripts/manage_models.py"
+  ],
+  "selection_fields": [
+    "metrics.optuna.best_value"
+  ],
+  "excluded_fields": [
+    "metrics.f1_macro",
+    "per_class_metrics",
+    "test_prediction_distribution"
+  ],
+  "eligibility_rules": [
+    "status == CANDIDATE",
+    "model artifact exists",
+    "feature artifact exists",
+    "model hash matches registry model_hash",
+    "feature hash matches registry feature_hash",
+    "provenance_status == COMPLETE",
+    "dataset_hash is present",
+    "feature_pipeline_version is present",
+    "feature_pipeline_hash is present",
+    "CV selection metric exists",
+    "CV selection metric is finite",
+    "candidate belongs to the configured production ticker universe"
+  ],
+  "SELECTION_METRIC": "metrics.optuna.best_value",
+  "PRIMARY_SELECTION_RULE": "select the eligible candidate with the highest metrics.optuna.best_value",
+  "tie_break_rules": [
+    "1. Highest CV F1 (metrics.optuna.best_value)",
+    "2. If exactly tied: latest trained_at",
+    "3. If still tied: lexicographically smallest model_version"
+  ],
+  "missing_invalid_cv_rule": "candidate = INELIGIBLE",
+  "no_eligible_candidate_rule": "selection_status = NO_ELIGIBLE_CANDIDATE",
+  "multiple_valid_candidates_rule": "The highest CV candidate wins deterministically",
+  "no_write_guarantee": "This policy does not mutate MongoDB or the filesystem."
+}

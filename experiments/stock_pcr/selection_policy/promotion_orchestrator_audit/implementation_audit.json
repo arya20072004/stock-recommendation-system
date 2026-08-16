@@ -1,0 +1,23 @@
+{
+  "is_fully_implemented": true,
+  "is_default_readonly": true,
+  "zero_mongodb_writes_in_default": true,
+  "zero_artifact_writes_in_default": true,
+  "preserves_frozen_policy": true,
+  "preserves_frozen_promotion_plan": true,
+  "50_targets_valid": true,
+  "reliance_isolated": true,
+  "artifact_hashes_valid": true,
+  "provenance_complete": true,
+  "unexpected_lifecycle_states": false,
+  "accidental_reselection": false,
+  "uses_test_metrics": false,
+  "calls_setup_indexes_in_readonly": false,
+  "reuses_canonical_primitive": true,
+  "failure_window": "MongoDB update succeeds but active manifest write fails (os.replace exception), leaving system in split-brain state.",
+  "failure_window_mitigation": "Requires catching exception and potentially attempting rollback or manual intervention. Script aborts on first failure.",
+  "idempotent": false,
+  "aborts_on_mismatch": true,
+  "post_promotion_detects_split_brain": true,
+  "safe_to_authorize": true
+}

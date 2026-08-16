@@ -1,0 +1,2 @@
+MIGRATE_SAFE_TO_RUN: NO
+manage_models.py migrate looks for `model_{ticker}.joblib`. It registers them directly as ACTIVE. It does NOT check whether a candidate exists, does NOT validate feature hashes against pipeline versions, does NOT check provenance. It overwrites ACTIVE records. It is unsafe to run because it will activate legacy artifacts and disrupt the current versioned models.

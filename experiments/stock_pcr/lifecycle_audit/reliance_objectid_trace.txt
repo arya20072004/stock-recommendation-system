@@ -1,0 +1,2 @@
+INDEPENDENT_SECONDARY_DEFECT
+In src/ml/history.py, raw_inputs is extracted: `{k: v for k, v in full_latest_row.items() if ...}`. The _id field from MongoDB is passed through as an ObjectId. RELIANCE hits this because its manifest exists, so it proceeds to feature extraction, whereas others fail at `load_active_bundle`.

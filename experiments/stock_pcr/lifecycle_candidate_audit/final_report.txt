@@ -1,0 +1,38 @@
+FINAL REPORT - READ-ONLY CANDIDATE AUDIT
+============================================================
+PHASE 0 — BASELINE
+- model_registry records: 153
+- ACTIVE: 1
+- CANDIDATE: 152
+- RETIRED: 0
+- configured TICKERS count: 51
+- model artifact count: 204
+- feature artifact count: 204
+- active manifest count: 1
+
+============================================================
+PHASE 1-8 — RESULTS
+1. How many candidates exist? 152
+2. How many candidates per ticker? Generally 3.
+3. Are all model artifacts present? YES.
+4. Are all feature artifacts present? YES.
+5. Do registry hashes match filesystem hashes? YES.
+6. Which candidates have complete provenance? ALL candidates have COMPLETE provenance metadata (version, hash, metrics).
+7. Which candidates are blocked? NONE are blocked by integrity, but ALL are blocked from automatic promotion due to missing selection rule.
+8. Is there exactly one defensible candidate per ticker? NO. Most tickers have 3 valid candidates.
+9. Is there a canonical candidate-selection rule in the code? NO. `manage_models.py promote` requires an explicit version argument. There is no automated criteria (like highest F1 or newest).
+10. Are any tickers ambiguous? YES. All tickers with multiple candidates are ambiguous because no selection rule exists.
+11. Are any tickers missing a valid candidate? NO.
+12. Is RELIANCE's ObjectId issue independent? YES. It occurs in `history.py` downstream of the active manifest loading. It has no relation to candidate selection.
+13. Is promotion currently safe? NO. It is SELECTION_RULE_REQUIRED.
+14. If not, exactly what evidence is missing? A canonical rule for selecting which of the 3 candidates to promote (e.g. highest test F1, most recent timestamp, or specific validation pass).
+15. What is the smallest safe next step? Define and implement a canonical selection rule, or manually select versions for promotion.
+
+============================================================
+PHASE 9 — RELIANCE SEPARATION
+LIFECYCLE STATUS: VALID ACTIVE RECORD
+RUNTIME SERIALIZATION DEFECT: INDEPENDENT_SECONDARY_DEFECT
+
+============================================================
+FINAL VERDICT
+SELECTION_RULE_REQUIRED

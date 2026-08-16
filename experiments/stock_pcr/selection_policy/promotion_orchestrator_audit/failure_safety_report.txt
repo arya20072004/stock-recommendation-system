@@ -1,0 +1,11 @@
+FAILURE SAFETY REPORT
+=====================
+The canonical promote_model() function in src/ml/model_registry.py has a critical failure window:
+1. It demotes the current ACTIVE to RETIRED in MongoDB.
+2. It promotes the target CANDIDATE to ACTIVE in MongoDB.
+3. It writes the active manifest to the filesystem.
+
+If step 3 fails (e.g. permission error, disk full), MongoDB is mutated but the filesystem is not. This causes split-brain.
+Because MongoDB and the filesystem do not share a transactional boundary, and the current primitive does not implement two-phase commit or safe rollback, this failure window cannot be fully mitigated by the orchestrator without changing the underlying canonical semantics.
+
+VERDICT: PROMOTION_BLOCKED_PENDING_LIFECYCLE_HARDENING

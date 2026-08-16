@@ -1,0 +1,8 @@
+test_name,classification,passed
+Test 1 - Normal promotion with NO existing ACTIVE,SUCCESS,True
+Test 2 - Normal promotion with existing ACTIVE,SUCCESS,True
+"Test 3 - Manifest staging failure, NO existing ACTIVE",PROMOTION_ABORTED_BEFORE_MUTATION,True
+"Test 5 - os.replace() failure, NO existing ACTIVE",PROMOTION_ROLLED_BACK,True
+"Test 6 - os.replace() failure, EXISTING ACTIVE",PROMOTION_ROLLED_BACK,True
+"Test 8 - Rollback database failure, NO existing ACTIVE",RECOVERY_REQUIRED,True
+Test 10 - Post-promotion verification failure,POST_PROMOTION_VERIFICATION_FAILED,True

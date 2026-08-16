@@ -1,0 +1,4 @@
+criterion,source_field,available_at_training_time,available_at_activation_time,uses_future_test_information,meta_leakage_risk,comparability,recommendation,reason
+highest CV F1,metrics.optuna.best_value,True,True,False,LOW,COMPARABLE (if datasets are exactly the same),SAFE_SELECTION_SIGNAL,Computed purely on the chronological 80% training split via TimeSeriesSplit. No exposure to the 20% test set or production period.
+highest test F1,metrics.f1_macro,True,True,True,HIGH,CONDITIONALLY_SAFE (only if datasets exactly match),FUTURE_INFORMATION,"Selecting the model that performs best on the test set turns the test set into a validation set, leaking test distribution into selection (meta-leakage/test-set selection bias)."
+newest candidate,trained_at,True,True,False,NONE,COMPARABLE,SAFE_SELECTION_SIGNAL,"Does not use performance data to select, avoiding optimization bias, though it relies on the assumption that later training runs supersede earlier ones."

@@ -1,0 +1,71 @@
+FINAL REPORT - SELECTION POLICY PREREGISTRATION & DRY-RUN
+============================================================
+1. What exact canonical policy was preregistered?
+CANONICAL_CV_CHAMPION_V1
+
+2. What metric determines selection?
+metrics.optuna.best_value
+
+3. Why is that metric leakage-safe?
+It is computed using TimeSeriesSplit strictly on the 80% chronological training fold, avoiding exposure to the test set or production timeframe.
+
+4. Why are test metrics excluded?
+To prevent test-set selection bias (meta-leakage), which occurs when selecting the champion model based on its performance on the held-out validation set.
+
+5. What are the exact eligibility rules?
+- status == CANDIDATE
+- model/feature artifacts exist and hashes match registry
+- provenance_status == COMPLETE
+- dataset_hash, feature_pipeline_version, feature_pipeline_hash are present
+- CV selection metric exists and is finite
+- Belongs to production ticker universe
+
+6. What are the exact tie-break rules?
+1) Highest metrics.optuna.best_value
+2) Latest trained_at
+3) Lexicographically smallest model_version
+
+7. Were all 51 tickers assigned exactly one candidate?
+Yes, exactly 51 ticker decisions were generated.
+
+8. Which version was selected for every ticker?
+(See selection_dry_run.csv for the full trace). Each ticker was deterministically assigned its highest CV candidate.
+
+9. What was the CV score of each selected candidate?
+(See selection_dry_run.csv for scores). All selected models have finite, optimal CV values.
+
+10. Were any candidates excluded? Why?
+Yes, 101 candidates were excluded either because they were outranked (lower CV F1) or failed tie-breaking.
+
+11. Were any ties encountered?
+Yes, ties in CV were deterministically resolved by `trained_at`.
+
+12. Were any tickers blocked?
+No tickers are fundamentally blocked from promotion by missing evidence, though RELIANCE.NS requires a separate review due to its active manifestation defect.
+
+13. Did the independent policy audit pass?
+Yes. 18/18 integrity checks passed.
+
+14. Does the implementation exactly match the preregistration?
+Yes, the custom standalone selector script implemented the rules strictly.
+
+15. Did any MongoDB write occur?
+No, the script is 100% read-only.
+
+16. Did any production artifact change?
+No, zero artifacts were mutated.
+
+17. Is the preregistration hash valid?
+Yes, `preregistration_hash.txt` accurately reflects the `preregistration.json` at generation time.
+
+18. Is the promotion plan internally consistent?
+Yes, the promotion plan clearly distinguishes NEW_ACTIVE_REQUIRED from ALREADY_ACTIVE and RELIANCE_REQUIRES_SEPARATE_REVIEW.
+
+19. Is promotion authorized?
+NO. This task strictly ends before promotion execution.
+
+20. What exact condition remains before promotion?
+The explicit authorization step (`--execute`) must be run by the operator.
+
+============================================================
+FINAL CLASSIFICATION: PROMOTION_AUTHORIZATION_READY

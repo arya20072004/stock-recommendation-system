@@ -1,0 +1,6 @@
+{
+  "failure_window": "PROMOTION_FAILURE_WINDOW_IDENTIFIED",
+  "details": "The canonical promote_model primitive performs MongoDB updates (update_many, update_one) independently of the filesystem write (update_manifest_atomically). If the filesystem write fails, the MongoDB state is already mutated, leading to split-brain. This cannot be safely mitigated without changing canonical lifecycle semantics (e.g. adding two-phase commit or transactional outbox).",
+  "orchestrator_mitigation": "The orchestrator aborts execution on the very first ticker failure, preventing cascading partial state. It does not attempt unsafe rollback.",
+  "verdict": "PROMOTION_BLOCKED_PENDING_LIFECYCLE_HARDENING"
+}

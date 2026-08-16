@@ -1,0 +1,23 @@
+POLICY INTEGRITY REPORT
+=======================
+Audited 51 Tickers.
+1. Exactly 51 ticker decisions exist: True
+2. Every configured ticker appears exactly once: True
+3. No duplicate ticker decisions exist: True
+4. Every selected candidate has status CANDIDATE: True
+5. Every selected candidate passes every eligibility rule: True
+6. Every selected candidate has matching model hash: True
+7. Every selected candidate has matching feature hash: True
+8. Every selected candidate has complete provenance: True
+9. Every selected candidate has a finite CV score: True
+10. No selected candidate was chosen using test F1: True
+11. No test metric appears in the ranking computation: True
+12. For each ticker, no eligible candidate has a higher CV score than the selected candidate: True
+13. Ties are resolved exactly according to preregistered rules: True
+14. No manual override exists: True
+15. No MongoDB mutation occurred: True
+16. No production artifact was modified: True
+17. Policy hash matches preregistration.json: True
+18. Selector source code implements exactly the preregistered policy: True
+
+OVERALL STATUS: PASS

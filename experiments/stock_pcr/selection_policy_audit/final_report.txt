@@ -1,0 +1,47 @@
+FINAL REPORT - SELECTION POLICY AUDIT
+============================================================
+1. Why are there multiple candidates per ticker?
+The repository contains a script (src/ml/trainer.py) that registers a new candidate every time it is run. The multiple candidates primarily represent repeated execution of the same configuration (Optuna TPE hyperparameter searches) on the exact same dataset, leading to different hyperparameter outcomes (Category B & G).
+
+2. What differs between them?
+The candidates have the exact same dataset hashes, training cutoffs, and pipeline versions. The only differences are the `trained_at` timestamps, the hyperparameters discovered by Optuna, and the resulting CV/Test metrics.
+
+3. Are candidate metrics comparable?
+Yes. Because the underlying dataset hash and feature pipeline are identical across the 3 candidates for each ticker, the metrics are strictly comparable.
+
+4. Which metrics are available without future information?
+CV F1 (`metrics.optuna.best_value`) is computed strictly on the chronological 80% training split. It contains no future information relative to the test set or the production timeline.
+
+5. Which metrics are unsafe for candidate selection?
+Test F1 (`metrics.f1_macro`). Because it is computed on the 20% held-out chronological test set, selecting the best model across 3 runs based on Test F1 introduces test-set selection bias (meta-leakage). This turns the test set into a validation set, potentially overestimating out-of-sample performance.
+
+6. Does the repository already define a selection policy?
+NO_POLICY_FOUND. There is no automated promotion script or policy documented in the codebase.
+
+7. If not, why not?
+The CLI `manage_models.py promote` requires an explicit `<version>` argument, placing the burden of selection entirely on a human operator or an external orchestrator. The repository was designed to store all evidence (metrics, provenance) so that a policy *could* be enacted, but the code itself defers the decision.
+
+8. Which hypothetical policies are leakage-safe?
+- "Highest CV F1" (Policy B): Safe, relies entirely on the training-split validation.
+- "Newest Candidate" (Policy A): Safe, time-based, purely operational.
+
+9. Are any policies unstable?
+Yes. Comparing "Highest CV F1" with "Newest Candidate" yields significant disagreement. Optuna's random TPE search means the newest run is not necessarily the best run, making selection highly sensitive to the chosen policy.
+
+10. Can a deterministic canonical policy now be defined?
+POLICY_CAN_BE_DEFINED. We have complete provenance, matching dataset hashes, and robust training-split metrics (CV F1). A deterministic rule can be safely implemented using the available metadata.
+
+11. What information or rule is still missing?
+We are only missing the explicit code logic (the "rule") to query the registry, apply a safe sorting metric (like `optuna.best_value`), break ties (e.g., using `trained_at`), and execute the promotion.
+
+12. What must be frozen before promotion?
+The selection policy must be explicitly defined, approved, and frozen (e.g., encoded in a script like `scripts/promote_candidates.py`) so that promotion is 100% reproducible and deterministic.
+
+13. Is promotion still blocked?
+Yes. PROMOTION_REMAINS_BLOCKED until the rule is implemented, to avoid arbitrary manual selection.
+
+14. What is the exact next safe phase?
+Design, approve, and implement a `promote_candidates.py` script that algorithmically selects exactly one candidate per ticker using a leakage-safe metric (Highest CV F1).
+
+============================================================
+FINAL CLASSIFICATION: POLICY_CAN_BE_DEFINED
