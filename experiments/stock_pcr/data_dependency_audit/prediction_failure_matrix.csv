@@ -1,0 +1,6 @@
+dependency,failure_condition,affected_tickers,severity,fail_open_closed,evidence
+historical_data,missing latest date,ALL,CRITICAL,fail-closed,history.py get_latest_valid_feature_row
+manifest,missing active manifest,Per-ticker,CRITICAL,fail-closed,history.py load_active_bundle
+model,hash mismatch,Per-ticker,CRITICAL,fail-closed,history.py load_active_bundle
+pcr_data,missing,NONE,INFO,fail-open,engineering.py zero fill
+news,missing,NONE,INFO,fail-open,engineering.py zero fill
