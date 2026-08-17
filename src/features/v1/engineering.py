@@ -299,7 +299,7 @@ def _fetch_cached_macro(ticker, start_date, end_date):
         _MACRO_CACHE[cache_key] = pd.DataFrame()
         return pd.DataFrame()
 
-def _prepare_nifty_data(start_date, end_date):
+def _prepare_nifty_data(start_date, end_date, prediction_target_date=None):
     nifty_df = _fetch_cached_macro("^NSEI", start_date, end_date)
     is_valid, nifty_df = _validate_macro_asset(nifty_df, "^NSEI", min_valid_rows=200)
     
@@ -310,12 +310,16 @@ def _prepare_nifty_data(start_date, end_date):
     nifty_df = nifty_df[["nifty_close"]].copy()
     nifty_df["nifty_return"] = nifty_df["nifty_close"].pct_change()
     nifty_df["nifty_sma_200"] = nifty_df["nifty_close"].rolling(window=200).mean()
+    
+    if prediction_target_date:
+        nifty_df = nifty_df.reindex(nifty_df.index.union([pd.Timestamp(prediction_target_date)]))
+        
     # Shift by one day to avoid same-day lookahead leakage.
     nifty_df["market_regime"] = (nifty_df["nifty_close"] > nifty_df["nifty_sma_200"]).astype(int).shift(1)
     return nifty_df
 
 
-def _prepare_macro_data(start_date, end_date, client):
+def _prepare_macro_data(start_date, end_date, client, prediction_target_date=None):
     macro = pd.DataFrame()
 
     # NIFTY
@@ -544,10 +548,13 @@ def _prepare_macro_data(start_date, end_date, client):
     if macro.empty:
         return pd.DataFrame()
 
+    if prediction_target_date:
+        macro = macro.reindex(macro.index.union([pd.Timestamp(prediction_target_date)]))
+
     macro = macro.shift(1)
     return macro
 
-def _prepare_stock_pcr_data(ticker, client, start_date, end_date):
+def _prepare_stock_pcr_data(ticker, client, start_date, end_date, prediction_target_date=None):
     """
     Fetches per-ticker stock-level options PCR from pcr_data collection
     (populated by pcr_builder.py's _compute_daily_stock_pcr). Distinct
@@ -577,6 +584,9 @@ def _prepare_stock_pcr_data(ticker, client, start_date, end_date):
     result = pd.DataFrame(index=pcr_df.index)
     result["stock_pcr_oi"] = pcr_df["pcr_oi"]
     result["stock_pcr_chg_5d"] = pcr_df["pcr_oi"].diff(5)
+
+    if prediction_target_date:
+        result = result.reindex(result.index.union([pd.Timestamp(prediction_target_date)]))
 
     # Shift by 1 day — same leakage-safety convention as every other
     # macro/PCR column (day T's PCR is only known after market close T).
@@ -875,7 +885,7 @@ def add_technical_indicators(df, ticker):
     return df, True
 
 
-def add_derived_features(df, ticker, client):
+def add_derived_features(df, ticker, client, prediction_target_date=None):
     """
     Adds sentiment rolling averages, price changes, market correlation,
     OBV/VWAP deviations, relative volume, HL compression, and sector
@@ -957,7 +967,7 @@ def add_derived_features(df, ticker, client):
         df["volume"] / vol_sma_20.replace(0, pd.NA)
     ).shift(1)
 
-    stock_pcr_df = _prepare_stock_pcr_data(ticker, client, df.index.min(), df.index.max())
+    stock_pcr_df = _prepare_stock_pcr_data(ticker, client, df.index.min(), df.index.max(), prediction_target_date=prediction_target_date)
     if not stock_pcr_df.empty:
         df = df.join(stock_pcr_df, how="left")
         logger.info("%s: stock-level PCR joined (%d rows with data)", ticker, stock_pcr_df["stock_pcr_oi"].notna().sum())
@@ -994,7 +1004,7 @@ def add_derived_features(df, ticker, client):
 # Inference-time feature builder
 # ---------------------------------------------------------------------------
 
-def build_feature_row(ticker, client, db):
+def build_feature_row(ticker, client, db, last_completed_session, prediction_target_date):
     """
     Builds the full feature DataFrame for *inference* — identical
     pipeline to create_dataset() in ml_trainer.py, minus the target
@@ -1033,8 +1043,31 @@ def build_feature_row(ticker, client, db):
     start_date = prices_df.index.min()
     end_date = prices_df.index.max()
 
+    required_ohlcv = ["open", "high", "low", "close", "volume"]
+    ts_last = pd.Timestamp(last_completed_session)
+
+    if ts_last not in prices_df.index:
+        raise ValueError(
+            f"Missing last_completed_session ({last_completed_session}) raw equity data for {ticker}"
+        )
+
+    raw_t1 = prices_df.loc[ts_last, required_ohlcv]
+
+    if raw_t1.isna().any():
+        missing_fields = raw_t1[raw_t1.isna()].index.tolist()
+        raise ValueError(
+            f"Incomplete last_completed_session ({last_completed_session}) OHLCV data for {ticker}: missing {missing_fields}"
+        )
+
+    if raw_t1["close"] <= 0:
+        raise ValueError(
+            f"Invalid canonical close for {ticker} on {last_completed_session}: {raw_t1['close']}"
+        )
+
+    prices_df = prices_df.reindex(prices_df.index.union([pd.Timestamp(prediction_target_date)]))
+
     # --- 1. Nifty join ---
-    nifty_df = _prepare_nifty_data(start_date, end_date)
+    nifty_df = _prepare_nifty_data(start_date, end_date, prediction_target_date=prediction_target_date)
     if nifty_df.empty:
         raise ValueError(f"{ticker}: failed to fetch Nifty data")
 
@@ -1076,7 +1109,7 @@ def build_feature_row(ticker, client, db):
     )
 
     # --- 2. Macro join (zero-fill on failure, matching ALL_MACRO_COLS) ---
-    macro_df = _prepare_macro_data(start_date, end_date, client)
+    macro_df = _prepare_macro_data(start_date, end_date, client, prediction_target_date=prediction_target_date)
     if not macro_df.empty:
         df = df.join(macro_df, how="left")
         for col in ALL_MACRO_COLS:
@@ -1121,7 +1154,7 @@ def build_feature_row(ticker, client, db):
         )
 
     # --- 6. Derived features + sector momentum ---
-    df = add_derived_features(df, ticker, client)
+    df = add_derived_features(df, ticker, client, prediction_target_date=prediction_target_date)
 
     # --- 7. Calendar features ---
     df = add_calendar_features(df)

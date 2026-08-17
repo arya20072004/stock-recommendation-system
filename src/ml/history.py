@@ -95,7 +95,7 @@ def load_active_bundle(ticker: str):
     expected_pipeline_version = manifest.get("feature_pipeline_version")
     expected_pipeline_hash = manifest.get("feature_pipeline_hash")
 
-    if not version or not expected_model_hash or not expected_feature_hash or not expected_pipeline_version:
+    if not version or not expected_model_hash or not expected_feature_hash or not expected_pipeline_version or not expected_pipeline_hash:
         raise ValueError(f"Malformed active manifest for {ticker}. Failing closed.")
 
     # Check 1: Route the pipeline
@@ -107,7 +107,7 @@ def load_active_bundle(ticker: str):
     # Check 2: Verify pipeline hash
     actual_pipeline_hash = get_feature_pipeline_hash(expected_pipeline_version)
     if expected_pipeline_hash and actual_pipeline_hash != expected_pipeline_hash:
-        raise RuntimeError(f"Feature pipeline hash mismatch for {ticker}. Expected {expected_pipeline_hash}, got {actual_pipeline_hash}. Failing closed.")
+        raise ValueError(f"Feature pipeline hash mismatch for {ticker}. Expected {expected_pipeline_hash}, got {actual_pipeline_hash}. Failing closed.")
 
     # Verify Model
     model_path = os.path.join(MODELS_DIR, f"model_{ticker}_{version}.joblib")
@@ -160,6 +160,7 @@ def get_latest_valid_feature_row(
     ticker: str,
     computed_df,
     feature_names: list[str],
+    prediction_target_date: date,
 ):
     """
     Return the feature vector for the latest market date.
@@ -203,16 +204,12 @@ def get_latest_valid_feature_row(
             f"{missing_columns}"
         )
 
-    # --------------------------------------------------------------
-    # Determine latest market date
-    # --------------------------------------------------------------
+    latest_market_date = pd.Timestamp(prediction_target_date)
 
-    latest_market_date = computed_df.index.max()
-
-    if latest_market_date is None:
+    if latest_market_date not in computed_df.index:
 
         raise PredictionDataNotReadyError(
-            f"{ticker}: could not determine latest market date."
+            f"{ticker}: prediction target date {prediction_target_date} not in computed_df."
         )
 
     latest_row = computed_df.loc[
@@ -272,14 +269,81 @@ def get_latest_valid_feature_row(
     return latest_market_date, latest_row
 
 
+def _verify_production_readiness(db):
+    """
+    Validates complete ACTIVE model registry and filesystem manifest state.
+    """
+    import os
+    import json
+    
+    current_version = "v1"
+    current_hash = get_feature_pipeline_hash(current_version)
+    
+    expected_tickers = set(TICKERS)
+    
+    active_records = list(db.model_registry.find({"status": "ACTIVE"}))
+    if len(active_records) != len(expected_tickers):
+        raise RuntimeError(f"PRODUCTION INFERENCE BLOCKED: Expected {len(expected_tickers)} ACTIVE records, found {len(active_records)}")
+        
+    db_tickers = set(r.get("ticker") for r in active_records)
+    if db_tickers != expected_tickers:
+        raise RuntimeError("PRODUCTION INFERENCE BLOCKED: ACTIVE records do not match TICKERS universe")
+        
+    for rec in active_records:
+        ticker = rec.get("ticker")
+        
+        if rec.get("feature_pipeline_version") != current_version:
+            raise RuntimeError(f"PRODUCTION INFERENCE BLOCKED: {ticker} has wrong pipeline version in MongoDB")
+        if rec.get("feature_pipeline_hash") != current_hash:
+            raise RuntimeError(f"PRODUCTION INFERENCE BLOCKED: {ticker} has wrong pipeline hash in MongoDB")
+        if not rec.get("model_hash") or not rec.get("feature_hash"):
+            raise RuntimeError(f"PRODUCTION INFERENCE BLOCKED: {ticker} missing artifact references in MongoDB")
+            
+        manifest_path = os.path.join(MODELS_DIR, f"{ticker}_active.json")
+        if not os.path.exists(manifest_path):
+            raise RuntimeError(f"PRODUCTION INFERENCE BLOCKED: {ticker} missing filesystem manifest")
+            
+        try:
+            with open(manifest_path, 'r', encoding='utf-8') as f:
+                manifest = json.load(f)
+        except Exception:
+            raise RuntimeError(f"PRODUCTION INFERENCE BLOCKED: {ticker} filesystem manifest unreadable")
+            
+        if manifest.get("feature_pipeline_version") != current_version:
+            raise RuntimeError(f"PRODUCTION INFERENCE BLOCKED: {ticker} wrong pipeline version in filesystem")
+        if manifest.get("feature_pipeline_hash") != current_hash:
+            raise RuntimeError(f"PRODUCTION INFERENCE BLOCKED: {ticker} wrong pipeline hash in filesystem")
+            
+        if manifest.get("ticker") != ticker:
+            raise RuntimeError(f"PRODUCTION INFERENCE BLOCKED: {ticker} mismatch in ticker field")
+        if manifest.get("model_version") != rec.get("version"):
+            raise RuntimeError(f"PRODUCTION INFERENCE BLOCKED: {ticker} mismatch in model_version field")
+        if manifest.get("model_hash") != rec.get("model_hash"):
+            raise RuntimeError(f"PRODUCTION INFERENCE BLOCKED: {ticker} mismatch in model_hash field")
+        if manifest.get("feature_hash") != rec.get("feature_hash"):
+            raise RuntimeError(f"PRODUCTION INFERENCE BLOCKED: {ticker} mismatch in feature_hash field")
+            
+        mv = manifest.get("model_version")
+        model_path = os.path.join(MODELS_DIR, f"model_{ticker}_{mv}.joblib")
+        feat_path = os.path.join(FEATURES_DIR, f"features_{ticker}_{mv}.json")
+        
+        if not os.path.exists(model_path):
+            raise RuntimeError(f"PRODUCTION INFERENCE BLOCKED: {ticker} missing model artifact")
+        if not os.path.exists(feat_path):
+            raise RuntimeError(f"PRODUCTION INFERENCE BLOCKED: {ticker} missing feature artifact")
+
 # ======================================================================
 # Prediction generation
 # ======================================================================
 
-def generate_and_persist_predictions(client, target_market_date: date):
+def generate_and_persist_predictions(client, last_completed_session: date, prediction_target_date: date):
     """
     Generate and persist one immutable daily prediction snapshot for
     every configured ticker.
+    # ==================================================================
+    # Production Readiness Gate
+    # ==================================================================
+    _verify_production_readiness(client["stock_market_db"])
 
     Idempotency key:
 
@@ -385,6 +449,8 @@ def generate_and_persist_predictions(client, target_market_date: date):
                 ticker,
                 client,
                 db,
+                last_completed_session=last_completed_session,
+                prediction_target_date=prediction_target_date,
             )
 
             # ----------------------------------------------------------
@@ -398,26 +464,15 @@ def generate_and_persist_predictions(client, target_market_date: date):
                 ticker,
                 computed_df,
                 feature_names,
+                prediction_target_date,
             )
 
             market_date_obj = market_date.date() if hasattr(market_date, "date") else market_date
 
-            if market_date_obj < target_market_date:
-                logger.warning(
-                    "%s: STALE DATA. Latest valid date %s < target %s. Skipping prediction.",
-                    ticker,
-                    market_date_obj,
-                    target_market_date
-                )
-                stale_tickers.append(ticker)
-                skipped_count += 1
-                continue
-
-            if market_date_obj > target_market_date:
-
+            if market_date_obj != prediction_target_date:
                 raise PredictionDataNotReadyError(
-                    f"Future market data detected for {ticker}: "
-                    f"{market_date_obj} > {target_market_date}"
+                    f"Market date mismatch for {ticker}: "
+                    f"{market_date_obj} != {prediction_target_date}"
                 )
 
             market_date_str = (
@@ -438,7 +493,7 @@ def generate_and_persist_predictions(client, target_market_date: date):
                 )
 
             price_value = computed_df.loc[
-                market_date,
+                pd.Timestamp(last_completed_session),
                 "close",
             ]
 

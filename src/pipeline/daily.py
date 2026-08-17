@@ -37,7 +37,8 @@ class DailyPipeline:
         self.force = force
         self.run_id = str(uuid.uuid4())
         self.start_time = datetime.now(timezone.utc)
-        self.target_market_date = None
+        self.last_completed_session = None
+        self.prediction_target_date = None
         self.stages = {}
         self.degraded_stages = []
         self.errors = []
@@ -107,7 +108,7 @@ class DailyPipeline:
         record = {
             "run_id": self.run_id,
             "owner": self.run_id,
-            "market_date": self.target_market_date.strftime("%Y-%m-%d") if self.target_market_date else None,
+            "market_date": self.prediction_target_date.strftime("%Y-%m-%d") if self.prediction_target_date else None,
             "status": self.status,
             "started_at": self.start_time,
             "stages": self.stages,
@@ -374,9 +375,12 @@ class DailyPipeline:
             bhav = _fetch_bhavcopy(dt_candidate)
             
             if bhav is not None and not bhav.empty:
-                self.target_market_date = candidate
+                self.last_completed_session = candidate
+                import src.data.session_calendar as session_calendar
+                self.prediction_target_date = session_calendar.next_session(self.last_completed_session)
                 logger.info(f"Rejected non-trading dates: {rejected}")
-                logger.info(f"Resolved target market date: {self.target_market_date}")
+                logger.info(f"Resolved last completed session: {self.last_completed_session}")
+                logger.info(f"Resolved prediction target date: {self.prediction_target_date}")
                 self._log_stage("TRADING_SESSION", "SUCCESS")
                 self._detect_missed_sessions()
                 return
@@ -450,7 +454,7 @@ class DailyPipeline:
     def validate_ohlcv_integrity(self):
         self._verify_ownership()
         logger.info("Validating OHLCV integrity (GATE)...")
-        dt_start = datetime.combine(self.target_market_date, datetime.min.time())
+        dt_start = datetime.combine(self.last_completed_session, datetime.min.time())
         
         from src.data.nifty50 import TICKERS
         expected_count = len(TICKERS)
@@ -461,7 +465,7 @@ class DailyPipeline:
         missing_tickers = set(TICKERS) - set(found_tickers)
         
         if missing_tickers:
-            msg = f"Missing tickers for {self.target_market_date}: {missing_tickers}"
+            msg = f"Missing tickers for {self.last_completed_session}: {missing_tickers}"
             self._log_stage("OHLCV_INTEGRITY", "FAILED", msg)
             raise RuntimeError(msg)
             
@@ -515,7 +519,11 @@ class DailyPipeline:
             
         try:
             from src.ml.history import generate_and_persist_predictions
-            result = generate_and_persist_predictions(self.client, target_market_date=self.target_market_date)
+            result = generate_and_persist_predictions(
+                self.client, 
+                last_completed_session=self.last_completed_session,
+                prediction_target_date=self.prediction_target_date
+            )
             
             stale_list = result.get("stale", [])
             failed_list = result.get("failed", [])
@@ -536,7 +544,7 @@ class DailyPipeline:
             self._log_stage("PREDICTION_VALIDATION", "SUCCESS")
             return
             
-        dt_str = self.target_market_date.strftime("%Y-%m-%d")
+        dt_str = self.prediction_target_date.strftime("%Y-%m-%d")
         preds = list(self.db.prediction_history.find({
             "market_date": dt_str,
             "prediction_horizon": 10
@@ -675,7 +683,7 @@ class DailyPipeline:
             notify({
                 "severity": Severity.WARNING if exit_code == 2 else Severity.INFO,
                 "run_id": self.run_id,
-                "market_date": self.target_market_date.strftime("%Y-%m-%d") if self.target_market_date else None,
+                "market_date": self.prediction_target_date.strftime("%Y-%m-%d") if self.prediction_target_date else None,
                 "status": self.status,
                 "message": f"Pipeline finished gracefully.",
                 "reason": f"Degraded stages: {self.degraded_stages}" if exit_code == 2 else "Nominal"
@@ -702,7 +710,7 @@ class DailyPipeline:
                 notify({
                     "severity": Severity.CRITICAL,
                     "run_id": self.run_id,
-                    "market_date": self.target_market_date.strftime("%Y-%m-%d") if self.target_market_date else None,
+                    "market_date": self.prediction_target_date.strftime("%Y-%m-%d") if self.prediction_target_date else None,
                     "status": "FAILED",
                     "reason": "RUNTIME_ERROR",
                     "message": str(e)
@@ -715,7 +723,7 @@ class DailyPipeline:
             notify({
                 "severity": Severity.CRITICAL,
                 "run_id": self.run_id,
-                "market_date": self.target_market_date.strftime("%Y-%m-%d") if self.target_market_date else None,
+                "market_date": self.prediction_target_date.strftime("%Y-%m-%d") if self.prediction_target_date else None,
                 "status": "FAILED",
                 "reason": "UNHANDLED_EXCEPTION",
                 "message": str(e)
