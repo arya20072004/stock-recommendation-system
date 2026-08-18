@@ -863,7 +863,7 @@ def add_technical_indicators(df, ticker):
     df["macd_hist"] = df[macdh_col]
     df["bb_width"]  = (df[bbu_col] - df[bbl_col]) / df[bbm_col].replace(0, pd.NA)
     df["atr"]       = df[atr_col]
-    df["atr_pct"]   = df["atr"] / df["close"].replace(0, pd.NA)
+    df["atr_pct"]   = df["atr"] / df["close"].shift(1).replace(0, pd.NA)
 
     # ADX — already shifted above via resolved_indicator_cols
     ticker_sector = SECTOR_MAP.get(ticker, "")
