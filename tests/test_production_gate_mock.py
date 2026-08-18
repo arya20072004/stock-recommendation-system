@@ -43,13 +43,19 @@ class TestProductionGate(unittest.TestCase):
         # We also need to mock get_feature_pipeline_hash to avoid builtins.open breaking it
         self.patcher_hash = patch("src.ml.history.get_feature_pipeline_hash")
         self.mock_hash = self.patcher_hash.start()
-        self.mock_hash.return_value = self.current_hash
+        def dynamic_json_load(f):
+            m = self.valid_manifest.copy()
+            basename = os.path.basename(f.name)
+            ticker = basename.replace('_active.json', '')
+            m["ticker"] = ticker
+            return m
+        self.mock_json.side_effect = dynamic_json_load
         
         self.valid_manifest = {
             "status": "ACTIVE",
             "feature_pipeline_version": self.current_version,
             "feature_pipeline_hash": self.current_hash,
-            "ticker": "RELIANCE",
+            "ticker": "RELIANCE.NS",
             "model_version": "v1.0.0",
             "model_hash": "model_123",
             "feature_hash": "feat_123"
@@ -102,7 +108,7 @@ class TestProductionGate(unittest.TestCase):
             
     def test_missing_filesystem_manifest(self):
         def exists_side_effect(path):
-            if "RELIANCE_active.json" in path:
+            if "RELIANCE.NS_active.json" in path:
                 return False
             return True
         self.mock_exists.side_effect = exists_side_effect
@@ -112,6 +118,8 @@ class TestProductionGate(unittest.TestCase):
     def test_unexpected_hash_filesystem(self):
         def dynamic_json_load(f):
             m = self.valid_manifest.copy()
+            basename = os.path.basename(f.name)
+            m["ticker"] = basename.replace('_active.json', '')
             m["feature_pipeline_hash"] = "WRONG"
             return m
         self.mock_json.side_effect = dynamic_json_load
@@ -128,6 +136,8 @@ class TestProductionGate(unittest.TestCase):
     def test_mongodb_fs_mismatch(self):
         def dynamic_json_load(f):
             m = self.valid_manifest.copy()
+            basename = os.path.basename(f.name)
+            m["ticker"] = basename.replace('_active.json', '')
             m["model_hash"] = "MISMATCH"
             return m
         self.mock_json.side_effect = dynamic_json_load

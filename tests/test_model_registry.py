@@ -152,9 +152,12 @@ def test_sync_manifest(mock_db, mock_directories):
     ticker = "SYNC"
 
     hm, hf = create_mock_artifacts(ticker, "v1", temp_models, temp_features)
+    from src.features.router import get_feature_pipeline_hash
     mock_db.model_registry.insert_one({
         "ticker": ticker, "version": "v1", "status": "ACTIVE",
-        "model_hash": hm, "feature_hash": hf
+        "model_hash": hm, "feature_hash": hf,
+        "feature_pipeline_version": "v1",
+        "feature_pipeline_hash": get_feature_pipeline_hash("v1")
     })
 
     assert not os.path.exists(os.path.join(temp_models, f"{ticker}_active.json"))

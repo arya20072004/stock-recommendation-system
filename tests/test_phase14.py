@@ -141,7 +141,7 @@ def test_b2_pipeline_hash_mismatch(mock_directories):
         "provenance_status": "LEGACY_UNAVAILABLE"
     }))
     
-    with pytest.raises(RuntimeError, match="Feature pipeline hash mismatch for RELIANCE.NS. Expected wrong_hash"):
+    with pytest.raises(ValueError, match="Feature pipeline hash mismatch for RELIANCE.NS. Expected wrong_hash"):
         load_active_bundle(ticker)
 
 def test_b3_unknown_pipeline(mock_directories):
@@ -287,6 +287,13 @@ def test_cdefh_trainer_dataset_archival_and_provenance(mock_directories, mock_db
     from src.ml.model_registry import MODELS_DIR as REGISTRY_MODELS_DIR
     monkeypatch.setattr("src.ml.model_registry.MODELS_DIR", str(temp_models))
     monkeypatch.setattr("src.ml.model_registry.FEATURES_DIR", str(temp_features))
+    
+    # Mock session to bypass Mongomock limitation
+    mock_session = MagicMock()
+    mock_session.__enter__.return_value = mock_session
+    mock_session.start_transaction.return_value = MagicMock()
+    mock_session.__exit__.return_value = None
+    mock_db.client.start_session = lambda: mock_session
     
     promote_model(mock_db, ticker, version)
     
