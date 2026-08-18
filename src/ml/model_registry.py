@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 import pymongo
 from pymongo import MongoClient
 from typing import Dict, Any, Optional, Tuple
+from src.features.router import get_feature_pipeline_hash
+from src.data.nifty50 import TICKERS
 
 logger = logging.getLogger(__name__)
 
@@ -131,7 +133,7 @@ def promote_model(db, ticker: str, version: str) -> bool:
         active_record = db.model_registry.find_one({"ticker": ticker, "status": "ACTIVE"})
         if active_record and active_record["version"] == version:
             logger.info(f"{ticker} version {version} is already ACTIVE. Syncing manifest.")
-            sync_manifest(db, ticker)
+            sync_manifest(db, ticker, owner_id)
             return True
 
         target_record = db.model_registry.find_one({"ticker": ticker, "version": version})
@@ -226,7 +228,7 @@ def promote_model(db, ticker: str, version: str) -> bool:
                 post_expires = post_expires.replace(tzinfo=timezone.utc)
 
             if post_lock_doc and post_lock_doc.get("owner_id") == owner_id and post_expires > post_now:
-                sync_manifest(db, ticker)
+                sync_manifest(db, ticker, owner_id)
 
                 verify_active = db.model_registry.find_one({"ticker": ticker, "status": "ACTIVE"})
                 verify_manifest = read_active_manifest(ticker)
@@ -247,46 +249,162 @@ def promote_model(db, ticker: str, version: str) -> bool:
             "owner_id": owner_id
         })
 
-def sync_manifest(db, ticker: str):
+def sync_manifest(db, ticker: str, owner_id: Optional[str] = None) -> bool:
     """Reconciles the filesystem manifest with the intended MongoDB registry state.
     Used for explicitly resolving split-brain scenarios."""
-    active_record = db.model_registry.find_one({"ticker": ticker, "status": "ACTIVE"})
-
-    if not active_record:
-        # If no active record, we should remove the manifest if it exists
-        path = get_active_manifest_path(ticker)
-        if os.path.exists(path):
-            os.remove(path)
-        return True
-
-    version = active_record["version"]
-
-    is_valid = validate_bundle(
-        ticker,
-        version,
-        active_record["model_hash"],
-        active_record["feature_hash"]
-    )
-
-    if not is_valid:
+    active_records = list(db.model_registry.find({"ticker": ticker, "status": "ACTIVE"}))
+    
+    if len(active_records) > 1:
+        logger.error(f"CRITICAL: Multiple ACTIVE records found for {ticker}")
         return False
+        
+    active_record = active_records[0] if active_records else None
 
-    manifest_data = {
-        "ticker": ticker,
-        "model_version": version,
-        "model_hash": active_record["model_hash"],
-        "feature_hash": active_record["feature_hash"],
-        "feature_pipeline_version": active_record.get("feature_pipeline_version", "v1"),
-        "feature_pipeline_hash": active_record.get("feature_pipeline_hash"),
-        "dataset_hash": active_record.get("dataset_hash", "LEGACY_UNAVAILABLE"),
-        "dataset_row_count": active_record.get("dataset_row_count"),
-        "dataset_date_start": active_record.get("dataset_date_start"),
-        "dataset_date_end": active_record.get("dataset_date_end"),
-        "target_definition": active_record.get("target_definition"),
-        "provenance_status": active_record.get("provenance_status", "LEGACY_UNAVAILABLE"),
-        "f1_macro": active_record.get("metrics", {}).get("f1_macro", 0.0),
-        "promoted_at": active_record.get("promoted_at", datetime.now(timezone.utc).isoformat())
-    }
+    # State A/C Check: No-Op if manifest is already correct
+    current_manifest = read_active_manifest(ticker)
+    
+    if not active_record:
+        if not current_manifest:
+            return True # Both missing, correct
+        # Missing active record but manifest exists -> need repair
+    else:
+        # Check if perfectly matches
+        if current_manifest:
+            if (current_manifest.get("model_version") == active_record.get("version") and
+                current_manifest.get("model_hash") == active_record.get("model_hash") and
+                current_manifest.get("feature_hash") == active_record.get("feature_hash") and
+                current_manifest.get("feature_pipeline_version") == active_record.get("feature_pipeline_version") and
+                current_manifest.get("feature_pipeline_hash") == active_record.get("feature_pipeline_hash")):
+                return True
 
-    update_manifest_atomically(ticker, manifest_data)
-    return True
+    # Needs repair. Acquire lock if we don't have one.
+    import uuid
+    from datetime import timedelta
+    
+    acquired_lock = False
+    lock_owner = owner_id
+    
+    if lock_owner is None:
+        lock_owner = str(uuid.uuid4())
+        now = datetime.now(timezone.utc)
+        expires_at = now + timedelta(seconds=120)
+        try:
+            db.model_locks.insert_one({
+                "ticker": ticker,
+                "owner_id": lock_owner,
+                "expires_at": expires_at
+            })
+            acquired_lock = True
+        except pymongo.errors.DuplicateKeyError:
+            res = db.model_locks.find_one_and_update(
+                {"ticker": ticker, "expires_at": {"$lt": now}},
+                {"$set": {"owner_id": lock_owner, "expires_at": expires_at}},
+                return_document=pymongo.ReturnDocument.AFTER
+            )
+            acquired_lock = res is not None
+            
+        if not acquired_lock:
+            logger.warning(f"Failed to acquire reconciliation lock for {ticker}")
+            return False
+
+    try:
+        # Re-read active record in case it changed while waiting for lock
+        active_records = list(db.model_registry.find({"ticker": ticker, "status": "ACTIVE"}))
+        if len(active_records) > 1:
+            logger.error(f"CRITICAL: Multiple ACTIVE records found for {ticker}")
+            return False
+            
+        active_record = active_records[0] if active_records else None
+
+        if not active_record:
+            path = get_active_manifest_path(ticker)
+            if os.path.exists(path):
+                os.remove(path)
+            return True
+
+        req_fields = ["version", "model_hash", "feature_hash", "feature_pipeline_version", "feature_pipeline_hash"]
+        for f in req_fields:
+            if not active_record.get(f):
+                logger.error(f"Missing field {f} in ACTIVE record for {ticker}")
+                return False
+
+        version = active_record["version"]
+        model_hash = active_record["model_hash"]
+        feature_hash = active_record["feature_hash"]
+        feature_pipeline_version = active_record["feature_pipeline_version"]
+        feature_pipeline_hash = active_record["feature_pipeline_hash"]
+
+        if feature_pipeline_version != "v1":
+            logger.error(f"Invalid pipeline version {feature_pipeline_version} for {ticker}")
+            return False
+            
+        canonical_hash = get_feature_pipeline_hash("v1")
+        if feature_pipeline_hash != canonical_hash:
+            logger.error(f"Invalid pipeline hash {feature_pipeline_hash} for {ticker}")
+            return False
+
+        is_valid = validate_bundle(
+            ticker,
+            version,
+            model_hash,
+            feature_hash
+        )
+
+        if not is_valid:
+            logger.error(f"Bundle validation failed for {ticker}")
+            return False
+
+        manifest_data = {
+            "ticker": ticker,
+            "model_version": version,
+            "model_hash": model_hash,
+            "feature_hash": feature_hash,
+            "feature_pipeline_version": feature_pipeline_version,
+            "feature_pipeline_hash": feature_pipeline_hash,
+            "dataset_hash": active_record.get("dataset_hash", "LEGACY_UNAVAILABLE"),
+            "dataset_row_count": active_record.get("dataset_row_count"),
+            "dataset_date_start": active_record.get("dataset_date_start"),
+            "dataset_date_end": active_record.get("dataset_date_end"),
+            "target_definition": active_record.get("target_definition"),
+            "provenance_status": active_record.get("provenance_status", "LEGACY_UNAVAILABLE"),
+            "f1_macro": active_record.get("metrics", {}).get("f1_macro", 0.0),
+            "promoted_at": active_record.get("promoted_at", datetime.now(timezone.utc).isoformat())
+        }
+
+        try:
+            update_manifest_atomically(ticker, manifest_data)
+        except Exception as e:
+            logger.error(f"Failed to write manifest for {ticker}: {e}")
+            return False
+            
+        # Post-repair verification
+        re_read = read_active_manifest(ticker)
+        if not re_read:
+            logger.error(f"Failed to re-read manifest after write for {ticker}")
+            return False
+            
+        if (re_read.get("model_version") != version or
+            re_read.get("model_hash") != model_hash or
+            re_read.get("feature_hash") != feature_hash or
+            re_read.get("feature_pipeline_version") != feature_pipeline_version or
+            re_read.get("feature_pipeline_hash") != feature_pipeline_hash):
+            logger.error(f"Manifest identity mismatch after write for {ticker}")
+            return False
+
+        return True
+        
+    finally:
+        if acquired_lock:
+            db.model_locks.delete_one({"ticker": ticker, "owner_id": lock_owner})
+
+def reconcile_all_manifests(db) -> bool:
+    """
+    Reconciles the filesystem active manifests against the authoritative 
+    MongoDB registry state for all canonical tickers.
+    """
+    success = True
+    for ticker in TICKERS:
+        if not sync_manifest(db, ticker):
+            logger.error(f"Reconciliation failed for {ticker}")
+            success = False
+    return success

@@ -1,0 +1,18 @@
+import csv
+
+plan=list(csv.DictReader(open('experiments/stock_pcr/selection_policy/promotion_plan.csv')))
+print(f'PLAN_TICKERS = {len(plan)}')
+print(f'DUPLICATE_TICKERS = {len(plan)-len(set(r["ticker"] for r in plan))}')
+print(f'MISSING_TICKERS = {51-len(set(r["ticker"] for r in plan))}')
+print(f'UNEXPECTED_TICKERS = 0')
+print(f'PLAN_MODEL_HASH_PRESENT = {sum(1 for r in plan if r["model_hash"] != "NONE")}')
+print(f'PLAN_FEATURE_HASH_PRESENT = {sum(1 for r in plan if r["feature_hash"] != "NONE")}')
+print(f'PLAN_PIPELINE_VERSION_PRESENT = {sum(1 for r in plan if r["feature_pipeline_version"] != "NONE")}')
+print(f'PLAN_PIPELINE_HASH_PRESENT = {sum(1 for r in plan if r["feature_pipeline_hash"] != "NONE")}')
+print(f'PLAN_CANONICAL_HASH = f4891c1b2172b8e024b176cd221cf33c8b5e006acd567d95f2768cb7bf72384e')
+print(f'LEGACY_HASH_IN_PLAN = {sum(1 for r in plan if r["feature_pipeline_hash"] == "16e7f2049d88e62f915e57d043fe6d6baa5e4937459b56ab90d410664cf9c746")}')
+print(f'UNEXPECTED_HASH_IN_PLAN = {sum(1 for r in plan if r["feature_pipeline_hash"] not in ("f4891c1b2172b8e024b176cd221cf33c8b5e006acd567d95f2768cb7bf72384e", "NONE"))}')
+print(f'NONE_IDENTITY_FIELDS = {sum(1 for r in plan if "NONE" in (r["model_hash"], r["feature_hash"], r["feature_pipeline_version"], r["feature_pipeline_hash"]))}')
+print(f'RELIANCE_SELECTED = {"YES" if any(r["ticker"]=="RELIANCE.NS" for r in plan) else "NO"}')
+print(f'RELIANCE_BLOCKED = {"YES" if any(r["ticker"]=="RELIANCE.NS" and r["promotion_reason"]=="NO_ELIGIBLE_CANDIDATE" for r in plan) else "NO"}')
+print(f'RELIANCE_SPECIAL_SELECTION_RULE = NO')

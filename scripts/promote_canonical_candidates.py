@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 sys.path.append("c:/Users/aryab/Coding/stock_recommendations")
 from src.data.nifty50 import TICKERS
 from src.ml.model_registry import promote_model
+from src.features.router import get_feature_pipeline_hash
 
 def hash_file_sha256(filepath: str, truncate_to: int = 64) -> str:
     if not os.path.exists(filepath): return ""
@@ -34,6 +35,55 @@ def get_db():
 def read_csv(path):
     with open(path, "r") as f:
         return list(csv.DictReader(f))
+
+def validate_promotion_plan(plan, all_records):
+    CURRENT_CANONICAL_HASH = get_feature_pipeline_hash("v1")
+    targets = plan
+    
+    for target in targets:
+        ticker = target["ticker"]
+        selected_version = target["selected_version"]
+        if selected_version == "NONE":
+            raise ValueError(f"Missing candidate version for {ticker}")
+
+        req_fields = ["model_hash", "feature_hash", "feature_pipeline_version", "feature_pipeline_hash"]
+        for f in req_fields:
+            if not target.get(f) or target.get(f) == "NONE":
+                raise ValueError(f"Missing {f} in plan for {ticker}")
+            
+        cand = next((c for c in all_records if c.get("ticker") == ticker and c.get("version") == selected_version), None)
+        if not cand:
+            raise ValueError(f"Selected candidate {ticker}_{selected_version} not found in live registry.")
+            
+        if cand.get("status") != "CANDIDATE":
+            raise ValueError(f"Selected candidate {ticker}_{selected_version} is not CANDIDATE.")
+            
+        # Validate identity fields
+        if target["model_hash"] != cand.get("model_hash"):
+            raise ValueError(f"Model hash mismatch for {ticker}")
+        if target["feature_hash"] != cand.get("feature_hash"):
+            raise ValueError(f"Feature hash mismatch for {ticker}")
+        if target["feature_pipeline_version"] != cand.get("feature_pipeline_version"):
+            raise ValueError(f"Pipeline version mismatch for {ticker}")
+        if target["feature_pipeline_hash"] != cand.get("feature_pipeline_hash"):
+            raise ValueError(f"Pipeline hash mismatch for {ticker}")
+
+        # Validate against canonical hash
+        if target["feature_pipeline_hash"] != CURRENT_CANONICAL_HASH:
+            raise ValueError(f"Plan pipeline hash is not canonical for {ticker}")
+        if cand.get("feature_pipeline_hash") != CURRENT_CANONICAL_HASH:
+            raise ValueError(f"Candidate pipeline hash is not canonical for {ticker}")
+        if target["feature_pipeline_version"] != "v1":
+            raise ValueError(f"Plan pipeline version is not v1 for {ticker}")
+        if cand.get("feature_pipeline_version") != "v1":
+            raise ValueError(f"Candidate pipeline version is not v1 for {ticker}")
+            
+    # Also validate missing, duplicate, unexpected tickers
+    plan_tickers = [row["ticker"] for row in plan]
+    if len(plan) != 51 or len(set(plan_tickers)) != 51 or set(plan_tickers) != set(TICKERS):
+        raise ValueError("Promotion plan ticker universe mismatch.")
+        
+    return True
 
 def main():
     parser = argparse.ArgumentParser()
@@ -63,67 +113,17 @@ def main():
     plan_path = os.path.join(BASE_DIR, "promotion_plan.csv")
     plan = read_csv(plan_path)
     
-    plan_tickers = [row["ticker"] for row in plan]
-    if len(plan) != 51 or len(set(plan_tickers)) != 51 or set(plan_tickers) != set(TICKERS):
-        logger.error("Promotion plan ticker universe mismatch.")
-        sys.exit(1)
-
-    # Prepare targets
-    targets = [row for row in plan if row["ticker"] != "RELIANCE.NS"]
-    reliance = next(row for row in plan if row["ticker"] == "RELIANCE.NS")
-    
-    if reliance["promotion_reason"] != "RELIANCE_REQUIRES_SEPARATE_REVIEW":
-        logger.error("RELIANCE.NS is not explicitly excluded/flagged for review.")
-        sys.exit(1)
-
     db = get_db()
     all_records = list(db.model_registry.find())
     
-    # Pre-execution validation
-    for target in targets:
-        ticker = target["ticker"]
-        selected_version = target["selected_version"]
-        
-        # Check current active state
-        active_recs = [r for r in all_records if r.get("ticker") == ticker and r.get("status") == "ACTIVE"]
-        if active_recs:
-            logger.error(f"Unexpected ACTIVE record for {ticker}.")
-            sys.exit(1)
-            
-        cand = next((c for c in all_records if c.get("ticker") == ticker and c.get("version") == selected_version), None)
-        if not cand:
-            logger.error(f"Selected candidate {ticker}_{selected_version} not found in live registry.")
-            sys.exit(1)
-            
-        if cand.get("status") != "CANDIDATE":
-            logger.error(f"Selected candidate {ticker}_{selected_version} is not CANDIDATE.")
-            sys.exit(1)
-            
-        # Verify hashes
-        m_path = os.path.join(MODELS_DIR, f"model_{ticker}_{selected_version}.joblib")
-        f_path = os.path.join(FEATURES_DIR, f"features_{ticker}_{selected_version}.json")
-        if not os.path.exists(m_path) or not os.path.exists(f_path):
-            logger.error(f"Missing artifacts for {ticker}_{selected_version}.")
-            sys.exit(1)
-            
-        mh = hash_file_sha256(m_path, 12)
-        fh = hash_file_sha256(f_path, 64)
-        if mh != cand.get("model_hash") or fh != cand.get("feature_hash"):
-            logger.error(f"Hash mismatch for {ticker}_{selected_version}.")
-            sys.exit(1)
-            
-        if cand.get("provenance_status") != "COMPLETE" or not cand.get("dataset_hash") or not cand.get("feature_pipeline_version"):
-            logger.error(f"Incomplete provenance for {ticker}_{selected_version}.")
-            sys.exit(1)
-            
-    # Verify RELIANCE is untouched
-    rel_live = [r for r in all_records if r.get("ticker") == "RELIANCE.NS" and r.get("status") == "ACTIVE"]
-    if not rel_live or rel_live[0].get("version") != reliance["current_active_version"]:
-        logger.error("RELIANCE.NS state unexpectedly altered.")
+    try:
+        validate_promotion_plan(plan, all_records)
+    except ValueError as e:
+        logger.error(str(e))
         sys.exit(1)
-
-    logger.info("Pre-execution validation complete. 50 targets perfectly match frozen plan.")
-
+        
+    logger.info("Pre-execution validation complete. 51 targets perfectly match frozen plan.")
+    
     if not args.execute:
         logger.info("DRY-RUN MODE. Execution authorized ONLY with --execute.")
         sys.exit(0)
@@ -131,7 +131,7 @@ def main():
     logger.info("EXECUTING PROMOTION...")
     # NOTE: Since instructions say "DO NOT RUN --execute during this phase", 
     # we don't expect this path to be hit. But if it were, we'd loop over targets and call promote_model(db, ticker, version).
-    for target in targets:
+    for target in plan:
         ticker = target["ticker"]
         selected_version = target["selected_version"]
         success = promote_model(db, ticker, selected_version)

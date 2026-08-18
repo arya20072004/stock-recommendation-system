@@ -36,6 +36,7 @@ from pymongo import MongoClient
 from xgboost import XGBClassifier
 
 from src.data.nifty50 import TICKERS
+from src.ml.model_registry import reconcile_all_manifests
 from src.features.router import (
     resolve_feature_pipeline,
     get_feature_pipeline_hash,
@@ -340,26 +341,21 @@ def generate_and_persist_predictions(client, last_completed_session: date, predi
     """
     Generate and persist one immutable daily prediction snapshot for
     every configured ticker.
+    """
+    
+    db = client["stock_market_db"]
+
+    # ==================================================================
+    # Pre-Inference Reconciliation
+    # ==================================================================
+    logger.info("Running pre-inference reconciliation...")
+    if not reconcile_all_manifests(db):
+        raise RuntimeError("PRODUCTION INFERENCE BLOCKED: Cross-store reconciliation failed.")
+
     # ==================================================================
     # Production Readiness Gate
     # ==================================================================
-    _verify_production_readiness(client["stock_market_db"])
-
-    Idempotency key:
-
-        symbol + market_date + prediction_horizon
-
-    Existing records are not overwritten.
-
-    If any ticker fails, the function raises RuntimeError after processing
-    the complete ticker list. This ensures:
-
-    - all errors are visible in one run
-    - successful tickers may still persist
-    - the calling pipeline receives a non-zero exit status
-    """
-
-    db = client["stock_market_db"]
+    _verify_production_readiness(db)
 
     # ==================================================================
     # MongoDB indexes
@@ -791,7 +787,7 @@ def generate_and_persist_predictions(client, last_completed_session: date, predi
 
             raw_inputs = {
                 str(k): float(v) if pd.api.types.is_numeric_dtype(type(v)) else v
-                for k, v in full_latest_row.items() if k not in set(feature_names)
+                for k, v in full_latest_row.items() if k not in set(feature_names) and k != "_id"
             }
 
             features_dict = {
@@ -969,10 +965,13 @@ if __name__ == "__main__":
     import argparse
     from dotenv import load_dotenv
 
+    import src.data.session_calendar as session_calendar
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", type=str, required=True, help="Target market date YYYY-MM-DD")
     args = parser.parse_args()
     target_date = datetime.strptime(args.date, "%Y-%m-%d").date()
+    last_completed_session = session_calendar.previous_session(target_date)
 
     load_dotenv()
 
@@ -990,6 +989,7 @@ if __name__ == "__main__":
         result = (
             generate_and_persist_predictions(
                 client,
+                last_completed_session,
                 target_date
             )
         )

@@ -15,6 +15,9 @@ OUTPUT_DIR = "c:/Users/aryab/Coding/stock_recommendations/experiments/stock_pcr/
 import sys
 sys.path.append("c:/Users/aryab/Coding/stock_recommendations")
 from src.data.nifty50 import TICKERS
+from src.features.router import get_feature_pipeline_hash
+
+CURRENT_CANONICAL_HASH = get_feature_pipeline_hash("v1")
 
 def get_db():
     from dotenv import load_dotenv
@@ -72,6 +75,8 @@ for ticker in TICKERS:
         if not dh: failures.append("no dataset_hash")
         if not fpv: failures.append("no feature_pipeline_version")
         if not fph: failures.append("no feature_pipeline_hash")
+        if c.get("feature_pipeline_version") != "v1": failures.append("wrong pipeline version")
+        if c.get("feature_pipeline_hash") != CURRENT_CANONICAL_HASH: failures.append("wrong pipeline hash")
         if not cv_valid: failures.append("CV score invalid or missing")
         
         is_eligible = len(failures) == 0
@@ -116,6 +121,10 @@ for ticker in TICKERS:
         promotion_plan.append({
             "ticker": ticker,
             "selected_version": "NONE",
+            "model_hash": "NONE",
+            "feature_hash": "NONE",
+            "feature_pipeline_version": "NONE",
+            "feature_pipeline_hash": "NONE",
             "selected_cv_score": "",
             "current_active_version": active_cand.get("version") if active_cand else "NONE",
             "current_manifest_status": "EXISTING" if active_cand else "MISSING",
@@ -212,13 +221,13 @@ for ticker in TICKERS:
         p_req = False
         p_reason = "ALREADY_ACTIVE"
         
-    if ticker == "RELIANCE.NS":
-        p_reason = "RELIANCE_REQUIRES_SEPARATE_REVIEW"
-        p_req = False
-        
     promotion_plan.append({
         "ticker": ticker,
         "selected_version": selected.get("version"),
+        "model_hash": selected.get("model_hash"),
+        "feature_hash": selected.get("feature_hash"),
+        "feature_pipeline_version": selected.get("feature_pipeline_version"),
+        "feature_pipeline_hash": selected.get("feature_pipeline_hash"),
         "selected_cv_score": extract_metric(selected, ["optuna", "best_value"]),
         "current_active_version": active_cand.get("version") if active_cand else "NONE",
         "current_manifest_status": "EXISTING" if active_cand else "MISSING",
