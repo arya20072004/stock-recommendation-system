@@ -77,10 +77,10 @@ def test_atomicity(mongo_client, monkeypatch):
         def get_target_return_threshold(ticker, atr):
             return 0.05
         @staticmethod
-        def build_feature_row(ticker, client, db):
+        def build_feature_row(ticker, client, db, **kwargs):
             df = pd.DataFrame({
-                "f1": [1.0], "f2": [2.0], "close": [100.0], "atr_pct": [0.05]
-            }, index=pd.DatetimeIndex(["2026-08-10"]))
+                "f1": [1.0, 1.0], "f2": [2.0, 2.0], "close": [100.0, 100.0], "atr_pct": [0.05, 0.05]
+            }, index=pd.DatetimeIndex(["2026-08-09", "2026-08-10"]))
             return df
 
     def mock_load(ticker):
@@ -89,10 +89,12 @@ def test_atomicity(mongo_client, monkeypatch):
     import src.ml.history
     monkeypatch.setattr(src.ml.history, "load_active_bundle", mock_load)
     monkeypatch.setattr(src.ml.history, "TICKERS", ["RELIANCE.NS"])
+    monkeypatch.setattr(src.ml.history, "_verify_production_readiness", lambda db: None)
+    monkeypatch.setattr(src.ml.history, "reconcile_all_manifests", lambda db: True)
     
     from datetime import date
     with pytest.raises((RuntimeError, pymongo.errors.OperationFailure)):
-        generate_and_persist_predictions(mongo_client, target_market_date=date(2026, 8, 10))
+        generate_and_persist_predictions(mongo_client, last_completed_session=date(2026, 8, 9), prediction_target_date=date(2026, 8, 10))
         
     # Verify no half-pair exists
     assert db.prediction_history.count_documents({}) == 0
@@ -148,10 +150,10 @@ def test_provenance_integration(mongo_client, monkeypatch):
         def get_target_return_threshold(ticker, atr):
             return 0.05
         @staticmethod
-        def build_feature_row(ticker, client, db):
+        def build_feature_row(ticker, client, db, **kwargs):
             df = pd.DataFrame({
-                "f1": [1.0], "f2": [2.0], "close": [100.0], "atr_pct": [0.05]
-            }, index=pd.DatetimeIndex(["2026-08-10"]))
+                "f1": [1.0, 1.0], "f2": [2.0, 2.0], "close": [100.0, 100.0], "atr_pct": [0.05, 0.05]
+            }, index=pd.DatetimeIndex(["2026-08-09", "2026-08-10"]))
             return df
 
     def mock_load(ticker):
@@ -163,7 +165,10 @@ def test_provenance_integration(mongo_client, monkeypatch):
     # Also patch TICKERS to only run for one ticker to speed up
     monkeypatch.setattr(src.ml.history, "TICKERS", ["RELIANCE.NS"])
     
-    # Patch mongomock to ignore session argument since it doesn't support it
+    monkeypatch.setattr("src.ml.history._verify_production_readiness", lambda db: None)
+    monkeypatch.setattr("src.ml.history.reconcile_all_manifests", lambda db: True)
+    
+    # Let's write some mock model data so joblib.load doesn't failnce it doesn't support it
     orig_update = mongomock.Collection.update_one
     def mock_update(self, filter, update, **kwargs):
         kwargs.pop("session", None)
@@ -197,7 +202,7 @@ def test_provenance_integration(mongo_client, monkeypatch):
     monkeypatch.setattr(mongo_client, "start_session", lambda *args, **kwargs: MockSession())
     
     from datetime import date
-    generate_and_persist_predictions(mongo_client, target_market_date=date(2026, 8, 10))
+    generate_and_persist_predictions(mongo_client, last_completed_session=date(2026, 8, 9), prediction_target_date=date(2026, 8, 10))
         
     hist_docs = list(db.prediction_history.find({"symbol": "RELIANCE.NS"}))
     assert len(hist_docs) == 1
@@ -224,7 +229,7 @@ def test_provenance_integration(mongo_client, monkeypatch):
     
     # D - Immutability and Idempotency
     # Retrying should succeed idempotently
-    generate_and_persist_predictions(mongo_client, target_market_date=date(2026, 8, 10))
+    generate_and_persist_predictions(mongo_client, last_completed_session=date(2026, 8, 9), prediction_target_date=date(2026, 8, 10))
     assert db.prediction_history.count_documents({"symbol": "RELIANCE.NS"}) == 1
     
     # Modifying hash should cause integrity error
@@ -234,6 +239,6 @@ def test_provenance_integration(mongo_client, monkeypatch):
     )
     
     with pytest.raises(pymongo.errors.OperationFailure) as excinfo:
-        generate_and_persist_predictions(mongo_client, target_market_date=date(2026, 8, 10))
+        generate_and_persist_predictions(mongo_client, last_completed_session=date(2026, 8, 9), prediction_target_date=date(2026, 8, 10))
     
     assert "Provenance collision" in str(excinfo.value)

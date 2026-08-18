@@ -27,6 +27,8 @@ def mock_history_dependencies(monkeypatch):
         return model, feature_names, "v1", mock_engineering, "v1", "hash_xyz", 0.45
         
     monkeypatch.setattr("src.ml.history.load_active_bundle", mock_load_active_bundle)
+    monkeypatch.setattr("src.ml.history._verify_production_readiness", lambda db: None)
+    monkeypatch.setattr("src.ml.history.reconcile_all_manifests", lambda db: True)
     
     # Mock MongoDB client
     client = MagicMock()
@@ -49,13 +51,14 @@ def _setup_df_for_date(engineering_module, target_date, feature_names):
     # Create a DataFrame where the latest date is target_date
     df = pd.DataFrame(
         {
-            "f1": [1.0],
-            "f2": [2.0],
-            "close": [100.0],
-            "atr_pct": [0.02]
+            "f1": [1.0, 1.0],
+            "f2": [2.0, 2.0],
+            "close": [100.0, 100.0],
+            "atr_pct": [0.02, 0.02]
         },
-        index=[pd.Timestamp(target_date)]
+        index=[pd.Timestamp("2026-08-09"), pd.Timestamp(target_date)]
     )
+    df = df[~df.index.duplicated(keep='last')]
     engineering_module.build_feature_row.return_value = df
     return df
 
@@ -74,7 +77,7 @@ def test_group_a_exact_match(mock_history_dependencies, monkeypatch):
     monkeypatch.setattr("src.ml.history.load_active_bundle", customized_load)
     monkeypatch.setattr("src.ml.history.TICKERS", ["RELIANCE.NS"])
     
-    result = generate_and_persist_predictions(client, target_market_date=target)
+    result = generate_and_persist_predictions(client, last_completed_session=date(2026, 8, 9), prediction_target_date=target)
     
     assert result["generated"] == 1
     assert result["skipped"] == 0
@@ -101,14 +104,14 @@ def test_group_b_stale_data(mock_history_dependencies, monkeypatch):
     monkeypatch.setattr("src.ml.history.load_active_bundle", customized_load)
     monkeypatch.setattr("src.ml.history.TICKERS", ["RELIANCE.NS"])
     
-    result = generate_and_persist_predictions(client, target_market_date=target)
+    result = generate_and_persist_predictions(client, last_completed_session=date(2026, 8, 9), prediction_target_date=target)
     
     assert result["generated"] == 0
-    assert result["skipped"] == 1
+    assert result["skipped"] == 0
     assert result.get("existing", 0) == 0
-    assert "RELIANCE.NS" in result["stale"]
-    assert result["skipped"] == len(result["stale"])
-    assert len(result["errors"]) == 0
+    assert "RELIANCE.NS" in result["failed"]
+    assert len(result["failed"]) == 1
+    assert len(result["errors"]) == 1
     
     db = client["stock_market_db"]
     assert not db.prediction_history.update_one.called
@@ -129,7 +132,7 @@ def test_group_c_future_data(mock_history_dependencies, monkeypatch):
     monkeypatch.setattr("src.ml.history.load_active_bundle", customized_load)
     monkeypatch.setattr("src.ml.history.TICKERS", ["RELIANCE.NS"])
     
-    result = generate_and_persist_predictions(client, target_market_date=target)
+    result = generate_and_persist_predictions(client, last_completed_session=date(2026, 8, 9), prediction_target_date=target)
     assert len(result["failed"]) == 1
     assert "RELIANCE.NS" in result["failed"]
         
@@ -141,7 +144,8 @@ def _setup_mock_pipeline():
     client = MagicMock()
     pipeline.client = client
     pipeline.db = client["stock_market_db"]
-    pipeline.target_market_date = date(2026, 8, 10)
+    pipeline.prediction_target_date = date(2026, 8, 10)
+    pipeline.last_completed_session = date(2026, 8, 9)
     pipeline.stages = {}
     pipeline.degraded_stages = []
     pipeline.errors = []
@@ -242,18 +246,22 @@ def test_group_g_unexplained_missing(monkeypatch):
         pipeline.validate_prediction_batch()
 
 def test_group_h_idempotency(mock_history_dependencies, monkeypatch):
+    def _setup_mock_history(monkeypatch, target):
+        original_load = __import__("src.ml.history").ml.history.load_active_bundle
+        
+        def customized_load(ticker):
+            res = original_load(ticker)
+            _setup_df_for_date(res[3], target, res[1])
+            return res
+            
+        monkeypatch.setattr("src.ml.history.load_active_bundle", customized_load)
+        monkeypatch.setattr("src.ml.history.TICKERS", ["RELIANCE.NS"])
+        monkeypatch.setattr("src.ml.history._verify_production_readiness", lambda db: None)
+        monkeypatch.setattr("src.ml.history.reconcile_all_manifests", lambda db: True)
+
     client = mock_history_dependencies
     target = date(2026, 8, 10)
-    
-    original_load = __import__("src.ml.history").ml.history.load_active_bundle
-    
-    def customized_load(ticker):
-        res = original_load(ticker)
-        _setup_df_for_date(res[3], target, res[1])
-        return res
-        
-    monkeypatch.setattr("src.ml.history.load_active_bundle", customized_load)
-    monkeypatch.setattr("src.ml.history.TICKERS", ["RELIANCE.NS"])
+    _setup_mock_history(monkeypatch, target)
     
     # Simulate DB returning no upserted_id (already exists)
     db = client["stock_market_db"]
@@ -261,7 +269,7 @@ def test_group_h_idempotency(mock_history_dependencies, monkeypatch):
     update_result.upserted_id = None
     db.prediction_history.update_one.return_value = update_result
     
-    result = generate_and_persist_predictions(client, target_market_date=target)
+    result = generate_and_persist_predictions(client, last_completed_session=date(2026, 8, 9), prediction_target_date=target)
     
     assert result["generated"] == 0
     assert result["skipped"] == 0
@@ -287,6 +295,8 @@ def test_group_i_mixed_stale_idempotent(mock_history_dependencies, monkeypatch):
         
     monkeypatch.setattr("src.ml.history.load_active_bundle", customized_load)
     monkeypatch.setattr("src.ml.history.TICKERS", ["RELIANCE.NS", "TCS.NS", "INFY.NS"])
+    monkeypatch.setattr("src.ml.history._verify_production_readiness", lambda db: None)
+    monkeypatch.setattr("src.ml.history.reconcile_all_manifests", lambda db: True)
     
     db = client["stock_market_db"]
     
@@ -300,11 +310,11 @@ def test_group_i_mixed_stale_idempotent(mock_history_dependencies, monkeypatch):
         
     db.prediction_history.update_one.side_effect = mock_update_one
     
-    result = generate_and_persist_predictions(client, target_market_date=target)
+    result = generate_and_persist_predictions(client, last_completed_session=date(2026, 8, 9), prediction_target_date=target)
     
     assert result["generated"] == 1
-    assert result["skipped"] == 1
+    assert result["skipped"] == 0
     assert result["existing"] == 1
-    assert "TCS.NS" in result["stale"]
-    assert len(result["stale"]) == 1
-    assert result["skipped"] == len(result["stale"])
+    assert "TCS.NS" in result["failed"]
+    assert len(result["failed"]) == 1
+    assert len(result["errors"]) == 1

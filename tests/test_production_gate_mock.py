@@ -43,13 +43,7 @@ class TestProductionGate(unittest.TestCase):
         # We also need to mock get_feature_pipeline_hash to avoid builtins.open breaking it
         self.patcher_hash = patch("src.ml.history.get_feature_pipeline_hash")
         self.mock_hash = self.patcher_hash.start()
-        def dynamic_json_load(f):
-            m = self.valid_manifest.copy()
-            basename = os.path.basename(f.name)
-            ticker = basename.replace('_active.json', '')
-            m["ticker"] = ticker
-            return m
-        self.mock_json.side_effect = dynamic_json_load
+
         
         self.valid_manifest = {
             "status": "ACTIVE",
@@ -66,10 +60,11 @@ class TestProductionGate(unittest.TestCase):
         self.mock_json = self.patcher_json.start()
         
         def load_se(f):
-            m = self.valid_records.pop(0)
-            self.valid_records.append(m) # cycle it
-            m = m.copy()
-            m["model_version"] = m["version"]
+            m = self.valid_manifest.copy()
+            basename = os.path.basename(f.name)
+            ticker = basename.replace('_active.json', '')
+            m["ticker"] = ticker
+            m["model_version"] = m["version"] if "version" in m else m.get("model_version", "v1.0.0")
             return m
         self.mock_json.side_effect = load_se
 
