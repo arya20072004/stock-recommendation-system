@@ -1,0 +1,334 @@
+{
+  "ticker": "TCS.NS",
+  "model_metadata": {
+    "trained_at": "2026-08-18T09:30:11.074686+00:00",
+    "model_version": "71108313884b",
+    "prediction_horizon": 10,
+    "feature_count": 57,
+    "model_type": "XGBClassifier"
+  },
+  "f1_macro": 0.3012297302267511,
+  "per_class_metrics": {
+    "SELL": {
+      "precision": 0.2692307692307692,
+      "recall": 0.0875,
+      "f1": 0.1320754716981132,
+      "support": 80
+    },
+    "HOLD": {
+      "precision": 0.32222222222222224,
+      "recall": 0.35802469135802467,
+      "f1": 0.3391812865497076,
+      "support": 81
+    },
+    "BUY": {
+      "precision": 0.34782608695652173,
+      "recall": 0.5714285714285714,
+      "f1": 0.43243243243243246,
+      "support": 70
+    }
+  },
+  "train_size": 923,
+  "test_size": 231,
+  "total_rows_after_features": 1154,
+  "label_distribution": {
+    "0": 390,
+    "1": 363,
+    "2": 401
+  },
+  "test_prediction_distribution": {
+    "SELL": 26,
+    "HOLD": 90,
+    "BUY": 115
+  },
+  "feature_importance": [
+    {
+      "feature": "month_cos",
+      "importance": 0.035405464470386505
+    },
+    {
+      "feature": "sentiment_30d_avg",
+      "importance": 0.03024248406291008
+    },
+    {
+      "feature": "atr_pct",
+      "importance": 0.02971860207617283
+    },
+    {
+      "feature": "gold_vol_10d",
+      "importance": 0.027607593685388565
+    },
+    {
+      "feature": "atr",
+      "importance": 0.027017557993531227
+    },
+    {
+      "feature": "copper_vol_10d",
+      "importance": 0.026790037751197815
+    },
+    {
+      "feature": "market_regime",
+      "importance": 0.026443390175700188
+    },
+    {
+      "feature": "vix_vol_10d",
+      "importance": 0.024785248562693596
+    },
+    {
+      "feature": "market_correlation",
+      "importance": 0.024556120857596397
+    },
+    {
+      "feature": "vwap_deviation",
+      "importance": 0.024259140715003014
+    },
+    {
+      "feature": "nifty_vol_10d",
+      "importance": 0.02401326224207878
+    },
+    {
+      "feature": "rsi",
+      "importance": 0.02374974451959133
+    },
+    {
+      "feature": "stock_pcr_chg_5d",
+      "importance": 0.023170068860054016
+    },
+    {
+      "feature": "copper_ret_5d",
+      "importance": 0.022987447679042816
+    },
+    {
+      "feature": "bb_width",
+      "importance": 0.022877715528011322
+    },
+    {
+      "feature": "nasdaq_ret_20d",
+      "importance": 0.022045234218239784
+    },
+    {
+      "feature": "nifty_ret_20d",
+      "importance": 0.021926866844296455
+    },
+    {
+      "feature": "nifty_ret_10d",
+      "importance": 0.02152070961892605
+    },
+    {
+      "feature": "nifty_pcr_chg_5d",
+      "importance": 0.02119538001716137
+    },
+    {
+      "feature": "relative_volume",
+      "importance": 0.021097365766763687
+    },
+    {
+      "feature": "banknifty_pcr_oi",
+      "importance": 0.0210767462849617
+    },
+    {
+      "feature": "month_sin",
+      "importance": 0.020525259897112846
+    },
+    {
+      "feature": "obv_deviation",
+      "importance": 0.020456276834011078
+    },
+    {
+      "feature": "stock_pcr_oi",
+      "importance": 0.020047223195433617
+    },
+    {
+      "feature": "usdinr_vol_10d",
+      "importance": 0.01966710016131401
+    },
+    {
+      "feature": "vix_chg_5d",
+      "importance": 0.019446266815066338
+    },
+    {
+      "feature": "vix_level",
+      "importance": 0.018924951553344727
+    },
+    {
+      "feature": "crude_ret_5d",
+      "importance": 0.018789509311318398
+    },
+    {
+      "feature": "usdinr_ret_5d",
+      "importance": 0.0185843538492918
+    },
+    {
+      "feature": "crude_vol_10d",
+      "importance": 0.01836763136088848
+    },
+    {
+      "feature": "nifty_futures_basis",
+      "importance": 0.018160339444875717
+    },
+    {
+      "feature": "gold_ret_5d",
+      "importance": 0.017713181674480438
+    },
+    {
+      "feature": "nifty_ret_5d",
+      "importance": 0.01764783263206482
+    },
+    {
+      "feature": "copper_ret_1d",
+      "importance": 0.01747891679406166
+    },
+    {
+      "feature": "nifty_futures_basis_chg_5d",
+      "importance": 0.017046133056282997
+    },
+    {
+      "feature": "outperformance",
+      "importance": 0.01685856468975544
+    },
+    {
+      "feature": "vix_ret_1d",
+      "importance": 0.016851704567670822
+    },
+    {
+      "feature": "macd_hist",
+      "importance": 0.016001906245946884
+    },
+    {
+      "feature": "gold_ret_1d",
+      "importance": 0.01596437767148018
+    },
+    {
+      "feature": "is_expiry_week",
+      "importance": 0.015772506594657898
+    },
+    {
+      "feature": "usdinr_ret_1d",
+      "importance": 0.015576851554214954
+    },
+    {
+      "feature": "nasdaq_ret_5d",
+      "importance": 0.015562506392598152
+    },
+    {
+      "feature": "price_change_1d",
+      "importance": 0.015173342078924179
+    },
+    {
+      "feature": "price_change_5d",
+      "importance": 0.01505685318261385
+    },
+    {
+      "feature": "nifty_pcr_oi",
+      "importance": 0.014997701160609722
+    },
+    {
+      "feature": "banknifty_pcr_chg_5d",
+      "importance": 0.01484604924917221
+    },
+    {
+      "feature": "crude_ret_1d",
+      "importance": 0.0144801689311862
+    },
+    {
+      "feature": "nifty_ret_1d",
+      "importance": 0.014293629676103592
+    },
+    {
+      "feature": "in_earnings_season",
+      "importance": 0.013222677633166313
+    },
+    {
+      "feature": "sentiment_7d_avg",
+      "importance": 0.0
+    },
+    {
+      "feature": "sector_momentum",
+      "importance": 0.0
+    },
+    {
+      "feature": "sector_momentum_5d",
+      "importance": 0.0
+    },
+    {
+      "feature": "adx",
+      "importance": 0.0
+    },
+    {
+      "feature": "adx_trending",
+      "importance": 0.0
+    },
+    {
+      "feature": "is_month_end",
+      "importance": 0.0
+    },
+    {
+      "feature": "is_month_start",
+      "importance": 0.0
+    },
+    {
+      "feature": "quarter_end",
+      "importance": 0.0
+    }
+  ],
+  "confidence_stats": {
+    "mean_max_proba": 0.5049415230751038,
+    "mean_top2_margin": 0.1924755871295929,
+    "f1_macro": 0.3012297302267511
+  },
+  "optuna": {
+    "best_value": 0.3666044989809228,
+    "best_params": {
+      "n_estimators": 112,
+      "max_depth": 7,
+      "learning_rate": 0.16967533607196555,
+      "subsample": 0.6849356442713105,
+      "colsample_bytree": 0.6727299868828402,
+      "min_child_weight": 5,
+      "reg_lambda": 5.95514915847399,
+      "reg_alpha": 2.86140394234507,
+      "gamma": 1.3526405540621358
+    },
+    "n_trials": 30,
+    "cv_splits": 5,
+    "scoring": "f1_macro (recency-weighted, HOLD-penalty)"
+  },
+  "smote_floors_used": {
+    "0": 0.5,
+    "1": 0.5,
+    "2": 0.5
+  },
+  "threshold_calibration": null,
+  "very_low_confidence": true,
+  "data_fingerprint": {
+    "feature_date_min": "2021-09-29 00:00:00",
+    "feature_date_max": "2026-08-14 00:00:00",
+    "train_date_min": "2021-09-29 00:00:00",
+    "train_date_max": "2025-08-19 00:00:00",
+    "test_date_min": "2025-08-20 00:00:00",
+    "test_date_max": "2026-08-14 00:00:00",
+    "feature_matrix_hash": "c0abec13904c3c73ee6c75655f2b5b4da6c05da8f1045bf11f1c65fc97d8accc",
+    "train_matrix_hash": "d04853dedf4174cbbadb9e3fd8fc3c992cdbf3ea59f7354f7c19c3f053b1e6ce",
+    "test_matrix_hash": "f39f2aa6948841afad5fa46cacd7a0a35f30f7c896a71d06b70e6e28c344aa89",
+    "train_labels_hash": "e8618256723f4e79cb72e2b8c518168a81448374530167317b2c40ebc40f38af",
+    "test_labels_hash": "0e7522a8c1c15389f757b1ac677523a13b1f8220fb700bdcf9c9c10775899481",
+    "row_identity_hash": "4d0c4988421e038ac363f3125e28ef3637a47d0f8ba2635c30ad2e582fdcd9f1",
+    "train_row_identity_hash": "d40a81e7323daa93e35ad91e608897f48a52dcb3ca04559aa61fb57bf6d507e3",
+    "test_row_identity_hash": "6d07f61bbf51caa2d609d914292be5762affc856efcd5fb3b690d818c81885ed",
+    "row_hash": "15937240506060183691"
+  },
+  "feature_pipeline_version": "v1",
+  "feature_pipeline_hash": "f4891c1b2172b8e024b176cd221cf33c8b5e006acd567d95f2768cb7bf72384e",
+  "dataset_hash": "529d9b4a6a28de0729e8387fb576bb7ee644ed49e00bb44ad4bbb02bcab6749b",
+  "dataset_row_count": 1154,
+  "dataset_date_start": "2021-09-29 00:00:00",
+  "dataset_date_end": "2026-08-14 00:00:00",
+  "target_definition": [
+    "SELL",
+    "HOLD",
+    "BUY"
+  ],
+  "provenance_status": "COMPLETE",
+  "model_hash": "71108313884b",
+  "feature_hash": "86e4397fc5ced163a91be9a8b72334d89e16c0dd0165b173380b2ffebb60ee46"
+}

@@ -207,6 +207,24 @@ def test_b4_mongodb_independence(mock_directories, monkeypatch):
 @pytest.fixture
 def mock_db():
     import mongomock
+    
+    # Patch mongomock Collection methods to ignore session kwarg
+    original_update_one = mongomock.Collection.update_one
+    def patched_update_one(self, filter, update, *args, **kwargs):
+        kwargs.pop('session', None)
+        return original_update_one(self, filter, update, *args, **kwargs)
+    if not getattr(mongomock.Collection.update_one, '_is_patched', False):
+        patched_update_one._is_patched = True
+        mongomock.Collection.update_one = patched_update_one
+    
+    original_update_many = mongomock.Collection.update_many
+    def patched_update_many(self, filter, update, *args, **kwargs):
+        kwargs.pop('session', None)
+        return original_update_many(self, filter, update, *args, **kwargs)
+    if not getattr(mongomock.Collection.update_many, '_is_patched', False):
+        patched_update_many._is_patched = True
+        mongomock.Collection.update_many = patched_update_many
+
     return mongomock.MongoClient()["stock_market_db"]
 
 def test_cdefh_trainer_dataset_archival_and_provenance(mock_directories, mock_db, monkeypatch):

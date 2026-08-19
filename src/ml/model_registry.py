@@ -212,6 +212,27 @@ def promote_model(db, ticker: str, version: str) -> bool:
             os.replace(temp_path, manifest_path)
         except Exception as e:
             logger.error(f"Manifest replacement failed: {e}")
+            
+            try:
+                with client.start_session() as session:
+                    with session.start_transaction():
+                        db.model_registry.update_one(
+                            {"ticker": ticker, "version": version},
+                            {"$set": {"status": "CANDIDATE"}},
+                            session=session
+                        )
+                        if active_record:
+                            db.model_registry.update_many(
+                                {"ticker": ticker, "status": "RETIRED", "version": active_record["version"]},
+                                {"$set": {"status": "ACTIVE"}},
+                                session=session
+                            )
+            except Exception as rollback_exc:
+                logger.error(f"CRITICAL: Failed to rollback database after os.replace failure: {rollback_exc}")
+                raise RuntimeError("RECOVERY_REQUIRED") from rollback_exc
+            
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
             return False
 
         final_active = db.model_registry.find_one({"ticker": ticker, "status": "ACTIVE"})
