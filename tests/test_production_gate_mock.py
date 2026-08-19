@@ -39,10 +39,20 @@ class TestProductionGate(unittest.TestCase):
         
         self.patcher_open = patch("builtins.open")
         self.mock_open = self.patcher_open.start()
+
+        def open_side_effect(path, *args, **kwargs):
+            mock_file = MagicMock()
+            mock_file.name = path
+            mock_file.__enter__.return_value = mock_file
+            mock_file.__exit__.return_value = False
+            return mock_file
+
+        self.mock_open.side_effect = open_side_effect
         
         # We also need to mock get_feature_pipeline_hash to avoid builtins.open breaking it
         self.patcher_hash = patch("src.ml.history.get_feature_pipeline_hash")
         self.mock_hash = self.patcher_hash.start()
+        self.mock_hash.return_value = self.current_hash
 
         
         self.valid_manifest = {
@@ -58,14 +68,22 @@ class TestProductionGate(unittest.TestCase):
         # Mock json load
         self.patcher_json = patch("json.load")
         self.mock_json = self.patcher_json.start()
-        
+
         def load_se(f):
-            m = self.valid_manifest.copy()
-            basename = os.path.basename(f.name)
-            ticker = basename.replace('_active.json', '')
-            m["ticker"] = ticker
-            m["model_version"] = m["version"] if "version" in m else m.get("model_version", "v1.0.0")
-            return m
+            path = str(f.name)
+            filename = os.path.basename(path)
+            ticker = filename.removesuffix("_active.json")
+
+            return {
+                "status": "ACTIVE",
+                "feature_pipeline_version": self.current_version,
+                "feature_pipeline_hash": self.current_hash,
+                "ticker": ticker,
+                "model_version": "v1.0.0",
+                "model_hash": "model_123",
+                "feature_hash": "feat_123",
+            }
+
         self.mock_json.side_effect = load_se
 
     def tearDown(self):
