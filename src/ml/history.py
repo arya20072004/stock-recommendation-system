@@ -771,7 +771,7 @@ def generate_and_persist_predictions(client, last_completed_session: date, predi
                     feature_snapshot
                 ),
 
-                "status": "PENDING",
+                "status": "UNVALIDATED",
 
                 "provenance_hash": None, # Will be updated below
                 "provenance_status": "COMPLETE",

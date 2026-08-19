@@ -84,7 +84,7 @@ def get_latest_predictions_snapshot(db, active_tickers):
 
     Returns: (predictions_list, meta_dict)
     """
-    latest_doc = db.prediction_history.find_one({}, sort=[("market_date", -1)])
+    latest_doc = db.prediction_history.find_one({"status": {"$ne": "UNVALIDATED"}}, sort=[("market_date", -1)])
     if not latest_doc:
         return [], {
             "market_date": None,
@@ -100,7 +100,8 @@ def get_latest_predictions_snapshot(db, active_tickers):
     # Check if we have predictions for all active tickers for this date
     predictions = list(db.prediction_history.find({
         "market_date": latest_market_date,
-        "symbol": {"$in": active_tickers}
+        "symbol": {"$in": active_tickers},
+        "status": {"$ne": "UNVALIDATED"}
     }))
 
     returned_symbols = {p['symbol'] for p in predictions}
@@ -341,7 +342,7 @@ def get_stock_details_persisted(ticker):
                 market_stats["day_change"] = round(d0.get('close') - prev_close, 2)
                 market_stats["day_change_pct"] = round(((d0.get('close') - prev_close) / prev_close) * 100, 2)
 
-        pred_doc = db.prediction_history.find_one({"symbol": ticker}, sort=[("market_date", -1)])
+        pred_doc = db.prediction_history.find_one({"symbol": ticker, "status": {"$ne": "UNVALIDATED"}}, sort=[("market_date", -1)])
         prediction_obj = None
         if pred_doc:
             prediction_obj = {
@@ -510,7 +511,7 @@ def get_prediction_history():
     limit = int(request.args.get('limit', 50))
     offset = int(request.args.get('offset', 0))
 
-    query = {}
+    query = {"status": {"$ne": "UNVALIDATED"}}
     if symbol:
         import re
         query['symbol'] = {'$regex': re.escape(symbol), '$options': 'i'}
@@ -543,7 +544,7 @@ def get_prediction_history():
 @app.route('/api/predictions/history/<prediction_id>')
 def get_prediction_detail(prediction_id):
     try:
-        doc = db.prediction_history.find_one({'_id': ObjectId(prediction_id)})
+        doc = db.prediction_history.find_one({'_id': ObjectId(prediction_id), 'status': {'$ne': 'UNVALIDATED'}})
         if not doc:
             return jsonify({'error': 'Prediction not found'}), 404
 
@@ -564,7 +565,7 @@ def get_prediction_performance():
     ticker = request.args.get('ticker')
     model_version = request.args.get('model_version')
 
-    query = {}
+    query = {"status": {"$ne": "UNVALIDATED"}}
     if ticker: query["symbol"] = ticker
     if model_version: query["model_version"] = model_version
 

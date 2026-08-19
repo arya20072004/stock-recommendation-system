@@ -27,6 +27,11 @@ logger = logging.getLogger("daily_pipeline")
 IST = ZoneInfo("Asia/Kolkata")
 warnings.filterwarnings("ignore")
 
+def _ensure_utc_aware(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
+
 class DailyPipeline:
     def __init__(self, mongo_uri, dry_run=False, skip_collection=False, force=False, 
                  lock_ttl=7200, heartbeat_interval=30, lease_safety_margin=60):
@@ -143,7 +148,14 @@ class DailyPipeline:
             lock = self.db.pipeline_locks.find_one({"lock_id": "daily_production_lock"})
             
             # If the lock is missing, expired, or owned by someone else, this run is stale
-            if not lock or lock.get("owner") != r_id or lock.get("expires_at", now) < now:
+            if not lock or lock.get("owner") != r_id:
+                is_stale = True
+            else:
+                expires_at = lock.get("expires_at", now)
+                expires_at = _ensure_utc_aware(expires_at)
+                is_stale = expires_at < now
+
+            if is_stale:
                 logger.warning(f"Reconciling stale run: {r_id}")
                 self.db.pipeline_runs.update_one(
                     {"run_id": r_id},
@@ -408,7 +420,7 @@ class DailyPipeline:
             return
             
         from src.data.collector import run as run_collector
-        results = run_collector()
+        results = run_collector(target_date=self.last_completed_session)
         
         metrics = {"successful": results.get("successful", 0), "failed": results.get("failed", 0)}
         
@@ -616,6 +628,22 @@ class DailyPipeline:
                 self._log_stage("PREDICTION_VALIDATION", "FAILED", msg)
                 raise RuntimeError(msg)
 
+        # All-or-nothing validation successful. Execute bulk transition.
+        unvalidated_count = sum(1 for p in preds if p.get("status") == "UNVALIDATED")
+        if unvalidated_count > 0:
+            result = self.db.prediction_history.update_many(
+                {
+                    "market_date": dt_str,
+                    "prediction_horizon": 10,
+                    "status": "UNVALIDATED"
+                },
+                {"$set": {"status": "PENDING"}}
+            )
+            if result.modified_count != unvalidated_count:
+                msg = f"Atomicity failure: expected to transition {unvalidated_count} UNVALIDATED records, but modified {result.modified_count}."
+                self._log_stage("PREDICTION_VALIDATION", "FAILED", msg)
+                raise RuntimeError(msg)
+
         current_status = self.stages.get("PREDICTION_VALIDATION", {}).get("status")
         if current_status != "DEGRADED":
             self._log_stage("PREDICTION_VALIDATION", "SUCCESS")
@@ -662,8 +690,8 @@ class DailyPipeline:
             self._log_stage("START", "SUCCESS")
             self.acquire_lock()
             self.resolve_trading_session()
-            self.collect_market_data()
             self.collect_auxiliary_data()
+            self.collect_market_data()
             self.validate_ohlcv_integrity()
             self.run_settlement()
             self.generate_predictions()
