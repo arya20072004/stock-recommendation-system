@@ -27,9 +27,9 @@ def clean_db(db):
 
 def test_group_a_fully_homogeneous_snapshot(client, db):
     db.prediction_history.insert_many([
-        {"symbol": "PHASE21_A", "market_date": "2026-08-11", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "BUY"},
-        {"symbol": "PHASE21_B", "market_date": "2026-08-11", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "SELL"},
-        {"symbol": "PHASE21_C", "market_date": "2026-08-11", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "HOLD"}
+        {"symbol": "PHASE21_A", "market_date": "2099-01-02", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "BUY", "status": "PENDING"},
+        {"symbol": "PHASE21_B", "market_date": "2099-01-02", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "SELL", "status": "PENDING"},
+        {"symbol": "PHASE21_C", "market_date": "2099-01-02", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "HOLD", "status": "PENDING"}
     ])
 
     app.cache.clear()
@@ -42,7 +42,7 @@ def test_group_a_fully_homogeneous_snapshot(client, db):
         data = response.get_json()
         
         meta = data.get("meta", {})
-        assert meta.get("market_date") == "2026-08-11"
+        assert meta.get("market_date") == "2099-01-02"
         assert meta.get("complete") is True
         assert meta.get("mixed_date") is False
         assert meta.get("missing_tickers") == []
@@ -50,16 +50,16 @@ def test_group_a_fully_homogeneous_snapshot(client, db):
         preds = data.get("data", [])
         assert len(preds) == 3
         for p in preds:
-            assert p["market_date"] == "2026-08-11"
+            assert p["market_date"] == "2099-01-02"
             
     finally:
         app.TICKERS = original_tickers
 
 def test_group_b_mixed_date_database(client, db):
     db.prediction_history.insert_many([
-        {"symbol": "PHASE21_A", "market_date": "2026-08-11", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "BUY"},
-        {"symbol": "PHASE21_B", "market_date": "2026-08-11", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "SELL"},
-        {"symbol": "PHASE21_C", "market_date": "2026-08-10", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "HOLD"}
+        {"symbol": "PHASE21_A", "market_date": "2099-01-02", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "BUY", "status": "PENDING"},
+        {"symbol": "PHASE21_B", "market_date": "2099-01-02", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "SELL", "status": "PENDING"},
+        {"symbol": "PHASE21_C", "market_date": "2099-01-01", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "HOLD", "status": "PENDING"}
     ])
 
     app.cache.clear()
@@ -72,7 +72,7 @@ def test_group_b_mixed_date_database(client, db):
         data = response.get_json()
         
         meta = data.get("meta", {})
-        assert meta.get("market_date") == "2026-08-11"
+        assert meta.get("market_date") == "2099-01-02"
         assert meta.get("complete") is False
         assert meta.get("mixed_date") is False
         assert "PHASE21_C" in meta.get("missing_tickers")
@@ -80,19 +80,19 @@ def test_group_b_mixed_date_database(client, db):
         preds = data.get("data", [])
         assert len(preds) == 2
         for p in preds:
-            assert p["market_date"] == "2026-08-11"
+            assert p["market_date"] == "2099-01-02"
             
     finally:
         app.TICKERS = original_tickers
 
 def test_group_c_older_prediction_not_used(client, db):
     db.prediction_history.insert_one({
-        "symbol": "PHASE21_C", "market_date": "2026-08-10", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "SELL"
+        "symbol": "PHASE21_C", "market_date": "2099-01-01", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "SELL", "status": "PENDING"
     })
     
-    # Insert another ticker to anchor the latest market_date to 2026-08-11
+    # Insert another ticker to anchor the latest market_date to 2099-01-02
     db.prediction_history.insert_one({
-        "symbol": "PHASE21_A", "market_date": "2026-08-11", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "BUY"
+        "symbol": "PHASE21_A", "market_date": "2099-01-02", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "BUY", "status": "PENDING"
     })
 
     app.cache.clear()
@@ -105,7 +105,7 @@ def test_group_c_older_prediction_not_used(client, db):
         data = response.get_json()
         
         meta = data.get("meta", {})
-        assert meta.get("market_date") == "2026-08-11"
+        assert meta.get("market_date") == "2099-01-02"
         
         preds = data.get("data", [])
         returned_tickers = [p["ticker"] for p in preds]
@@ -116,7 +116,7 @@ def test_group_c_older_prediction_not_used(client, db):
 
 def test_group_d_individual_details_retains_stale(client, db):
     db.prediction_history.insert_one({
-        "symbol": "PHASE21_C", "market_date": "2026-08-10", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "SELL"
+        "symbol": "PHASE21_C", "market_date": "2099-01-01", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "SELL", "status": "PENDING"
     })
     
     # We must insert historical data for it to not 404 in details
@@ -132,7 +132,7 @@ def test_group_d_individual_details_retains_stale(client, db):
         data = response.get_json()
         
         pred = data.get("prediction", {})
-        assert pred.get("market_date") == "2026-08-10"
+        assert pred.get("market_date") == "2099-01-01"
         
     finally:
         app.TICKERS = original_tickers
@@ -151,7 +151,7 @@ def test_group_e_empty_prediction_history(client, db):
 
 def test_group_f_no_live_inference(client, db):
     db.prediction_history.insert_many([
-        {"symbol": "PHASE21_A", "market_date": "2026-08-11", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "BUY"}
+        {"symbol": "PHASE21_A", "market_date": "2099-01-02", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "BUY", "status": "PENDING"}
     ])
 
     app.cache.clear()
@@ -173,9 +173,9 @@ def test_group_f_no_live_inference(client, db):
 
 def test_group_g_recommendations_invariant(client, db):
     db.prediction_history.insert_many([
-        {"symbol": "PHASE21_A", "market_date": "2026-08-11", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "BUY"},
-        {"symbol": "PHASE21_B", "market_date": "2026-08-11", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "SELL"},
-        {"symbol": "PHASE21_C", "market_date": "2026-08-10", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "HOLD"}
+        {"symbol": "PHASE21_A", "market_date": "2099-01-02", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "BUY", "status": "PENDING"},
+        {"symbol": "PHASE21_B", "market_date": "2099-01-02", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "SELL", "status": "PENDING"},
+        {"symbol": "PHASE21_C", "market_date": "2099-01-01", "prediction_timestamp": datetime.now(timezone.utc), "prediction_horizon": 10, "confidence": 0.9, "recommendation": "HOLD", "status": "PENDING"}
     ])
 
     app.cache.clear()
@@ -188,13 +188,13 @@ def test_group_g_recommendations_invariant(client, db):
         data = response.get_json()
         
         meta = data.get("meta", {})
-        assert meta.get("market_date") == "2026-08-11"
+        assert meta.get("market_date") == "2099-01-02"
         assert meta.get("complete") is False
         assert "PHASE21_C" in meta.get("missing_tickers")
         
         preds = data.get("data", [])
         for p in preds:
-            assert p["market_date"] == "2026-08-11"
+            assert p["market_date"] == "2099-01-02"
             
     finally:
         app.TICKERS = original_tickers
