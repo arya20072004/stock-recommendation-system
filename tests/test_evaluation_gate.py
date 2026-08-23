@@ -53,19 +53,194 @@ def test_generate_report_zero_actionable():
             assert result == "FAIL", "Should fail if candidate has 0 actionable predictions"
 
 def test_generate_report_ml_improve_economic_deteriorate():
+    """Policy B: economic degradation MUST produce FAIL."""
     active = {"model_version": "v1", "feature_pipeline_hash": "hash1"}
     cand = {"model_version": "v2", "feature_pipeline_hash": "hash1"}
     meta = {}
-    
-    am = {"actionable_precision": 0.5, "actionable_recall": 0.5, "actionable_count": 10, "class_distribution": {}}
-    cm = {"actionable_precision": 0.6, "actionable_recall": 0.6, "actionable_count": 10, "class_distribution": {}}
-    
-    stats = {"total_rows": 100, "actionable_intersection": 10, "mcnemar_statistic": 4.0, "mcnemar_pvalue": 0.04}
-    eco = {"active_return": 0.1, "candidate_return": -0.05} # economic deterioration
-    
+
+    am = {
+        "actionable_precision": 0.5,
+        "actionable_recall": 0.5,
+        "actionable_count": 10,
+        "class_distribution": {}
+    }
+    cm = {
+        "actionable_precision": 0.6,
+        "actionable_recall": 0.6,
+        "actionable_count": 10,
+        "class_distribution": {}
+    }
+
+    stats = {
+        "total_rows": 100,
+        "actionable_intersection": 10,
+        "mcnemar_statistic": 4.0,
+        "mcnemar_pvalue": 0.04
+    }
+
+    eco = {
+        "active_return": 0.1,
+        "candidate_return": -0.05
+    }
+
     with patch("builtins.open", MagicMock()):
-        result = generate_report("TEST", active, cand, meta, am, cm, stats, eco, {})
-        assert result == "INCONCLUSIVE", "Should be inconclusive if ML improves but economics deteriorate"
+        result = generate_report(
+            "TEST", active, cand, meta, am, cm, stats, eco, {}
+        )
+
+    assert result == "FAIL"
+
+def test_generate_report_precision_deteriorates_return_improves():
+    """Policy B: precision degradation MUST produce FAIL."""
+    active = {"model_version": "v1", "feature_pipeline_hash": "hash1"}
+    cand = {"model_version": "v2", "feature_pipeline_hash": "hash1"}
+    meta = {}
+
+    am = {
+        "actionable_precision": 0.60,
+        "actionable_recall": 0.5,
+        "actionable_count": 10,
+        "class_distribution": {}
+    }
+    cm = {
+        "actionable_precision": 0.55,
+        "actionable_recall": 0.5,
+        "actionable_count": 10,
+        "class_distribution": {}
+    }
+
+    stats = {
+        "total_rows": 100,
+        "actionable_intersection": 10,
+        "mcnemar_statistic": 4.0,
+        "mcnemar_pvalue": 0.01
+    }
+
+    eco = {
+        "active_return": 0.10,
+        "candidate_return": 0.20
+    }
+
+    with patch("builtins.open", MagicMock()):
+        result = generate_report(
+            "TEST", active, cand, meta, am, cm, stats, eco, {}
+        )
+
+    assert result == "FAIL"
+
+def test_generate_report_both_metrics_deteriorate():
+    """Policy B: degradation of either mandatory metric MUST produce FAIL."""
+    active = {"model_version": "v1", "feature_pipeline_hash": "hash1"}
+    cand = {"model_version": "v2", "feature_pipeline_hash": "hash1"}
+    meta = {}
+
+    am = {
+        "actionable_precision": 0.60,
+        "actionable_recall": 0.5,
+        "actionable_count": 10,
+        "class_distribution": {}
+    }
+    cm = {
+        "actionable_precision": 0.55,
+        "actionable_recall": 0.5,
+        "actionable_count": 10,
+        "class_distribution": {}
+    }
+
+    stats = {
+        "total_rows": 100,
+        "actionable_intersection": 10,
+        "mcnemar_statistic": 4.0,
+        "mcnemar_pvalue": 0.01
+    }
+
+    eco = {
+        "active_return": 0.10,
+        "candidate_return": 0.05
+    }
+
+    with patch("builtins.open", MagicMock()):
+        result = generate_report(
+            "TEST", active, cand, meta, am, cm, stats, eco, {}
+        )
+
+    assert result == "FAIL"
+
+def test_generate_report_equal_precision_and_improved_return_not_fail():
+    """Policy B: equality in precision is not degradation."""
+    active = {"model_version": "v1", "feature_pipeline_hash": "hash1"}
+    cand = {"model_version": "v2", "feature_pipeline_hash": "hash1"}
+    meta = {}
+
+    am = {
+        "actionable_precision": 0.60,
+        "actionable_recall": 0.5,
+        "actionable_count": 10,
+        "class_distribution": {}
+    }
+    cm = {
+        "actionable_precision": 0.60,
+        "actionable_recall": 0.5,
+        "actionable_count": 10,
+        "class_distribution": {}
+    }
+
+    stats = {
+        "total_rows": 100,
+        "actionable_intersection": 10,
+        "mcnemar_statistic": 1.0,
+        "mcnemar_pvalue": 0.30
+    }
+
+    eco = {
+        "active_return": 0.10,
+        "candidate_return": 0.20
+    }
+
+    with patch("builtins.open", MagicMock()):
+        result = generate_report(
+            "TEST", active, cand, meta, am, cm, stats, eco, {}
+        )
+
+    assert result == "INCONCLUSIVE"
+
+def test_generate_report_equal_return_and_improved_precision_not_fail():
+    """Policy B: equality in return is not degradation."""
+    active = {"model_version": "v1", "feature_pipeline_hash": "hash1"}
+    cand = {"model_version": "v2", "feature_pipeline_hash": "hash1"}
+    meta = {}
+
+    am = {
+        "actionable_precision": 0.60,
+        "actionable_recall": 0.5,
+        "actionable_count": 10,
+        "class_distribution": {}
+    }
+    cm = {
+        "actionable_precision": 0.70,
+        "actionable_recall": 0.5,
+        "actionable_count": 10,
+        "class_distribution": {}
+    }
+
+    stats = {
+        "total_rows": 100,
+        "actionable_intersection": 10,
+        "mcnemar_statistic": 1.0,
+        "mcnemar_pvalue": 0.30
+    }
+
+    eco = {
+        "active_return": 0.10,
+        "candidate_return": 0.10
+    }
+
+    with patch("builtins.open", MagicMock()):
+        result = generate_report(
+            "TEST", active, cand, meta, am, cm, stats, eco, {}
+        )
+
+    assert result == "INCONCLUSIVE"
 
 def test_generate_report_economic_improve_stat_inconclusive():
     active = {"model_version": "v1", "feature_pipeline_hash": "hash1"}

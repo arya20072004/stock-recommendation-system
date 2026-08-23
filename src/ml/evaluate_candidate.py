@@ -86,24 +86,38 @@ def generate_report(ticker, active_info, candidate_info, metadata, active_metric
     verdict = "INCONCLUSIVE"
     explanation = "Pending human review."
     
-    if candidate_metrics["actionable_precision"] > active_metrics["actionable_precision"] and economic["candidate_return"] > economic["active_return"]:
-        if stats["mcnemar_pvalue"] is not None and stats["mcnemar_pvalue"] < 0.05:
-            verdict = "PASS"
-            explanation = "Candidate statistically and economically outperforms Active model on actionable precision."
-        else:
-            verdict = "INCONCLUSIVE"
-            explanation = "Candidate economically outperforms, but statistical significance (McNemar) is weak or not applicable."
-    elif candidate_metrics["actionable_precision"] < active_metrics["actionable_precision"] and economic["candidate_return"] < economic["active_return"]:
-        verdict = "FAIL"
-        explanation = "Candidate strictly underperforms mathematically and economically."
-    else:
-        verdict = "INCONCLUSIVE"
-        explanation = "Mixed results between precision and economic returns."
-
-    # Edge cases
     if candidate_metrics["actionable_count"] == 0:
         verdict = "FAIL"
         explanation = "Candidate produced ZERO actionable predictions."
+
+    elif candidate_metrics["actionable_precision"] < active_metrics["actionable_precision"]:
+        verdict = "FAIL"
+        explanation = "Candidate actionable precision is below the Active model."
+
+    elif economic["candidate_return"] < economic["active_return"]:
+        verdict = "FAIL"
+        explanation = "Candidate simulated actionable cumulative return is below the Active model."
+
+    else:
+        # Mandatory Policy B gate passed.
+        # Further evidence determines whether the result is PASS or INCONCLUSIVE.
+        if (
+            candidate_metrics["actionable_precision"] > active_metrics["actionable_precision"]
+            and economic["candidate_return"] > economic["active_return"]
+            and stats["mcnemar_pvalue"] is not None
+            and stats["mcnemar_pvalue"] < 0.05
+        ):
+            verdict = "PASS"
+            explanation = (
+                "Candidate statistically and economically outperforms "
+                "Active model on actionable precision."
+            )
+        else:
+            verdict = "INCONCLUSIVE"
+            explanation = (
+                "No mandatory Policy B failure condition was triggered, "
+                "but remaining evidence is insufficient for a definitive PASS."
+            )
 
     report = f"""# Candidate Evaluation Report: {ticker}
 
