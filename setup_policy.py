@@ -93,6 +93,10 @@ OUTPUT_DIR = "{OUTPUT_DIR}"
 import sys
 sys.path.append("c:/Users/aryab/Coding/stock_recommendations")
 from src.data.nifty50 import TICKERS
+from src.features.router import get_feature_pipeline_hash
+from src.ml.model_registry import hash_file_sha256
+
+CURRENT_CANONICAL_HASH = get_feature_pipeline_hash("v1")
 
 def get_db():
     from dotenv import load_dotenv
@@ -132,8 +136,19 @@ for ticker in TICKERS:
         feature_path = os.path.join(FEATURES_DIR, f"features_{{ticker}}_{{version}}.json")
         model_exists = os.path.exists(model_path)
         feature_exists = os.path.exists(feature_path)
-        model_hash_match = True  # Assuming hash verified by previous phase
-        feature_hash_match = True
+        
+        model_hash_match = False
+        feature_hash_match = False
+        if model_exists:
+            expected_model_hash = c.get("model_hash", "")
+            actual_model_hash = hash_file_sha256(model_path, truncate_to=12)
+            model_hash_match = bool(expected_model_hash and actual_model_hash == expected_model_hash)
+            
+        if feature_exists:
+            expected_feature_hash = c.get("feature_hash", "")
+            actual_feature_hash = hash_file_sha256(feature_path, truncate_to=64)
+            feature_hash_match = bool(expected_feature_hash and actual_feature_hash == expected_feature_hash)
+            
         prov = c.get("provenance_status") == "COMPLETE"
         dh = bool(c.get("dataset_hash"))
         fpv = bool(c.get("feature_pipeline_version"))
@@ -145,11 +160,15 @@ for ticker in TICKERS:
         failures = []
         if status != "CANDIDATE": failures.append("not CANDIDATE")
         if not model_exists: failures.append("no model artifact")
+        elif not model_hash_match: failures.append("model hash mismatch")
         if not feature_exists: failures.append("no feature artifact")
+        elif not feature_hash_match: failures.append("feature hash mismatch")
         if not prov: failures.append("provenance not COMPLETE")
         if not dh: failures.append("no dataset_hash")
         if not fpv: failures.append("no feature_pipeline_version")
         if not fph: failures.append("no feature_pipeline_hash")
+        if c.get("feature_pipeline_version") != "v1": failures.append("wrong pipeline version")
+        if c.get("feature_pipeline_hash") != CURRENT_CANONICAL_HASH: failures.append("wrong pipeline hash")
         if not cv_valid: failures.append("CV score invalid or missing")
         
         is_eligible = len(failures) == 0
