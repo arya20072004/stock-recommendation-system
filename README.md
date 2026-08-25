@@ -1,256 +1,137 @@
-# ML-Powered Stock Recommendation System
+# Stock Recommendation System
 
-An advanced machine learning-based stock analysis and recommendation system that provides intelligent BUY/HOLD/SELL recommendations for Nifty 50 stocks using technical indicators, market data, sector indices, options data, and news sentiment analysis.
+## Overview
+An ML-powered stock recommendation and analysis system that provides BUY/HOLD/SELL predictions for a universe of 51 Nifty 50 stocks. The system uses a strictly governed, canonical 57-feature pipeline, dynamic artifact hashing, and an independent 10-session settlement observation process to validate prediction performance against live market data.
 
-## 🚀 Features
+## Current System Status
+- **Current Production Universe**: 51 active tickers.
+- **Canonical Feature Pipeline**: `v1` (57 features)
+- **Active Model Bundles**: 51 dynamically verified bundles matching the canonical pipeline.
+- **Settlement Process**: Actively observing cohorts (e.g., 2026-08-20 is at 3/10 valid sessions). Mature evaluation requires 10 valid future market sessions.
+- **Latest Legitimate Commit**: `9123f6e9 fix: harden production candidate validation and add regression tests`
 
-- **Real-time Stock Analysis**: Live price data and technical indicators for Nifty 50 stocks.
-- **Machine Learning Models**: XGBoost-based prediction models trained on historical data, supporting native `.ubj` and `.joblib` formats.
-- **Confidence Tiering**: Advanced confidence tier assignment (VERY_HIGH, HIGH, MEDIUM, LOW) based on F1-macro scores, prediction probabilities, and class margins to filter noisy signals.
-- **Advanced Feature Engineering**: 
-  - **Sector Indices**: Equal-weighted daily sector return indices built from the Nifty 500 universe for robust sector momentum features.
-  - **Options Data**: Integration of NIFTY and BANKNIFTY Put-Call Ratios (PCR) based on Open Interest from NSE F&O Bhavcopy archives.
-  - **Institutional Activity**: Tracks FII (Foreign Institutional Investors) and DII (Domestic Institutional Investors) data.
-- **Sentiment Analysis**: News article sentiment integration for enhanced predictions.
-- **Interactive Web Dashboard**: Modern web interface with real-time charts and a dedicated Portfolio Overview page sorted by conviction.
-- **Backtesting Engine**: Historical performance analysis and strategy validation.
-- **Comprehensive Data Pipeline**: Automated data collection, processing, and model training.
-- **MongoDB Integration**: Scalable data storage for historical prices, sector indices, options data, and news.
+## Architecture
+The system separates prediction generation from performance settlement. Predictions are generated using a rigorously governed feature pipeline, stored in MongoDB, and independently evaluated as future market data arrives.
 
-## 📊 Supported Stocks
+The conceptual lifecycle flow is:
+1. **Market data**
+2. **Feature generation**
+3. **Canonical feature pipeline**
+4. **Active production model**
+5. **Prediction**
+6. **Prediction history**
+7. **Future market observations**
+8. **Settlement evaluation**
+9. **10 valid future sessions**
+10. **Mature evaluation**
 
-The system analyzes all Nifty 50 stocks including:
-- Adani Enterprises, Adani Ports, Apollo Hospitals
-- Asian Paints, Axis Bank, Bajaj Auto, Bajaj Finance, Bajaj Finserv
-- Bharat Petroleum, Bharti Airtel, and 40+ more major Indian companies
+## Production Pipeline
+The daily production workflow currently uses:
+```bash
+python src/pipeline/daily.py
+```
+This pipeline performs:
+1. Data acquisition and processing
+2. Prediction generation
+3. Prediction validation
+4. API health check
+5. Pipeline completion
 
-## 🛠️ Technology Stack
+**Note**: A successful pipeline execution (e.g. `daily.py` completing without errors) generates predictions but is *not* equivalent to a complete post-run verification. Persistence and settlement audits are separate verification layers.
 
-- **Backend**: Python Flask, MongoDB
-- **Machine Learning**: XGBoost, scikit-learn, imbalanced-learn
-- **Data Processing**: pandas, pandas-ta, yfinance, numpy
-- **Sentiment Analysis**: NLTK
-- **Frontend**: HTML, Tailwind CSS, Lightweight Charts
-- **APIs**: Alpha Vantage, NewsAPI, NSE F&O Archives
+## Feature Engineering and Canonical Pipeline
+The system enforces a strict **canonical 57-feature schema** (`v1`). 
+The canonical pipeline hash is dynamically resolved through:
+```python
+get_feature_pipeline_hash("v1")
+```
+The old 55-feature pipeline is explicitly rejected and is no longer accepted for active production use. 
 
-## 📋 Prerequisites
+## Model / Bundle Governance
+Production model artifacts are not accepted merely because they exist. The production candidate-validation system enforces strict governance before a model is promoted to active status.
 
-- Python 3.8+
-- MongoDB (local or cloud instance)
-- API Keys for Alpha Vantage and NewsAPI
+The preflight validation verifies:
+- Model identity and artifact hashes
+- Feature hashes
+- Canonical feature pipeline identity (enforcing the expected schema)
+- Cryptographic provenance
+- Explicit rejection of obsolete pipeline bundles
 
-## 🚀 Installation
+Candidates must match the canonical, verified feature/model contract before being accepted. The system uses dynamic artifact verification rather than relying on hard-coded flags.
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/stock-recommendations.git
-   cd stock-recommendations
-   ```
+## Prediction Lifecycle
+A daily production run generates predictions for the active 51-ticker universe. These predictions are then persisted and wait for future market data to be evaluated.
 
-2. **Create virtual environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+## Settlement and Maturity
+Predictions are evaluated independently through an authoritative settlement implementation (`src/ml/settlement.py`).
 
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+**Maturity Horizon:** 10 valid future trading sessions.
 
-4. **Set up environment variables**
+A prediction's own `market_date` does NOT count as a settlement session. A valid settlement observation is a future observation satisfying the repository's settlement rules, specifically:
+- `historical_data.date > prediction.market_date`
+- `close > 0`
 
-   Create a `.env` file in the root directory:
-   ```env
-   MONGO_URI=mongodb://localhost:27017/
-   ALPHA_VANTAGE_API_KEY=your_alpha_vantage_api_key
-   NEWS_API_KEY=your_news_api_key
-   ```
+Settlement maturity is evaluated independently per ticker. The system is actively tracking live observation cohorts which advance as valid future market sessions are persisted. The cohorts are still being observed and are not yet mature.
 
-5. **Start MongoDB**
-   Make sure MongoDB is running on your system.
+## Production Preflight and Validation
+The repository uses a production preflight to ensure the active universe matches the expected state. It validates:
+- Active MongoDB records
+- Active filesystem manifests
+- Absence of unexpected hashes or old pipelines
+- Manifest read errors and identity mismatches
+- Pipeline version mismatches
+- Stale model counts
 
-## 📊 Data Pipeline Setup
+## Testing
+The targeted safety/acceptance suite for the corrective pipeline enforcement can be run via:
+```powershell
+$env:PYTHONPATH = (Get-Location).Path
+pytest -q tests/test_canonical_schema.py tests/test_old_pipeline_rejection.py tests/test_phase14.py
+```
+This targeted safety suite currently passes (`15 passed, 1 warning` for pandas Copy-on-Write deprecation).
 
-Run the complete data collection and model training pipeline. Before training, you need to build the foundational data collections:
+## Daily Operations
+The standard daily operational workflow is:
+1. Wait for completed market session/data availability.
+2. Run `daily.py` after the operational data window.
+3. Confirm pipeline execution success.
+4. Verify prediction persistence.
+5. Verify active model/bundle identity.
+6. Verify settlement observation advancement.
+7. Confirm maturity state.
+8. Continue observation until cohorts reach 10 valid sessions.
 
-1. **Collect historical stock data for Nifty 50 stocks**
-   ```bash
-   python -m src.data.collector
-   ```
+## Current Production State
+The most recent production run successfully generated and persisted predictions for the active 51-ticker universe.
 
-2. **Build Sector Indices (Nifty 500)**
-   ```bash
-   python -m src.data.sector_index_builder
-   ```
+Current verified settlement state for recent prediction cohorts (as they march towards 10 valid sessions):
+- `2026-08-20` → 3 / 10
+- `2026-08-21` → 2 / 10
+- `2026-08-24` → 1 / 10
+- `2026-08-25` → 0 / 10
 
-3. **Build Options Put-Call Ratio (PCR) History**
-   ```bash
-   python -m src.data.pcr_builder
-   ```
+Currently, 0 tickers are mature. The cohorts are live and will mature dynamically.
 
-4. **Run the Main Pipeline (News, Sentiment, Training)**
-   ```bash
-   python scripts/run_pipeline.py
-   ```
-
-This will perform sentiment analysis on news, train ML models for each stock, and save models (`.ubj`/`.joblib`) and feature lists.
-
-**Note**: The pipeline processes 10 stocks by default to avoid API rate limits. Modify `STOCKS_TO_PROCESS` in `scripts/run_pipeline.py` to process all 50 stocks.
-
-## 🌐 Running the Web Application
-
-1. **Start the Flask server**
-   ```bash
-   flask run
-   ```
-
-2. **Open your browser**
-   Navigate to `http://localhost:5000`
-
-3. **Dashboard Views**:
-   - **Individual Stock View**: Select a stock to view interactive price charts, technical indicators, ML-based BUY/HOLD/SELL recommendation, and confidence metrics.
-   - **Portfolio Overview** (`/portfolio`): View ML signals for all loaded stocks, intelligently sorted by algorithm conviction.
-
-## 📁 Project Structure
-
+## Repository Structure
 ```text
 stock-recommendations/
-├── app.py                     # Main Flask application with portfolio and stock routes
-├── src/                       # Core python packages
-│   ├── config/                # DB and config utilities
-│   ├── data/                  # Data collection, indexing, and Nifty50 list
-│   ├── features/              # Feature engineering and importance
-│   ├── ml/                    # ML training, backtesting, confidence, and sentiment
-│   └── analysis/              # Data analysis utilities
-├── scripts/                   # Executable scripts
-│   ├── run_pipeline.py        # Main data collection and training pipeline
-│   └── migrate_models.py      # Model migration utilities
-├── tests/                     # Unit and integration tests
-├── data/raw/                  # Raw CSV data files
-├── saved_models/              # Trained ML models (.ubj or .joblib)
-├── saved_features/            # Feature lists for each stock (.json files)
-├── reports/                   # Generated reports (e.g., MLStrategy.html)
-├── templates/                 # HTML templates
-│   ├── index.html             # Web dashboard template
-│   └── portfolio.html         # Portfolio overview template
-├── requirements.txt           # Python dependencies
-└── .env                       # Environment variables
+├── src/
+│   ├── data/                  # Market data collection
+│   ├── features/              # Canonical feature pipeline and routing
+│   ├── ml/                    # Training, settlement, evaluation, and registry
+│   ├── pipeline/              # daily.py production workflow
+│   └── ...
+├── tests/                     # Acceptance and regression tests
+├── scripts/                   # Validation and diagnostics
+├── saved_models/              # Trained ML models (do not commit)
+├── saved_features/            # Feature lists for each stock (do not commit)
+└── ...
 ```
 
-## 🔧 Configuration
+## Development Guidelines
+- **Artifacts**: Do NOT commit `saved_models/*`, `saved_features/*`, `saved_evaluations/*`, `scratch/*`, `*.joblib` generated artifacts, `*.parquet` datasets, audit JSON files, temporary reports, or test output files.
+- **Validation**: Any changes to feature pipelines or model generation must pass the production candidate validation tests to ensure the canonical pipeline is not broken.
 
-### API Keys
-- **Alpha Vantage**: Get your free API key from [alphavantage.co](https://www.alphavantage.co/support/#api-key)
-- **NewsAPI**: Get your API key from [newsapi.org](https://newsapi.org/)
-
-### Database
-The application uses MongoDB with several main collections:
-- `historical_data`: Stock price data
-- `news_articles`: News articles with sentiment scores
-- `sector_indices`: Sector performance data built from the Nifty 500
-- `pcr_data`: Options Put-Call Ratio data
-
-### Model Configuration
-Models are trained using an extensive feature set:
-- Technical indicators (RSI, MACD, Bollinger Bands, ATR, VWAP, OBV)
-- Market correlation metrics (Nifty 50 SMA, etc.)
-- Options Put-Call Ratio (PCR)
-- Sector performance indices (Equal-weighted)
-- FII/DII data tracking
-- News sentiment scores
-- Price momentum features
-
-Models output a base prediction which is then filtered through `src.ml.confidence` to ensure only actionable predictions (MEDIUM confidence and above) are shown as BUY/SELL, otherwise defaulting to HOLD.
-
-## 📈 Backtesting
-
-Test your strategies with historical data:
-
-```python
-from src.ml.backtester import Backtester
-
-# Initialize backtester
-bt = Backtester()
-
-# Run backtest for a specific stock
-results = bt.run_backtest('RELIANCE.NS', initial_capital=100000)
-
-# View performance metrics
-print(results.summary())
-```
-
-## 🤖 ML Model Details
-
-- **Algorithm**: XGBoost Classifier (saving in native `.ubj` format)
-- **Target Classes**: BUY (2), HOLD (1), SELL (0)
-- **Features**: Highly engineered dataset with technicals, options, sector momentum, and sentiment indicators
-- **Confidence Gates**: Uses F1-macro, prediction certainty, and class margins to assign confidence tiers
-- **Training Data**: Historical price data with labels based on future returns
-- **Handling Imbalance**: SMOTE oversampling for minority classes
-
-## ⚠️ Important Disclaimers
-
-- **Not Financial Advice**: This system is for educational and research purposes only. All recommendations are generated by algorithms and should not be considered as financial advice.
-- **Past Performance**: Historical performance does not guarantee future results.
-- **Risk Warning**: Stock trading involves substantial risk of loss. Always do your own research and consult with financial professionals.
-- **Data Accuracy**: While we strive for accuracy, data sources may have limitations or delays.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Nifty 50 data provided by Yahoo Finance
-- Options data from NSE India Archives
-- News data from NewsAPI
-- Technical analysis indicators from pandas-ta
-- ML framework by XGBoost and scikit-learn
-
-## 📞 Support
-
-If you encounter any issues or have questions:
-1. Check the existing issues on GitHub
-2. Create a new issue with detailed information
-3. Include error messages, Python version, and steps to reproduce
-
----
-
-**Remember**: Always invest responsibly and never risk more than you can afford to lose.
-
----
-
-## 🖥️ React Frontend
-
-The default frontend for this application has been migrated to a React/Vite Single Page Application. It uses a modern trading terminal aesthetic with dark and light mode themes.
-
-### Running the React app locally
-
-1. Ensure your Flask backend is running on port 5000:
-   ```bash
-   python app.py
-   ```
-
-2. Open a new terminal and start the Vite dev server:
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
-
-3. The React app will run on `http://localhost:5173` and automatically proxy `/api` requests to the Flask backend.
-
-### Assumptions
-
-- The Flask app runs on `http://localhost:5000` (the Vite proxy targets this).
-- The API responses conform strictly to the specified contract.
-- The React application is intended to run as a separate dev server during development. (For production deployment, the Vite app should be built with `npm run build` and either hosted independently or integrated into Flask's static folders).
+## Known Limitations / Operational Notes
+- The settlement observation system requires forward-looking market data and deliberately delays mature evaluations by 10 valid sessions.
+- Ensure that the `.env` file correctly defines `MONGO_URI` before executing validation scripts or `daily.py`.
