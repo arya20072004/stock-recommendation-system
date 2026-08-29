@@ -96,4 +96,5 @@ def test_zero_fill_path(mock_nifty, mock_macro, mock_sector, mock_pcr):
 def test_pipeline_hash():
     # G. Pipeline hash consistent
     h = get_feature_pipeline_hash("v1")
-    assert h == "f4891c1b2172b8e024b176cd221cf33c8b5e006acd567d95f2768cb7bf72384e"
+    assert h == "879f04b32ad89e0f6d9e648f8ec2801fba84d6d257bc5a0750eca5aa0685fe2d", \
+        "v1 pipeline hash updated due to NSE fallback integration (governed identity migration)"
