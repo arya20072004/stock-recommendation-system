@@ -308,6 +308,21 @@ def _prepare_nifty_data(start_date, end_date, prediction_target_date=None):
 
     nifty_df = nifty_df.rename(columns={"Close": "nifty_close"})
     nifty_df = nifty_df[["nifty_close"]].copy()
+
+    # --- NSE Fallback Integration ---
+    required_date = pd.Timestamp(end_date)
+    if not nifty_df.empty and required_date not in nifty_df.index:
+        logger.info(f"^NSEI missing required session {required_date.date()}, attempting NSE fallback...")
+        from src.data.nse_index_fallback import fetch_nse_index_close
+        close_val = fetch_nse_index_close(required_date)
+        if close_val is not None:
+            nifty_df.loc[required_date] = {"nifty_close": close_val}
+            nifty_df.sort_index(inplace=True)
+            logger.info(f"Successfully recovered Nifty 50 for {required_date.date()} via fallback.")
+        else:
+            logger.warning(f"NSE fallback failed for {required_date.date()}. Nifty data remains incomplete.")
+    # --------------------------------
+
     nifty_df["nifty_return"] = nifty_df["nifty_close"].pct_change()
     nifty_df["nifty_sma_200"] = nifty_df["nifty_close"].rolling(window=200).mean()
     
