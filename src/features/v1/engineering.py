@@ -278,50 +278,71 @@ def _validate_macro_asset(df, asset_name, required_column="Close", min_valid_row
     return True, df
 
 def _fetch_cached_macro(ticker, start_date, end_date):
-    """Fetches macro data using a run-local memory cache to prevent rate-limiting."""
-    cache_key = f"{ticker}_{start_date.date()}_{end_date.date()}"
-    if cache_key in _MACRO_CACHE:
-        return _MACRO_CACHE[cache_key].copy() if not _MACRO_CACHE[cache_key].empty else _MACRO_CACHE[cache_key]
-        
+    """Fetches macro data using a run-local memory cache and backfills gaps for benchmark."""
+    req_start = pd.Timestamp(start_date)
+    req_end = pd.Timestamp(end_date)
+
+    if ticker in _MACRO_CACHE:
+        cached = _MACRO_CACHE[ticker]
+        if not cached.empty and cached.index.min() <= req_start and cached.index.max() >= req_end:
+            return cached.loc[req_start:req_end].copy()
+
     try:
         df = yf.download(
-            ticker, 
-            start=start_date, 
-            end=end_date + timedelta(days=1), 
-            progress=False, 
+            ticker,
+            start=start_date,
+            end=end_date + timedelta(days=1),
+            progress=False,
             auto_adjust=True,
             timeout=10
         )
-        _MACRO_CACHE[cache_key] = df
-        return df.copy() if not df.empty else df
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
     except Exception as ex:
         logger.warning(f"macro: {ticker} download failed — {ex}")
-        _MACRO_CACHE[cache_key] = pd.DataFrame()
+        df = pd.DataFrame()
+
+    # Apply historical gap repair specifically for Nifty 50
+    if ticker == "^NSEI" and not df.empty:
+        from src.data.session_calendar import is_session
+        from src.data.nse_index_fallback import fetch_nse_index_close
+
+        curr = req_start
+        while curr <= req_end:
+            if is_session(curr):
+                missing_in_df = (curr not in df.index) or pd.isna(df.loc[curr, "Close"])
+                missing_in_cache = True
+                if ticker in _MACRO_CACHE and not _MACRO_CACHE[ticker].empty:
+                    if curr in _MACRO_CACHE[ticker].index and not pd.isna(_MACRO_CACHE[ticker].loc[curr, "Close"]):
+                        missing_in_cache = False
+
+                if missing_in_df and missing_in_cache:
+                    logger.info(f"^NSEI missing required session {curr.date()}, attempting NSE fallback...")
+                    close_val = fetch_nse_index_close(curr)
+                    if close_val is not None:
+                        df.loc[curr, "Close"] = close_val
+                        logger.info(f"Successfully recovered Nifty 50 for {curr.date()} via fallback.")
+            curr += timedelta(days=1)
+        df.sort_index(inplace=True)
+
+    if ticker in _MACRO_CACHE and not _MACRO_CACHE[ticker].empty and not df.empty:
+        _MACRO_CACHE[ticker] = _MACRO_CACHE[ticker].combine_first(df)
+    elif not df.empty:
+        _MACRO_CACHE[ticker] = df
+    else:
         return pd.DataFrame()
+
+    return _MACRO_CACHE[ticker].loc[req_start:req_end].copy()
 
 def _prepare_nifty_data(start_date, end_date, prediction_target_date=None):
     nifty_df = _fetch_cached_macro("^NSEI", start_date, end_date)
     is_valid, nifty_df = _validate_macro_asset(nifty_df, "^NSEI", min_valid_rows=200)
-    
+
     if not is_valid:
         return pd.DataFrame()
 
     nifty_df = nifty_df.rename(columns={"Close": "nifty_close"})
     nifty_df = nifty_df[["nifty_close"]].copy()
-
-    # --- NSE Fallback Integration ---
-    required_date = pd.Timestamp(end_date)
-    if not nifty_df.empty and required_date not in nifty_df.index:
-        logger.info(f"^NSEI missing required session {required_date.date()}, attempting NSE fallback...")
-        from src.data.nse_index_fallback import fetch_nse_index_close
-        close_val = fetch_nse_index_close(required_date)
-        if close_val is not None:
-            nifty_df.loc[required_date] = {"nifty_close": close_val}
-            nifty_df.sort_index(inplace=True)
-            logger.info(f"Successfully recovered Nifty 50 for {required_date.date()} via fallback.")
-        else:
-            logger.warning(f"NSE fallback failed for {required_date.date()}. Nifty data remains incomplete.")
-    # --------------------------------
 
     nifty_df["nifty_return"] = nifty_df["nifty_close"].pct_change()
     nifty_df["nifty_sma_200"] = nifty_df["nifty_close"].rolling(window=200).mean()
