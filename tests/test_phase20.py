@@ -1,3 +1,4 @@
+import mongomock
 import pytest
 import os
 import re
@@ -16,7 +17,9 @@ def client():
 
 @pytest.fixture(scope="module")
 def db():
-    client = MongoClient(app.MONGO_URI)
+    client = mongomock.MongoClient(app.MONGO_URI)
+    app.client = client
+    app.db = client['stock_market_db']
     return client['stock_market_db']
 
 def test_group_a_static_ml_isolation():
@@ -45,6 +48,7 @@ def test_group_b_canonical_recommendation_serving(client, db):
     db.prediction_history.insert_one({
         "symbol": "RELIANCE.NS",
         "market_date": "2026-08-11",
+        "status": "EVALUATED",
         "prediction_timestamp": datetime(2026, 8, 11, 20, 0, 0),
         "prediction_horizon": 10,
         "model_version": "v1.0.0-phase20",
@@ -126,6 +130,7 @@ def test_group_f_stale_prediction(client, db):
     db.prediction_history.insert_one({
         "symbol": "INFY.NS",
         "market_date": "2026-08-01",
+        "status": "PENDING",
         "prediction_timestamp": datetime(2026, 8, 1, 20, 0, 0),
         "prediction_horizon": 10,
         "recommendation": "SELL"
@@ -144,11 +149,11 @@ def test_group_f_stale_prediction(client, db):
 def test_group_g_mongodb_failure(client):
     """Group G: MongoDB failure -> controlled failure, no inference."""
     app.cache.clear()
-    # We patch db.prediction_history.find_one to simulate PyMongoError
-    with mock.patch("pymongo.collection.Collection.find_one", side_effect=Exception("Simulated MongoDB failure")):
+    # We patch mongomock.collection.Collection.find_one to simulate PyMongoError
+    with mock.patch("mongomock.collection.Collection.find_one", side_effect=Exception("Simulated MongoDB failure")):
         response = client.get('/api/stocks/TCS.NS/details')
         assert response.status_code in [500, 503]
 
-    with mock.patch("pymongo.collection.Collection.find_one", side_effect=Exception("Simulated MongoDB failure")):
+    with mock.patch("mongomock.collection.Collection.find_one", side_effect=Exception("Simulated MongoDB failure")):
         response = client.get('/api/stocks/summary')
         assert response.status_code in [500, 503]

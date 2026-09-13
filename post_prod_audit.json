@@ -1,0 +1,244 @@
+{
+  "1_runs": [
+    {
+      "_id": "6a85e62cfb39c59f7952d4b6",
+      "run_id": "a3b0e411-5f2d-4999-8f00-f2b6a845e869",
+      "degraded_stages": [],
+      "duration_ms": 2368786,
+      "errors": [],
+      "market_date": "2026-08-20",
+      "owner": "a3b0e411-5f2d-4999-8f00-f2b6a845e869",
+      "stages": {
+        "START": {
+          "status": "SUCCESS",
+          "timestamp": "2026-08-19T17:21:46.586000",
+          "started_at": "2026-08-19T17:21:46.586000"
+        },
+        "ACQUIRE_LOCK": {
+          "status": "SUCCESS",
+          "timestamp": "2026-08-19T17:21:46.646000",
+          "started_at": "2026-08-19T17:21:46.646000"
+        },
+        "TRADING_SESSION": {
+          "status": "SUCCESS",
+          "timestamp": "2026-08-19T17:21:48.313000",
+          "started_at": "2026-08-19T17:21:48.313000"
+        },
+        "COLLECT_PCR": {
+          "status": "SUCCESS",
+          "timestamp": "2026-08-19T17:50:54.578000",
+          "started_at": "2026-08-19T17:50:54.578000"
+        },
+        "COLLECT_SECTOR": {
+          "status": "SUCCESS",
+          "timestamp": "2026-08-19T17:54:32.585000",
+          "started_at": "2026-08-19T17:54:32.585000"
+        },
+        "COLLECT_FII_DII": {
+          "status": "SUCCESS",
+          "timestamp": "2026-08-19T17:54:33.829000",
+          "started_at": "2026-08-19T17:54:33.829000"
+        },
+        "COLLECT_NEWS": {
+          "status": "SUCCESS",
+          "timestamp": "2026-08-19T17:56:36.850000",
+          "started_at": "2026-08-19T17:56:36.850000"
+        },
+        "SENTIMENT": {
+          "status": "SUCCESS",
+          "timestamp": "2026-08-19T17:56:40.295000",
+          "started_at": "2026-08-19T17:56:40.295000"
+        },
+        "COLLECT_OHLCV": {
+          "status": "SUCCESS",
+          "timestamp": "2026-08-19T18:00:16.509000",
+          "started_at": "2026-08-19T18:00:16.509000",
+          "metrics": {
+            "successful": 51,
+            "failed": 0
+          }
+        },
+        "OHLCV_INTEGRITY": {
+          "status": "SUCCESS",
+          "timestamp": "2026-08-19T18:00:16.574000",
+          "started_at": "2026-08-19T18:00:16.574000",
+          "metrics": {
+            "processed": 51,
+            "missing": 0
+          }
+        },
+        "SETTLEMENT": {
+          "status": "SUCCESS",
+          "timestamp": "2026-08-19T18:00:18.563000",
+          "started_at": "2026-08-19T18:00:18.563000",
+          "metrics": {
+            "READY_TO_SETTLE": 0,
+            "NOT_MATURE": 63,
+            "LEGACY_UNSETTLEABLE": 134,
+            "MISSING_MARKET_DATA": 0,
+            "INVALID_PREDICTION_RECORD": 0,
+            "ALREADY_EVALUATED": 0,
+            "ERRORS": 0
+          }
+        },
+        "PREDICTION_GENERATION": {
+          "status": "SUCCESS",
+          "timestamp": "2026-08-19T18:01:13.613000",
+          "started_at": "2026-08-19T18:01:13.613000",
+          "metrics": {
+            "generated": 51,
+            "skipped": 0,
+            "stale": [],
+            "existing": 0,
+            "failed": [],
+            "errors": []
+          }
+        },
+        "PREDICTION_VALIDATION": {
+          "status": "SUCCESS",
+          "timestamp": "2026-08-19T18:01:13.685000",
+          "started_at": "2026-08-19T18:01:13.685000"
+        },
+        "API_HEALTH": {
+          "status": "SUCCESS",
+          "timestamp": "2026-08-19T18:01:14.764000",
+          "started_at": "2026-08-19T18:01:14.764000",
+          "metrics": {
+            "expected_count": 51,
+            "returned_count": 51
+          }
+        }
+      },
+      "started_at": "2026-08-19T17:21:45.993000",
+      "status": "SUCCESS",
+      "completed_at": "2026-08-19T18:01:14.780000"
+    }
+  ],
+  "3_lock": {
+    "_id": "6a75d9d637838b475fc21e3c",
+    "lock_id": "daily_production_lock",
+    "run_id": "a3b0e411-5f2d-4999-8f00-f2b6a845e869",
+    "status": "SUCCESS",
+    "started_at": "2026-08-19T17:21:46.616000",
+    "heartbeat_at": "2026-08-19T18:01:07.775000",
+    "expires_at": "2026-08-19T20:01:07.775000",
+    "owner": "a3b0e411-5f2d-4999-8f00-f2b6a845e869",
+    "completed_at": "2026-08-19T18:01:14.794000"
+  },
+  "4_preds": {
+    "count": 51,
+    "distinct_symbols": 51,
+    "horizons": [
+      10
+    ],
+    "statuses": {
+      "PENDING": 51
+    },
+    "duplicates": 0
+  },
+  "5_provenance": {
+    "missing_prov_fields": [
+      "ADANIENT.NS",
+      "ADANIPORTS.NS",
+      "APOLLOHOSP.NS",
+      "ASIANPAINT.NS",
+      "AXISBANK.NS",
+      "BAJAJ-AUTO.NS",
+      "BAJFINANCE.NS",
+      "BAJAJFINSV.NS",
+      "BEL.NS",
+      "BHARTIARTL.NS",
+      "BRITANNIA.NS",
+      "CIPLA.NS",
+      "COALINDIA.NS",
+      "DRREDDY.NS",
+      "EICHERMOT.NS",
+      "ETERNAL.NS",
+      "GRASIM.NS",
+      "HCLTECH.NS",
+      "HDFCBANK.NS",
+      "HDFCLIFE.NS",
+      "HEROMOTOCO.NS",
+      "HINDALCO.NS",
+      "HINDUNILVR.NS",
+      "ICICIBANK.NS",
+      "INDIGO.NS",
+      "INFY.NS",
+      "ITC.NS",
+      "JIOFIN.NS",
+      "JSWSTEEL.NS",
+      "KOTAKBANK.NS",
+      "LT.NS",
+      "M&M.NS",
+      "MARUTI.NS",
+      "MAXHEALTH.NS",
+      "NESTLEIND.NS",
+      "NTPC.NS",
+      "ONGC.NS",
+      "POWERGRID.NS",
+      "RELIANCE.NS",
+      "SBILIFE.NS",
+      "SBIN.NS",
+      "SHRIRAMFIN.NS",
+      "SUNPHARMA.NS",
+      "TATACONSUM.NS",
+      "TATASTEEL.NS",
+      "TCS.NS",
+      "TECHM.NS",
+      "TITAN.NS",
+      "TRENT.NS",
+      "ULTRACEMCO.NS",
+      "WIPRO.NS"
+    ],
+    "sample_prov": null
+  },
+  "6_manifests": {
+    "matching": 51,
+    "mismatch": 0,
+    "missing": 0
+  },
+  "9_historical": {
+    "count": 51,
+    "sources": {
+      "YAHOO": 51
+    },
+    "duplicates": 0
+  },
+  "12_indexes": [
+    {
+      "v": 2,
+      "key": {
+        "_id": 1
+      },
+      "name": "_id_"
+    },
+    {
+      "v": 2,
+      "key": {
+        "symbol": 1,
+        "market_date": -1,
+        "prediction_horizon": 1
+      },
+      "name": "symbol_1_market_date_-1_prediction_horizon_1",
+      "unique": true
+    },
+    {
+      "v": 2,
+      "key": {
+        "status": 1
+      },
+      "name": "status_1"
+    },
+    {
+      "v": 2,
+      "key": {
+        "prediction_timestamp": 1
+      },
+      "name": "prediction_timestamp_1"
+    }
+  ],
+  "14_repo": {
+    "head": "3b3b5f04",
+    "status": "?? audit_db_report.json\n?? failed_tests_detail.txt\n?? feature_inventory.json\n?? model_inventory.json\n?? preflight_audit.py\n?? provenance_audit.json\n?? remediation_manifest.json\n?? test_failures.txt"
+  }
+}

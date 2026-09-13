@@ -1,0 +1,20 @@
+.stock-identity { display: inline-flex; align-items: baseline; gap: var(--space-2); }
+.stock-identity__ticker { font-weight: var(--weight-bold); color: var(--color-text-primary); }
+.stock-identity__name { font-size: var(--text-sm); color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+.stock-identity__link { text-decoration: none; }
+.stock-identity__link:hover .stock-identity__ticker { color: var(--color-interaction-primary); }
+
+.price-display { font-weight: var(--weight-medium); color: var(--color-text-primary); font-variant-numeric: tabular-nums; }
+.price-display.unavailable { color: var(--color-text-disabled); }
+
+.change-display { display: inline-flex; align-items: center; gap: var(--space-1); font-variant-numeric: tabular-nums; font-weight: var(--weight-medium); font-size: var(--text-sm); }
+.change-display--positive { color: var(--color-status-success); }
+.change-display--negative { color: var(--color-status-error); }
+.change-display--neutral { color: var(--color-text-secondary); }
+.change-display.unavailable { color: var(--color-text-disabled); }
+.change-display__values { display: inline-flex; gap: var(--space-1); }
+.change-display__pct { opacity: 0.8; }
+
+.confidence-indicator { font-weight: var(--weight-medium); color: var(--color-text-primary); }
+.confidence-indicator.unavailable { color: var(--color-text-disabled); }
+.confidence-indicator.tier { text-transform: capitalize; }

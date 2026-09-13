@@ -1,0 +1,499 @@
+{
+  "collections": [
+    "sector_indices",
+    "model_locks",
+    "pipeline_runs",
+    "fii_dii_data",
+    "model_registry",
+    "historical_data",
+    "pcr_data",
+    "prediction_provenance",
+    "news_articles",
+    "prediction_history",
+    "pipeline_locks"
+  ],
+  "run_interrupted": {
+    "_id": {
+      "$oid": "6a9984d1f79cf9675ed36146"
+    },
+    "run_id": "91d09ca4-4ef1-46fb-8a79-8e1aa238863c",
+    "degraded_stages": [],
+    "duration_ms": 1982,
+    "errors": [
+      "STALE_EXECUTION"
+    ],
+    "market_date": "2026-09-03",
+    "owner": "91d09ca4-4ef1-46fb-8a79-8e1aa238863c",
+    "stages": {
+      "START": {
+        "status": "SUCCESS",
+        "timestamp": {
+          "$date": "2026-09-03T14:31:44.533Z"
+        },
+        "started_at": {
+          "$date": "2026-09-03T14:31:44.533Z"
+        }
+      },
+      "ACQUIRE_LOCK": {
+        "status": "SUCCESS",
+        "timestamp": {
+          "$date": "2026-09-03T14:31:44.653Z"
+        },
+        "started_at": {
+          "$date": "2026-09-03T14:31:44.653Z"
+        }
+      },
+      "TRADING_SESSION": {
+        "status": "SUCCESS",
+        "timestamp": {
+          "$date": "2026-09-03T14:31:45.932Z"
+        },
+        "started_at": {
+          "$date": "2026-09-03T14:31:45.932Z"
+        }
+      }
+    },
+    "started_at": {
+      "$date": "2026-09-03T14:31:43.949Z"
+    },
+    "status": "FAILED",
+    "completed_at": {
+      "$date": "2026-09-03T16:32:25.771Z"
+    }
+  },
+  "run_successful": {
+    "_id": {
+      "$oid": "6a99a11bf79cf9675ed36406"
+    },
+    "run_id": "4c83bf0b-5f8e-4aab-ae82-d36fff99e2af",
+    "degraded_stages": [],
+    "duration_ms": 2211657,
+    "errors": [],
+    "market_date": "2026-09-04",
+    "owner": "4c83bf0b-5f8e-4aab-ae82-d36fff99e2af",
+    "stages": {
+      "START": {
+        "status": "SUCCESS",
+        "timestamp": {
+          "$date": "2026-09-03T16:32:25.732Z"
+        },
+        "started_at": {
+          "$date": "2026-09-03T16:32:25.732Z"
+        }
+      },
+      "ACQUIRE_LOCK": {
+        "status": "SUCCESS",
+        "timestamp": {
+          "$date": "2026-09-03T16:32:25.830Z"
+        },
+        "started_at": {
+          "$date": "2026-09-03T16:32:25.830Z"
+        }
+      },
+      "TRADING_SESSION": {
+        "status": "SUCCESS",
+        "timestamp": {
+          "$date": "2026-09-03T16:32:27.410Z"
+        },
+        "started_at": {
+          "$date": "2026-09-03T16:32:27.410Z"
+        }
+      },
+      "COLLECT_PCR": {
+        "status": "SUCCESS",
+        "timestamp": {
+          "$date": "2026-09-03T17:00:00.452Z"
+        },
+        "started_at": {
+          "$date": "2026-09-03T17:00:00.452Z"
+        }
+      },
+      "COLLECT_SECTOR": {
+        "status": "SUCCESS",
+        "timestamp": {
+          "$date": "2026-09-03T17:03:08.009Z"
+        },
+        "started_at": {
+          "$date": "2026-09-03T17:03:08.009Z"
+        }
+      },
+      "COLLECT_FII_DII": {
+        "status": "SUCCESS",
+        "timestamp": {
+          "$date": "2026-09-03T17:03:09.098Z"
+        },
+        "started_at": {
+          "$date": "2026-09-03T17:03:09.098Z"
+        }
+      },
+      "COLLECT_NEWS": {
+        "status": "SUCCESS",
+        "timestamp": {
+          "$date": "2026-09-03T17:04:55.963Z"
+        },
+        "started_at": {
+          "$date": "2026-09-03T17:04:55.963Z"
+        }
+      },
+      "SENTIMENT": {
+        "status": "SUCCESS",
+        "timestamp": {
+          "$date": "2026-09-03T17:05:04.525Z"
+        },
+        "started_at": {
+          "$date": "2026-09-03T17:05:04.525Z"
+        }
+      },
+      "COLLECT_OHLCV": {
+        "status": "SUCCESS",
+        "timestamp": {
+          "$date": "2026-09-03T17:08:19.152Z"
+        },
+        "started_at": {
+          "$date": "2026-09-03T17:08:19.152Z"
+        },
+        "metrics": {
+          "successful": 51,
+          "failed": 0
+        }
+      },
+      "OHLCV_INTEGRITY": {
+        "status": "SUCCESS",
+        "timestamp": {
+          "$date": "2026-09-03T17:08:20.704Z"
+        },
+        "started_at": {
+          "$date": "2026-09-03T17:08:20.704Z"
+        },
+        "metrics": {
+          "processed": 51,
+          "missing": 0
+        }
+      },
+      "SETTLEMENT": {
+        "status": "SUCCESS",
+        "timestamp": {
+          "$date": "2026-09-03T17:08:29.656Z"
+        },
+        "started_at": {
+          "$date": "2026-09-03T17:08:29.656Z"
+        },
+        "metrics": {
+          "READY_TO_SETTLE": 51,
+          "NOT_MATURE": 510,
+          "LEGACY_UNSETTLEABLE": 134,
+          "MISSING_MARKET_DATA": 0,
+          "INVALID_PREDICTION_RECORD": 0,
+          "ALREADY_EVALUATED": 0,
+          "ERRORS": 0
+        }
+      },
+      "PREDICTION_GENERATION": {
+        "status": "SUCCESS",
+        "timestamp": {
+          "$date": "2026-09-03T17:09:15.933Z"
+        },
+        "started_at": {
+          "$date": "2026-09-03T17:09:15.933Z"
+        },
+        "metrics": {
+          "generated": 51,
+          "skipped": 0,
+          "stale": [],
+          "existing": 0,
+          "failed": [],
+          "errors": []
+        }
+      },
+      "PREDICTION_VALIDATION": {
+        "status": "SUCCESS",
+        "timestamp": {
+          "$date": "2026-09-03T17:09:16.005Z"
+        },
+        "started_at": {
+          "$date": "2026-09-03T17:09:16.005Z"
+        }
+      },
+      "API_HEALTH": {
+        "status": "SUCCESS",
+        "timestamp": {
+          "$date": "2026-09-03T17:09:16.980Z"
+        },
+        "started_at": {
+          "$date": "2026-09-03T17:09:16.980Z"
+        },
+        "metrics": {
+          "expected_count": 51,
+          "returned_count": 51
+        }
+      }
+    },
+    "started_at": {
+      "$date": "2026-09-03T16:32:25.334Z"
+    },
+    "status": "SUCCESS",
+    "completed_at": {
+      "$date": "2026-09-03T17:09:16.991Z"
+    }
+  },
+  "lock": {
+    "_id": {
+      "$oid": "6a92722539edae43290da2f6"
+    },
+    "lock_id": "daily_production_lock",
+    "run_id": "4c83bf0b-5f8e-4aab-ae82-d36fff99e2af",
+    "status": "SUCCESS",
+    "started_at": {
+      "$date": "2026-09-03T16:32:25.806Z"
+    },
+    "heartbeat_at": {
+      "$date": "2026-09-03T17:09:11.683Z"
+    },
+    "expires_at": {
+      "$date": "2026-09-03T19:09:11.683Z"
+    },
+    "owner": "4c83bf0b-5f8e-4aab-ae82-d36fff99e2af",
+    "completed_at": {
+      "$date": "2026-09-03T17:09:17.008Z"
+    }
+  },
+  "sep3_preds_count": 51,
+  "sep3_unique_symbols": [
+    "BAJAJ-AUTO.NS",
+    "TATACONSUM.NS",
+    "APOLLOHOSP.NS",
+    "SBIN.NS",
+    "SHRIRAMFIN.NS",
+    "BHARTIARTL.NS",
+    "MARUTI.NS",
+    "HDFCLIFE.NS",
+    "HINDALCO.NS",
+    "CIPLA.NS",
+    "TATASTEEL.NS",
+    "TRENT.NS",
+    "ULTRACEMCO.NS",
+    "GRASIM.NS",
+    "TECHM.NS",
+    "HEROMOTOCO.NS",
+    "HDFCBANK.NS",
+    "M&M.NS",
+    "KOTAKBANK.NS",
+    "BRITANNIA.NS",
+    "COALINDIA.NS",
+    "AXISBANK.NS",
+    "INDIGO.NS",
+    "MAXHEALTH.NS",
+    "SBILIFE.NS",
+    "SUNPHARMA.NS",
+    "JSWSTEEL.NS",
+    "ITC.NS",
+    "TITAN.NS",
+    "BEL.NS",
+    "ICICIBANK.NS",
+    "JIOFIN.NS",
+    "HINDUNILVR.NS",
+    "BAJFINANCE.NS",
+    "HCLTECH.NS",
+    "TCS.NS",
+    "ASIANPAINT.NS",
+    "ADANIPORTS.NS",
+    "POWERGRID.NS",
+    "DRREDDY.NS",
+    "NESTLEIND.NS",
+    "RELIANCE.NS",
+    "ETERNAL.NS",
+    "WIPRO.NS",
+    "ADANIENT.NS",
+    "EICHERMOT.NS",
+    "LT.NS",
+    "BAJAJFINSV.NS",
+    "NTPC.NS",
+    "INFY.NS",
+    "ONGC.NS"
+  ],
+  "sep3_statuses": [
+    "PENDING"
+  ],
+  "sep3_provenance_statuses": [
+    "COMPLETE"
+  ],
+  "sep3_pipeline_hashes": [
+    null
+  ],
+  "sep3_run_ids": [
+    null
+  ],
+  "sep3_model_versions": [
+    "8c7e40d330c7",
+    "14f89a12c35c",
+    "ab9595fb8f6e",
+    "ebb154405f47",
+    "49be56ade62a",
+    "d8b1972c8a6e",
+    "a33a7dc36c06",
+    "f3f93241aa7f",
+    "6888c529893d",
+    "edf7eb6f74c2",
+    "5915d86aa47e",
+    "f451172949c7",
+    "998a2e97d06c",
+    "482672d43ae3",
+    "9bf5c9ecc22f",
+    "41427818da56",
+    "d5fea4af8e8c",
+    "71108313884b",
+    "7e4d3751fab0",
+    "1be7345ec2e4",
+    "72bb31086173",
+    "19d7f122b7e9",
+    "aff9573e41eb",
+    "c2219c5b6bfc",
+    "d8d3d7787d1f",
+    "ce15b79a513d",
+    "51c339635e1b",
+    "58003cbc6ace",
+    "3892bb6bc643",
+    "b80cbc8d95e4",
+    "67463cc7852f",
+    "5be94b7ffff6",
+    "5d2ac87ac446",
+    "a4338ed0ae4a",
+    "f94e09e9cba3",
+    "cfaba47c9bb5",
+    "02888744d95f",
+    "8c662d24e01f",
+    "d4c009de83c6",
+    "28b648b70b23",
+    "34153fbfa3c3",
+    "7415aec5e55f",
+    "ad44ce6a4b40",
+    "5b607da2d633",
+    "0967faf3259b",
+    "aa0702de8ca8",
+    "094c1649e4e1",
+    "d7629d379cc2",
+    "5afc773cb5fe",
+    "50ecb447c774",
+    "d12253eafe81"
+  ],
+  "aug20_count": 51,
+  "aug20_statuses": [
+    "EVALUATED"
+  ],
+  "aug20_accuracy": {
+    "correct": 22,
+    "incorrect": 29,
+    "total_evaluated": 51
+  },
+  "aug20_sample": {
+    "_id": {
+      "$oid": "6a85ef3dfb39c59f7952d634"
+    },
+    "market_date": "2026-08-20",
+    "prediction_horizon": 10,
+    "symbol": "ADANIENT.NS",
+    "actual_price": 2901.0,
+    "actual_return": -0.031353269025874875,
+    "confidence": 75.8,
+    "confidence_tier": "HIGH",
+    "feature_snapshot": {
+      "atr_pct": 0.021977858070947928,
+      "nifty_ret_20d": 0.003419316820336471,
+      "vix_level": 11.322500228881836,
+      "crude_vol_10d": 0.0200514828051227,
+      "market_correlation": 0.4886798189241714,
+      "obv_deviation": -0.008323845533380725,
+      "atr": 65.72039006269318,
+      "vix_vol_10d": 0.01353944296154041,
+      "price_change_5d": 0.0015407099613089503,
+      "month_cos": -0.5000000000000004,
+      "stock_pcr_oi": 0.6581509909497079,
+      "nasdaq_ret_20d": 0.015723551927264712,
+      "is_month_end": 1.0,
+      "gold_vol_10d": 0.015567664799475084,
+      "copper_ret_5d": -0.01591632819926858
+    },
+    "model_version": "1be7345ec2e4",
+    "outcome": "CORRECT",
+    "prediction_correct": true,
+    "prediction_timestamp": {
+      "$date": "2026-08-19T18:00:27.836Z"
+    },
+    "price_at_prediction": 2990.300048828125,
+    "provenance_hash": "55942c8eec8f7e5405f6dd37083262588c93a18a0b6b1cef42f7d05ce4511da9",
+    "provenance_status": "COMPLETE",
+    "raw_prediction": "SELL",
+    "recommendation": "SELL",
+    "status": "EVALUATED",
+    "target_return_threshold": 0.021977858070947928,
+    "threshold_pct": null,
+    "actual_class": "SELL",
+    "evaluation_timestamp": {
+      "$date": "2026-09-03T17:08:22.363Z"
+    },
+    "raw_prediction_correct": true,
+    "recommendation_correct": true,
+    "settlement_hash": "e72f512b0d09764827f01584157ca0b7b1f77fd9a4f6a99880ad08c4ea7e51f8",
+    "settlement_market_date": "2026-09-03"
+  },
+  "later_cohorts": {
+    "2026-08-21": {
+      "count": 51,
+      "statuses": [
+        "PENDING"
+      ]
+    },
+    "2026-08-24": {
+      "count": 51,
+      "statuses": [
+        "PENDING"
+      ]
+    },
+    "2026-08-25": {
+      "count": 51,
+      "statuses": [
+        "PENDING"
+      ]
+    },
+    "2026-08-26": {
+      "count": 51,
+      "statuses": [
+        "PENDING"
+      ]
+    },
+    "2026-08-27": {
+      "count": 51,
+      "statuses": [
+        "PENDING"
+      ]
+    },
+    "2026-08-28": {
+      "count": 51,
+      "statuses": [
+        "PENDING"
+      ]
+    },
+    "2026-08-31": {
+      "count": 51,
+      "statuses": [
+        "PENDING"
+      ]
+    },
+    "2026-09-01": {
+      "count": 51,
+      "statuses": [
+        "PENDING"
+      ]
+    },
+    "2026-09-02": {
+      "count": 51,
+      "statuses": [
+        "PENDING"
+      ]
+    }
+  },
+  "active_models_count": 51,
+  "active_models_hashes": [
+    null
+  ]
+}

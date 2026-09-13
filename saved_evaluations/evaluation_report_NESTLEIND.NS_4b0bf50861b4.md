@@ -1,0 +1,51 @@
+# Candidate Evaluation Report: NESTLEIND.NS
+
+## 1. Identity
+- **Ticker**: NESTLEIND.NS
+- **Active Model Hash**: `d5fea4af8e8c`
+- **Candidate Model Hash**: `4b0bf50861b4`
+- **Evaluation Timestamp**: 2026-08-20T13:09:40.273953+00:00
+
+## 2. Dataset
+- **Evaluation Dataset Version**: `v1_a3262716b006`
+- **Evaluation Dataset Hash**: `a3262716b006e3097e592cd2855d91fdaed759bb52107fd164ffc70932a4f520`
+- **Evaluation Start Date**: 2025-08-25
+- **Evaluation End Date**: 2026-08-05
+- **Evaluation Rows (Ticker)**: 221
+
+## 3. Contract
+- **Prediction Horizon**: 10 sessions
+- **Active Feature Pipeline Hash**: `f4891c1b2172b8e024b176cd221cf33c8b5e006acd567d95f2768cb7bf72384e`
+- **Candidate Feature Pipeline Hash**: `f4891c1b2172b8e024b176cd221cf33c8b5e006acd567d95f2768cb7bf72384e`
+- **Feature Schema Compatibility**: PASS
+
+## 4. ML Metrics (Actionable Signals Only)
+| Metric | Active | Candidate | Delta |
+|--------|--------|-----------|-------|
+| Actionable Precision | 0.2703 | 0.3158 | 0.0455 |
+| Actionable Recall | 0.0787 | 0.0945 | 0.0157 |
+| Actionable Count | 37 | 38 | 1 |
+
+## 5. Statistical Evidence (McNemar's Test)
+- **Applicability**: APPLICABLE
+- **Test Statistic**: 0.0
+- **p-value**: 1.0
+- **Actionable Sample Size (Intersection)**: 23
+*(Note: Temporal dependence in observations limits strict p-value interpretation)*
+
+## 6. Economic Evidence (Simulated Actionable Cumulative Return)
+- **Active Return**: 22.34%
+- **Candidate Return**: 33.12%
+- **Delta**: 10.78%
+- **Transaction Costs**: NOT MODELED
+
+## 7. Robustness
+- **Active Class Distribution**: {0: 39, 1: 138, 2: 44}
+- **Candidate Class Distribution**: {0: 36, 1: 142, 2: 43}
+
+## 8. Final Decision
+### **Verdict**: INCONCLUSIVE
+**Explanation**: Candidate economically outperforms, but statistical significance (McNemar) is weak or not applicable.
+
+> [!WARNING]
+> This is an evidence report. It does NOT automatically promote the candidate.

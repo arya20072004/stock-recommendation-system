@@ -1,38 +1,31 @@
+/* model-intelligence.css */
+
 .model-intelligence-page {
-  padding: 24px;
-  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 80rem;
   margin: 0 auto;
+  width: 100%;
 }
 
 .model-intelligence-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 32px;
-}
-
-.model-intelligence-header h1 {
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.model-intelligence-header p {
-  color: var(--text-muted, #a1a1aa);
-  font-size: 14px;
+  margin-bottom: var(--space-6);
 }
 
 .ticker-selector-container {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .model-dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-bottom: 24px;
+  gap: var(--space-6);
 }
 
 @media (max-width: 1024px) {
@@ -41,31 +34,22 @@
   }
 }
 
-.model-card {
-  background: var(--bg-card, #18181b);
-  border: 1px solid var(--border-color, #27272a);
-  border-radius: 12px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-}
-
 .model-card-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  color: var(--text-primary, #ffffff);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-4);
+  color: var(--text-primary);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 /* Metrics Section */
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
 }
 
 .metric-item {
@@ -74,106 +58,65 @@
 }
 
 .metric-label {
-  font-size: 13px;
-  color: var(--text-muted, #a1a1aa);
-  margin-bottom: 4px;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-1);
 }
 
 .metric-value {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text-primary, #ffffff);
-}
-
-.class-metrics-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 16px;
-}
-
-.class-metrics-table th,
-.class-metrics-table td {
-  padding: 12px;
-  text-align: right;
-  border-bottom: 1px solid var(--border-color, #27272a);
-  font-size: 14px;
-}
-
-.class-metrics-table th:first-child,
-.class-metrics-table td:first-child {
-  text-align: left;
-}
-
-.class-metrics-table th {
-  color: var(--text-muted, #a1a1aa);
-  font-weight: 500;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
 }
 
 /* Feature Importance */
 .feature-bars {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .feature-bar-item {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .feature-label {
   width: 140px;
-  font-size: 13px;
+  font-size: var(--text-sm);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--text-secondary, #d4d4d8);
+  color: var(--text-secondary);
 }
 
 .feature-bar-track {
   flex: 1;
   height: 8px;
-  background: var(--bg-hover, #27272a);
-  border-radius: 4px;
+  background: var(--surface-secondary);
+  border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .feature-bar-fill {
   height: 100%;
-  background: var(--accent-color, #3b82f6);
-  border-radius: 4px;
+  background: var(--brand-primary);
+  border-radius: var(--radius-full);
 }
 
 .feature-value {
   width: 60px;
-  font-size: 13px;
+  font-size: var(--text-sm);
   text-align: right;
-  color: var(--text-muted, #a1a1aa);
-}
-
-.view-all-btn {
-  background: transparent;
-  border: 1px solid var(--border-color, #27272a);
-  color: var(--text-primary, #ffffff);
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 13px;
-  cursor: pointer;
-  margin-top: 16px;
-  width: 100%;
-  transition: background 0.2s;
-}
-
-.view-all-btn:hover {
-  background: var(--bg-hover, #27272a);
+  color: var(--text-secondary);
 }
 
 /* Metadata Section */
 .metadata-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-5);
 }
 
 .metadata-item {
@@ -182,39 +125,82 @@
 }
 
 .metadata-label {
-  font-size: 13px;
-  color: var(--text-muted, #a1a1aa);
-  margin-bottom: 4px;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-1);
 }
 
 .metadata-value {
-  font-size: 14px;
-  color: var(--text-primary, #ffffff);
+  font-size: var(--text-base);
+  color: var(--text-primary);
 }
 
 .optuna-params {
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid var(--border-color, #27272a);
+  margin-top: var(--space-6);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--border-default);
 }
 
 .params-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-  margin-top: 16px;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
 }
 
-.unavailable-state {
-  padding: 32px 24px;
-  text-align: center;
-  color: var(--text-muted, #a1a1aa);
-  font-size: 14px;
-  background: var(--bg-hover, #27272a);
-  border-radius: 8px;
-  flex: 1;
+.param-item {
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+}
+
+.param-key {
+  color: var(--text-secondary);
+}
+
+.param-value {
+  color: var(--brand-primary);
+}
+
+ /* Mobile Data Card Integration */
+.mi-mobile-list {
   display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.mi-mobile-card-row {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  min-height: 180px;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.mi-mobile-card-row:last-child {
+  border-bottom: none;
+}
+
+.mi-mobile-card-label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.mi-mobile-card-value {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  font-weight: var(--weight-medium);
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+  .mobile-only {
+    display: flex;
+  }
 }

@@ -28,7 +28,7 @@ def test_historical_t1_t2_gap_recovery():
                 assert pd.Timestamp("2026-08-28") in df.index
                 assert df.loc[pd.Timestamp("2026-08-28"), "Close"] == 24122.6
                 assert mock_nse.call_count == 1
-                mock_nse.assert_called_with(pd.Timestamp("2026-08-28"))
+                mock_nse.assert_called_with(pd.Timestamp("2026-08-28"), index_name='Nifty 50')
 
 def test_cache_deduplication():
     start_date = datetime(2026, 8, 20)

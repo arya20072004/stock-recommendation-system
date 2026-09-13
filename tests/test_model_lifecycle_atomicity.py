@@ -22,6 +22,7 @@ from datetime import datetime, timezone, timedelta
 from pymongo.errors import DuplicateKeyError, OperationFailure
 
 import pymongo
+from src.features.router import get_feature_pipeline_hash
 
 class MockSession:
     def __init__(self, client):
@@ -104,6 +105,8 @@ def seed_candidate(db, ticker, version, status="CANDIDATE", valid_artifacts=True
         "status": status,
         "model_hash": m_hash,
         "feature_hash": f_hash,
+        "feature_pipeline_version": "v1",
+        "feature_pipeline_hash": get_feature_pipeline_hash("v1"),
         "metrics": {"f1_macro": 0.8},
         "trained_at": datetime.now(timezone.utc).isoformat()
     })
@@ -229,11 +232,10 @@ def test_11_manifest_replacement_failure(db):
         success = promote_model(db, ticker, "v1")
         assert success is False
         active = db.model_registry.find_one({"ticker": ticker, "status": "ACTIVE"})
-        assert active["version"] == "v1"
+        assert active is None
+        candidate = db.model_registry.find_one({"ticker": ticker, "status": "CANDIDATE"})
+        assert candidate["version"] == "v1"
         assert not os.path.exists(mr.get_active_manifest_path(ticker))
-    sync_manifest(db, ticker)
-    manifest = mr.read_active_manifest(ticker)
-    assert manifest["model_version"] == "v1"
 
 def test_12_registry_manifest_mismatch_recovery(db):
     ticker = "TEST12.NS"

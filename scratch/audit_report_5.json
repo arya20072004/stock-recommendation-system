@@ -1,0 +1,206 @@
+{
+  "runs": [
+    {
+      "run_id": "4c83bf0b-5f8e-4aab-ae82-d36fff99e2af",
+      "market_date": "2026-09-04",
+      "status": "SUCCESS",
+      "started_at": {
+        "$date": "2026-09-03T16:32:25.334Z"
+      },
+      "duration": 2211657,
+      "errors": []
+    },
+    {
+      "run_id": "d038875e-a695-4342-b3e4-f4f4d9ce516a",
+      "market_date": null,
+      "status": "BLOCKED",
+      "started_at": {
+        "$date": "2026-09-03T14:35:01.135Z"
+      },
+      "duration": 564,
+      "errors": []
+    },
+    {
+      "run_id": "91d09ca4-4ef1-46fb-8a79-8e1aa238863c",
+      "market_date": "2026-09-03",
+      "status": "FAILED",
+      "started_at": {
+        "$date": "2026-09-03T14:31:43.949Z"
+      },
+      "duration": 1982,
+      "errors": [
+        "STALE_EXECUTION"
+      ]
+    },
+    {
+      "run_id": "58b40556-3b80-450f-8099-b74d4884f5c9",
+      "market_date": "2026-09-03",
+      "status": "SUCCESS",
+      "started_at": {
+        "$date": "2026-09-02T14:31:49.865Z"
+      },
+      "duration": 2806703,
+      "errors": []
+    },
+    {
+      "run_id": "76f0cff2-0ef7-4638-bf27-d1b8a4fe9b28",
+      "market_date": "2026-09-02",
+      "status": "SUCCESS",
+      "started_at": {
+        "$date": "2026-09-01T15:15:06.159Z"
+      },
+      "duration": 2123265,
+      "errors": []
+    },
+    {
+      "run_id": "fdacd46c-fda1-477b-9362-283770b6f325",
+      "market_date": "2026-09-01",
+      "status": "SUCCESS",
+      "started_at": {
+        "$date": "2026-08-31T17:27:41.399Z"
+      },
+      "duration": 2698924,
+      "errors": []
+    }
+  ],
+  "lock": {
+    "_id": {
+      "$oid": "6a92722539edae43290da2f6"
+    },
+    "lock_id": "daily_production_lock",
+    "run_id": "4c83bf0b-5f8e-4aab-ae82-d36fff99e2af",
+    "status": "SUCCESS",
+    "started_at": {
+      "$date": "2026-09-03T16:32:25.806Z"
+    },
+    "heartbeat_at": {
+      "$date": "2026-09-03T17:09:11.683Z"
+    },
+    "expires_at": {
+      "$date": "2026-09-03T19:09:11.683Z"
+    },
+    "owner": "4c83bf0b-5f8e-4aab-ae82-d36fff99e2af",
+    "completed_at": {
+      "$date": "2026-09-03T17:09:17.008Z"
+    }
+  },
+  "sample_pred": {
+    "_id": {
+      "$oid": "6a74290740f8a3b0421d19d8"
+    },
+    "prediction_horizon": 10,
+    "symbol": "ADANIENT.NS",
+    "market_date": "2026-08-05",
+    "actual_price": null,
+    "actual_return": null,
+    "confidence": 65.9,
+    "confidence_tier": "HIGH",
+    "feature_snapshot": {
+      "atr_pct": 0.02357362579409266,
+      "vix_level": 12.1899995803833,
+      "nifty_ret_20d": 0.008861176160934514,
+      "obv_deviation": 0.0032179110897871902,
+      "month_cos": -0.5000000000000004,
+      "nasdaq_ret_20d": 0.01920063928932625,
+      "crude_vol_10d": 0.058244316824107724,
+      "atr": 71.89955867198262,
+      "vix_vol_10d": 0.04502983783481546,
+      "quarter_end": 0.0,
+      "month_sin": -0.8660254037844385,
+      "market_correlation": 0.5311915667445699,
+      "vwap_deviation": -0.015794883463716054,
+      "rsi": 48.99955989340463,
+      "is_month_end": 1.0
+    },
+    "model_version": "c49cc7592115",
+    "outcome": "PENDING",
+    "prediction_correct": null,
+    "prediction_timestamp": {
+      "$date": "2026-08-06T06:26:15.207Z"
+    },
+    "price_at_prediction": 3050.0,
+    "raw_prediction": "SELL",
+    "recommendation": "SELL",
+    "status": "PENDING",
+    "threshold_pct": null
+  },
+  "aug20_count": 51,
+  "aug20_statuses": [
+    "EVALUATED"
+  ],
+  "aug20_settlement_states": [
+    "none"
+  ],
+  "aug20_samples": [
+    {
+      "_id": {
+        "$oid": "6a85ef3dfb39c59f7952d634"
+      },
+      "market_date": "2026-08-20",
+      "prediction_horizon": 10,
+      "symbol": "ADANIENT.NS",
+      "actual_price": 2901.0,
+      "actual_return": -0.031353269025874875,
+      "confidence": 75.8,
+      "confidence_tier": "HIGH",
+      "feature_snapshot": {
+        "atr_pct": 0.021977858070947928,
+        "nifty_ret_20d": 0.003419316820336471,
+        "vix_level": 11.322500228881836,
+        "crude_vol_10d": 0.0200514828051227,
+        "market_correlation": 0.4886798189241714,
+        "obv_deviation": -0.008323845533380725,
+        "atr": 65.72039006269318,
+        "vix_vol_10d": 0.01353944296154041,
+        "price_change_5d": 0.0015407099613089503,
+        "month_cos": -0.5000000000000004,
+        "stock_pcr_oi": 0.6581509909497079,
+        "nasdaq_ret_20d": 0.015723551927264712,
+        "is_month_end": 1.0,
+        "gold_vol_10d": 0.015567664799475084,
+        "copper_ret_5d": -0.01591632819926858
+      },
+      "model_version": "1be7345ec2e4",
+      "outcome": "CORRECT",
+      "prediction_correct": true,
+      "prediction_timestamp": {
+        "$date": "2026-08-19T18:00:27.836Z"
+      },
+      "price_at_prediction": 2990.300048828125,
+      "provenance_hash": "55942c8eec8f7e5405f6dd37083262588c93a18a0b6b1cef42f7d05ce4511da9",
+      "provenance_status": "COMPLETE",
+      "raw_prediction": "SELL",
+      "recommendation": "SELL",
+      "status": "EVALUATED",
+      "target_return_threshold": 0.021977858070947928,
+      "threshold_pct": null,
+      "actual_class": "SELL",
+      "evaluation_timestamp": {
+        "$date": "2026-09-03T17:08:22.363Z"
+      },
+      "raw_prediction_correct": true,
+      "recommendation_correct": true,
+      "settlement_hash": "e72f512b0d09764827f01584157ca0b7b1f77fd9a4f6a99880ad08c4ea7e51f8",
+      "settlement_market_date": "2026-09-03"
+    }
+  ],
+  "sep3_counts": {
+    "md_sep3": 51,
+    "td_sep3": 0,
+    "md_sep4": 51,
+    "td_sep4": 0
+  },
+  "latest_counts_by_md": {
+    "2026-09-04": 51,
+    "2026-09-03": 4
+  },
+  "latest_counts_by_td": {
+    "missing": 55
+  },
+  "latest_hashes": [
+    null
+  ],
+  "latest_runs": [
+    null
+  ]
+}

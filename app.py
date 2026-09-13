@@ -426,7 +426,7 @@ def get_news():
         if ticker and ticker not in TICKERS:
             return jsonify({'error': 'Unsupported ticker'}), 400
 
-        if sentiment and sentiment not in ['POSITIVE', 'NEUTRAL', 'NEGATIVE']:
+        if sentiment and sentiment not in ['POSITIVE', 'NEUTRAL', 'NEGATIVE', 'UNSCORED']:
             return jsonify({'error': 'Unsupported sentiment'}), 400
 
         offset = (page - 1) * limit

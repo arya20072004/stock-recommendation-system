@@ -95,7 +95,7 @@ export function Stocks() {
       <PageHeader 
         title="Stocks" 
         description="Explore companies tracked by the recommendation system." 
-        actions={isPartial ? <Badge tone="warning">Partial Data</Badge> : <Badge tone="positive">Live</Badge>} 
+        actions={isPartial ? <Badge tone="warning">Partial Data</Badge> : <Badge tone="positive">Complete Snapshot</Badge>} 
       />
 
       <div className="stocks-toolbar">

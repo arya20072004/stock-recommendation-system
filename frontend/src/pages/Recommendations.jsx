@@ -8,25 +8,33 @@ import { LoadingState } from '../components/common/LoadingState'
 import { SearchInput } from '../components/common/SearchInput'
 import { Select } from '../components/common/Select'
 import { PageHeader } from '../components/layout/PageHeader'
-import { ConfidenceBar } from '../components/recommendations/ConfidenceBar'
-import { RecommendationBadge } from '../components/recommendations/RecommendationBadge'
-import { RiskBadge } from '../components/recommendations/RiskBadge'
+import { DataTable } from '../components/common/DataTable'
+import { MobileDataCard } from '../components/common/MobileDataCard'
+import { SignalIndicator } from '../components/common/SignalIndicator'
+import { ConfidenceIndicator } from '../components/common/ConfidenceIndicator'
+import { StockIdentity } from '../components/common/StockIdentity'
+import { PriceDisplay } from '../components/common/PriceDisplay'
+import { ChangeDisplay } from '../components/common/ChangeDisplay'
 import { fetchRecommendations } from '../api/recommendations'
-import { formatCurrency, formatPercent } from '../utils/formatters'
 import './recommendations-page.css'
 
 const signalFilters = ['ALL', 'BUY', 'HOLD', 'SELL']
-const tierOptions = [{ value: 'ALL', label: 'All Tiers' }, { value: 'HIGH', label: 'High' }, { value: 'MEDIUM', label: 'Medium' }, { value: 'LOW', label: 'Low' }]
-const sortOptions = [{ value: 'confidence', label: 'Confidence' }, { value: 'change', label: 'Day Change' }, { value: 'ticker', label: 'Ticker' }, { value: 'price', label: 'Price' }]
-const signalTones = { BUY: 'positive', HOLD: 'warning', SELL: 'negative', UNCERTAIN: 'neutral' }
+// Map of backend tiers for filtering, based on common canonical values.
+const tierOptions = [
+  { value: 'ALL', label: 'All Tiers' }, 
+  { value: 'VERY_HIGH', label: 'Very High' }, 
+  { value: 'HIGH', label: 'High' }, 
+  { value: 'MEDIUM', label: 'Medium' }, 
+  { value: 'LOW', label: 'Low' },
+  { value: 'VERY_LOW', label: 'Very Low' }
+]
 
 export function Recommendations() {
   const [signalFilter, setSignalFilter] = useState('ALL')
   const [tierFilter, setTierFilter] = useState('ALL')
-  const [sortBy, setSortBy] = useState('confidence')
   const [search, setSearch] = useState('')
   
-  const [recs, setRecs] = useState([])
+  const [recs, setRecs] = useState(null)
   const [meta, setMeta] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -48,6 +56,7 @@ export function Recommendations() {
   }, [])
 
   const filtered = useMemo(() => {
+    if (!recs) return []
     let result = recs
     if (signalFilter !== 'ALL') result = result.filter(r => r.recommendation === signalFilter)
     if (tierFilter !== 'ALL') result = result.filter(r => r.confidence_tier === tierFilter)
@@ -55,20 +64,15 @@ export function Recommendations() {
       const q = search.toLowerCase()
       result = result.filter(r => r.ticker.toLowerCase().includes(q))
     }
-    const sorted = [...result]
-    switch (sortBy) {
-      case 'confidence': sorted.sort((a, b) => b.confidence - a.confidence); break
-      case 'change': sorted.sort((a, b) => b.day_change_pct - a.day_change_pct); break
-      case 'ticker': sorted.sort((a, b) => a.ticker.localeCompare(b.ticker)); break
-      case 'price': sorted.sort((a, b) => b.last_close - a.last_close); break
-    }
-    return sorted
-  }, [recs, signalFilter, tierFilter, sortBy, search])
+    // We intentionally return the filtered subset WITHOUT re-sorting it.
+    // This preserves the authoritative conviction ordering from the backend.
+    return result
+  }, [recs, signalFilter, tierFilter, search])
 
   if (loading) {
     return (
-      <div className="recommendations-page">
-        <PageHeader title="Recommendations" description="AI-generated opportunities ranked by model confidence." />
+      <div className="recommendations-workspace">
+        <PageHeader title="Recommendations" description="AI-generated market opportunities." />
         <LoadingState label="Loading recommendations..." />
       </div>
     )
@@ -76,98 +80,139 @@ export function Recommendations() {
 
   if (error) {
     return (
-      <div className="recommendations-page">
-        <PageHeader title="Recommendations" description="AI-generated opportunities ranked by model confidence." />
+      <div className="recommendations-workspace">
+        <PageHeader title="Recommendations" description="AI-generated market opportunities." />
         <EmptyState title="Failed to load recommendations" description={error} />
       </div>
     )
   }
 
+  if (!recs) return null
+
   const isPartial = meta && !meta.complete
+  const totalCount = recs.length
+  const buyCount = recs.filter(r => r.recommendation === 'BUY').length
+  const holdCount = recs.filter(r => r.recommendation === 'HOLD').length
+  const sellCount = recs.filter(r => r.recommendation === 'SELL').length
+
+  const columns = [
+    {
+      key: 'ticker',
+      header: 'Stock',
+      render: (val, row) => (
+        <Link to={`/stocks/${encodeURIComponent(row.ticker)}`} className="table-stock-link">
+          <StockIdentity ticker={row.ticker} />
+        </Link>
+      )
+    },
+    {
+      key: 'recommendation',
+      header: 'Signal',
+      render: (val) => <SignalIndicator signal={val} />
+    },
+    {
+      key: 'last_close',
+      header: 'Price',
+      align: 'right',
+      render: (val) => <PriceDisplay price={val} />
+    },
+    {
+      key: 'day_change_pct',
+      header: 'Day Change',
+      align: 'right',
+      render: (val) => <ChangeDisplay percentageChange={val} />
+    },
+    {
+      key: 'confidence',
+      header: 'Confidence',
+      render: (val, row) => <ConfidenceIndicator confidence={row.confidence} tier={row.confidence_tier} />
+    },
+    {
+      key: 'market_date',
+      header: 'Date',
+      align: 'right',
+      render: (val) => <span className="mono text-sm text-secondary">{val}</span>
+    }
+  ]
 
   return (
-    <div className="recommendations-page">
+    <div className="recommendations-workspace">
       <PageHeader 
         title="Recommendations" 
-        description="AI-generated opportunities ranked by model confidence." 
-        actions={isPartial ? <Badge tone="warning">Partial Snapshot</Badge> : <Badge tone="positive">Live</Badge>} 
+        description="AI-generated market opportunities." 
+        actions={
+          <>
+            {meta?.market_date && <Badge tone="neutral">Target session {meta.market_date}</Badge>}
+            {meta?.mixed_date ? (
+              <Badge tone="warning">Mixed Market Dates</Badge>
+            ) : (
+              <Badge tone={isPartial ? 'warning' : 'positive'}>{isPartial ? 'Partial Snapshot' : 'Complete Snapshot'}</Badge>
+            )}
+          </>
+        } 
       />
 
-      {isPartial && (
-        <Card className="snapshot-warning-card" style={{ marginBottom: '1rem', borderColor: 'var(--warning)', background: 'var(--warning-light, rgba(255, 170, 0, 0.1))' }}>
-          <p style={{ margin: 0, color: 'var(--warning-text, inherit)' }}>
-            <strong>Mixed-date snapshot:</strong> This view contains predictions from multiple dates. 
-            Missing tickers: {meta.missing_tickers?.join(', ') || 'None'}.
-          </p>
-        </Card>
-      )}
+      <div className="universe-summary">
+        <div className="universe-summary__stats">
+          <span><strong>{totalCount}</strong> Universe</span>
+          <span><strong>{buyCount}</strong> BUY</span>
+          <span><strong>{holdCount}</strong> HOLD</span>
+          <span><strong>{sellCount}</strong> SELL</span>
+        </div>
+        <div className="universe-summary__filtered">
+          Showing <strong>{filtered.length}</strong> matching records
+        </div>
+      </div>
 
       <div className="filter-bar">
         <div className="signal-filters" role="group" aria-label="Filter by signal">
           {signalFilters.map(f => (
             <Button 
               key={f} 
-              variant="ghost" 
-              className={`signal-filter-button ${signalFilter === f ? 'signal-filter-button--active' : ''} ${f !== 'ALL' ? `signal-filter-button--${signalTones[f]}` : ''}`} 
+              variant={signalFilter === f ? 'primary' : 'ghost'} 
+              className={`signal-filter-button ${f !== 'ALL' ? `signal-filter-button--${f.toLowerCase()}` : ''}`} 
               onClick={() => setSignalFilter(f)} 
               aria-pressed={signalFilter === f}
             >
-              {f === 'ALL' ? 'All' : f.charAt(0) + f.slice(1).toLowerCase()}
+              {f === 'ALL' ? 'All Signals' : f}
             </Button>
           ))}
         </div>
-        <SearchInput className="rec-search" placeholder="Search recommendations..." value={search} onChange={e => setSearch(e.target.value)} />
         <div className="secondary-filters">
-          <Select label="Confidence Tier" value={tierFilter} onChange={setTierFilter} options={tierOptions} />
-          <Select label="Sort by" value={sortBy} onChange={setSortBy} options={sortOptions} />
+          <SearchInput className="rec-search" placeholder="Search ticker..." value={search} onChange={e => setSearch(e.target.value)} />
+          <Select label="Confidence Tier" value={tierFilter} onChange={setTierFilter} options={tierOptions} hideLabel />
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState title="No recommendations found" description="Try changing your filters or search criteria." />
+        <EmptyState title="No records found" description="Try adjusting your filters or search criteria." />
       ) : (
-        <>
-          {/* Desktop table */}
-          <Card className="rec-table-card">
-            <div className="rec-table" role="table" aria-label="Stock recommendations">
-              <div className="rec-table__header" role="row" style={{ gridTemplateColumns: 'minmax(120px, 1.5fr) 1fr 1fr 1fr 1.5fr 1fr' }}>
-                <span role="columnheader">Ticker</span>
-                <span role="columnheader">Signal</span>
-                <span role="columnheader">Price</span>
-                <span role="columnheader">Day Change</span>
-                <span role="columnheader">Confidence</span>
-                <span role="columnheader">Tier</span>
-              </div>
-              {filtered.map(rec => (
-                <Link key={rec.ticker} to={`/stocks/${encodeURIComponent(rec.ticker)}`} className="rec-table__row" role="row" aria-label={`${rec.ticker} — ${rec.recommendation}`} style={{ gridTemplateColumns: 'minmax(120px, 1.5fr) 1fr 1fr 1fr 1.5fr 1fr' }}>
-                  <span role="cell" className="rec-table__stock"><strong>{rec.ticker}</strong><span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{rec.market_date}</span></span>
-                  <span role="cell"><RecommendationBadge signal={rec.recommendation} /></span>
-                  <span role="cell" className="mono">{formatCurrency(rec.last_close)}</span>
-                  <span role="cell" className={`mono ${rec.day_change_pct >= 0 ? 'metric-positive' : 'metric-negative'}`}>{formatPercent(rec.day_change_pct)}</span>
-                  <span role="cell"><ConfidenceBar value={rec.confidence} tone={signalTones[rec.recommendation] ?? 'positive'} compact /></span>
-                  <span role="cell"><RiskBadge risk={rec.confidence_tier} /></span>
-                </Link>
-              ))}
-            </div>
-          </Card>
+        <div className="recommendations-content">
+          <div className="recommendations-desktop">
+            <Card className="recommendations-table-card">
+              <DataTable columns={columns} data={filtered} keyField="ticker" />
+            </Card>
+          </div>
 
-          {/* Mobile cards */}
-          <div className="rec-cards" aria-label="Stock recommendations">
+          <div className="recommendations-mobile">
             {filtered.map(rec => (
-              <Link key={rec.ticker} to={`/stocks/${encodeURIComponent(rec.ticker)}`} className="rec-card-link">
-                <Card hoverable className="rec-card">
-                  <div className="rec-card__header"><strong>{rec.ticker}</strong><RecommendationBadge signal={rec.recommendation} /></div>
-                  <span className="rec-card__price mono">{formatCurrency(rec.last_close)}</span>
-                  <div className="rec-card__metrics">
-                    <div><span>Day Change</span><strong className={`mono ${rec.day_change_pct >= 0 ? 'metric-positive' : 'metric-negative'}`}>{formatPercent(rec.day_change_pct)}</strong></div>
-                    <div><span>Confidence</span><strong className="mono">{rec.confidence}%</strong></div>
-                    <div><span>Tier</span><RiskBadge risk={rec.confidence_tier} /></div>
-                  </div>
-                </Card>
-              </Link>
+              <MobileDataCard 
+                key={rec.ticker}
+                identity={<StockIdentity ticker={rec.ticker} />}
+                primarySignal={<SignalIndicator signal={rec.recommendation} />}
+                primaryMetrics={
+                  <>
+                    <div><span className="metric-label">Price</span><PriceDisplay price={rec.last_close} /></div>
+                    <div><span className="metric-label">Change</span><ChangeDisplay percentageChange={rec.day_change_pct} /></div>
+                  </>
+                }
+                status={<ConfidenceIndicator confidence={rec.confidence} tier={rec.confidence_tier} />}
+                metadata={<span className="mono text-xs text-tertiary">Model: {rec.model_version} • {rec.market_date}</span>}
+                action={<Button as={Link} to={`/stocks/${encodeURIComponent(rec.ticker)}`} variant="outline" className="full-width">View Details</Button>}
+              />
             ))}
           </div>
-        </>
+        </div>
       )}
     </div>
   )

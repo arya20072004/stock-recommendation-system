@@ -105,11 +105,18 @@ def test_group_c_settlement_integration(client, db):
     }
     db.prediction_history.insert_one(hist)
     # Insert market data for settlement
-    db.historical_data.insert_one({
-        "ticker": "TICKER",
-        "date": datetime(2023, 10, 2),
-        "close": 110.0
-    })
+    db.historical_data.insert_many([
+        {
+            "ticker": "TICKER",
+            "date": datetime(2023, 10, 1),
+            "close": 100.0
+        },
+        {
+            "ticker": "TICKER",
+            "date": datetime(2023, 10, 2),
+            "close": 110.0
+        }
+    ])
     # Run evaluation
     evaluate_predictions(client, apply=True)
     record = db.prediction_history.find_one({"_id": "p1"})
@@ -184,7 +191,7 @@ def test_group_f_legacy_compatibility(db):
     }
     db.prediction_history.insert_one(hist)
     res = fetch_evaluated_predictions(db, {})
-    assert len(res) == 1  # Legacy record passed
+    assert len(res) == 0  # Legacy record without settlement_hash is now skipped
 
 def test_group_g_missing_corrupt_data(db):
     hist = {

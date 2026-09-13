@@ -201,7 +201,6 @@ def test_group_g_recommendations_invariant(client, db):
 
 def test_group_h_mongodb_failure(client, db):
     app.cache.clear()
-    with mock.patch("pymongo.collection.Collection.find_one", side_effect=Exception("Simulated MongoDB failure")):
+    with mock.patch("mongomock.collection.Collection.find_one", side_effect=Exception("Simulated MongoDB failure")):
         response = client.get('/api/stocks/summary')
         assert response.status_code in [500, 503]
-

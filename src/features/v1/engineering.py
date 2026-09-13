@@ -302,12 +302,13 @@ def _fetch_cached_macro(ticker, start_date, end_date):
         logger.warning(f"macro: {ticker} download failed — {ex}")
         df = pd.DataFrame()
 
-    # Apply historical gap repair specifically for Nifty 50
-    if ticker == "^NSEI" and not df.empty:
+    # Apply historical gap repair for Nifty 50 and India VIX
+    if ticker in ["^NSEI", "^INDIAVIX"] and not df.empty:
         from src.data.session_calendar import is_session
         from src.data.nse_index_fallback import fetch_nse_index_close
 
         curr = req_start
+        index_name_for_fallback = "Nifty 50" if ticker == "^NSEI" else "India VIX"
         while curr <= req_end:
             if is_session(curr):
                 missing_in_df = (curr not in df.index) or pd.isna(df.loc[curr, "Close"])
@@ -317,11 +318,11 @@ def _fetch_cached_macro(ticker, start_date, end_date):
                         missing_in_cache = False
 
                 if missing_in_df and missing_in_cache:
-                    logger.info(f"^NSEI missing required session {curr.date()}, attempting NSE fallback...")
-                    close_val = fetch_nse_index_close(curr)
+                    logger.info(f"{ticker} missing required session {curr.date()}, attempting NSE fallback...")
+                    close_val = fetch_nse_index_close(curr, index_name=index_name_for_fallback)
                     if close_val is not None:
                         df.loc[curr, "Close"] = close_val
-                        logger.info(f"Successfully recovered Nifty 50 for {curr.date()} via fallback.")
+                        logger.info(f"Successfully recovered {ticker} for {curr.date()} via fallback.")
             curr += timedelta(days=1)
         df.sort_index(inplace=True)
 
@@ -390,12 +391,18 @@ def _prepare_macro_data(start_date, end_date, client, prediction_target_date=Non
     is_valid, nasdaq = _validate_macro_asset(nasdaq, "^NDX", min_valid_rows=20)
     if is_valid:
         c = nasdaq["Close"]
-        macro["nasdaq_ret_5d"]  = c.pct_change(5)
-        macro["nasdaq_ret_20d"] = c.pct_change(20)
+        
+        # Calculate returns on the native US trading calendar
+        ndx_ret_5d = c.pct_change(5)
+        ndx_ret_20d = c.pct_change(20)
+        
+        # Align to the NSE calendar and carry forward the latest valid state
+        macro["nasdaq_ret_5d"]  = ndx_ret_5d.reindex(macro.index).ffill(limit=3)
+        macro["nasdaq_ret_20d"] = ndx_ret_20d.reindex(macro.index).ffill(limit=3)
     else:
-        logger.warning("WARNING: ^NDX unavailable/insufficient. nasdaq_ret_5d, nasdaq_ret_20d using neutral fallback 0.0.")
-        macro["nasdaq_ret_5d"]  = 0.0
-        macro["nasdaq_ret_20d"] = 0.0
+        logger.warning("WARNING: ^NDX unavailable/insufficient. nasdaq_ret_5d, nasdaq_ret_20d using NaN to fail-closed.")
+        macro["nasdaq_ret_5d"]  = float("nan")
+        macro["nasdaq_ret_20d"] = float("nan")
 
     # CRUDE
     crude = _fetch_cached_macro("BZ=F", start_date, end_date)

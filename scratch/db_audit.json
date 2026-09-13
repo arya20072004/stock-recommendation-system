@@ -1,0 +1,135 @@
+{
+  "Run": {
+    "id": "6a95b98ef1d2eac5d302fb66",
+    "run_id": "fdacd46c-fda1-477b-9362-283770b6f325",
+    "market_date": "2026-09-01",
+    "target_date": null,
+    "started_at": "2026-08-31 17:27:41.399000",
+    "completed_at": "2026-08-31 18:12:40.324000",
+    "status": "SUCCESS",
+    "stages": {
+      "START": {
+        "status": "SUCCESS",
+        "metrics": null
+      },
+      "ACQUIRE_LOCK": {
+        "status": "SUCCESS",
+        "metrics": null
+      },
+      "TRADING_SESSION": {
+        "status": "SUCCESS",
+        "metrics": null
+      },
+      "COLLECT_PCR": {
+        "status": "SUCCESS",
+        "metrics": null
+      },
+      "COLLECT_SECTOR": {
+        "status": "SUCCESS",
+        "metrics": null
+      },
+      "COLLECT_FII_DII": {
+        "status": "SUCCESS",
+        "metrics": null
+      },
+      "COLLECT_NEWS": {
+        "status": "SUCCESS",
+        "metrics": null
+      },
+      "SENTIMENT": {
+        "status": "SUCCESS",
+        "metrics": null
+      },
+      "COLLECT_OHLCV": {
+        "status": "SUCCESS",
+        "metrics": {
+          "successful": 51,
+          "failed": 0
+        }
+      },
+      "OHLCV_INTEGRITY": {
+        "status": "SUCCESS",
+        "metrics": {
+          "processed": 51,
+          "missing": 0
+        }
+      },
+      "SETTLEMENT": {
+        "status": "SUCCESS",
+        "metrics": {
+          "READY_TO_SETTLE": 0,
+          "NOT_MATURE": 423,
+          "LEGACY_UNSETTLEABLE": 134,
+          "MISSING_MARKET_DATA": 0,
+          "INVALID_PREDICTION_RECORD": 0,
+          "ALREADY_EVALUATED": 0,
+          "ERRORS": 0
+        }
+      },
+      "PREDICTION_GENERATION": {
+        "status": "SUCCESS",
+        "metrics": {
+          "generated": 51,
+          "skipped": 0,
+          "stale": [],
+          "existing": 0,
+          "failed": [],
+          "errors": []
+        }
+      },
+      "PREDICTION_VALIDATION": {
+        "status": "SUCCESS",
+        "metrics": null
+      },
+      "API_HEALTH": {
+        "status": "SUCCESS",
+        "metrics": {
+          "expected_count": 51,
+          "returned_count": 51
+        }
+      }
+    }
+  },
+  "Historical": {
+    "2026-08-28": {
+      "count": 0,
+      "nifty_count": 0
+    },
+    "2026-08-29": {
+      "count": 0,
+      "nifty_count": 0
+    },
+    "2026-08-31": {
+      "count": 0,
+      "nifty_count": 0
+    },
+    "2026-09-01": {
+      "count": 0,
+      "nifty_count": 0
+    }
+  },
+  "Predictions": {
+    "count": 0,
+    "target_dates": [],
+    "tickers": 0,
+    "nan_features": 0
+  },
+  "Provenance": {
+    "count": 0,
+    "hashes": []
+  },
+  "Old_Predictions_2026-08-31": {
+    "count": 0,
+    "run_ids": []
+  },
+  "Old_Provenance_2026-08-31": {
+    "count": 0,
+    "hashes": []
+  },
+  "Model_Registry": {
+    "active_count": 51,
+    "hashes": [
+      null
+    ]
+  }
+}

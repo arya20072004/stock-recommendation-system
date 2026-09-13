@@ -1,8 +1,6 @@
-import { Badge } from '../common/Badge'
+import { SignalIndicator } from '../common/SignalIndicator'
 import './recommendations.css'
 
-const signalTones = { 'STRONG BUY': 'positive', BUY: 'positive', HOLD: 'warning', SELL: 'negative', 'STRONG SELL': 'negative' }
-
 export function RecommendationBadge({ signal }) {
-  return <Badge tone={signalTones[signal] ?? 'neutral'} className="recommendation-badge">{signal}</Badge>
+  return <SignalIndicator signal={signal} className="recommendation-badge" />
 }

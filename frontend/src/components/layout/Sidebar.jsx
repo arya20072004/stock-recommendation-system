@@ -5,10 +5,8 @@ import './layout.css'
 
 const groups = [
   { label: 'Overview', items: [{ to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }] },
-  { label: 'Discover', items: [{ to: '/stocks', label: 'Stocks', icon: ChartNoAxesCombined }, { to: '/screener', label: 'Screener', icon: ListFilter }, { to: '/watchlist', label: 'Watchlist', icon: Star }] },
-  { label: 'Intelligence', items: [{ to: '/recommendations', label: 'Recommendations', icon: BookOpenCheck }, { to: '/news', label: 'News Intelligence', icon: Newspaper }, { to: '/predictions/history', label: 'Prediction History', icon: BarChart3 }, { to: '/model', label: 'Model Intelligence', icon: BrainCircuit }] },
-  { label: 'Portfolio', items: [{ to: '/portfolio', label: 'Portfolio', icon: BriefcaseBusiness }] },
-  { label: 'System', items: [{ to: '/settings', label: 'Settings', icon: Settings }] },
+  { label: 'Discover', items: [{ to: '/recommendations', label: 'Recommendations', icon: BookOpenCheck }, { to: '/screener', label: 'Screener', icon: ListFilter }] },
+  { label: 'Intelligence', items: [{ to: '/news', label: 'News Intelligence', icon: Newspaper }, { to: '/predictions/history', label: 'Prediction History', icon: BarChart3 }, { to: '/model', label: 'Model Intelligence', icon: BrainCircuit }] }
 ]
 
 export function Sidebar({ isOpen, onClose }) {

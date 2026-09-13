@@ -5,11 +5,14 @@ import './styles/global.css'
 import './styles/utilities.css'
 import App from './App.jsx'
 import { WatchlistProvider } from './context/WatchlistContext'
+import { ThemeProvider } from './context/ThemeContext'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <WatchlistProvider>
-      <App />
-    </WatchlistProvider>
+    <ThemeProvider>
+      <WatchlistProvider>
+        <App />
+      </WatchlistProvider>
+    </ThemeProvider>
   </StrictMode>,
 )

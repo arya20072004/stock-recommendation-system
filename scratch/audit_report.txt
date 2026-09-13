@@ -1,0 +1,125 @@
+============================================================
+STRICT READ-ONLY POST-RUN PRODUCTION AUDIT
+September 10, 2026
+============================================================
+
+RUN IDENTIFICATION
+Run ID: 7c725e08-b516-4303-a896-44ef7e810b08
+Start: 2026-09-10 14:50:08.787000
+Completion: 2026-09-10 15:27:12.226000
+Status: SUCCESS
+
+SESSION / TARGET
+Trading session: 2026-09-10
+Expected session: 2026-09-10
+Next valid trading session: 2026-09-11
+Target date: 2026-09-11
+Expected target: 2026-09-11
+Session/target verification: PASS
+
+PREDICTION COVERAGE
+Persisted predictions: 51
+Expected: 51
+Unique tickers: 51
+Missing tickers: []
+Unexpected tickers: []
+Duplicate predictions: 0
+
+PIPELINE PROVENANCE
+Current canonical hash: f0fa3983b0114cc63635a51f26ef954bd4f64b151ed81673aadadc857717d862
+Prediction hash distribution: {'f0fa3983b0114cc63635a51f26ef954bd4f64b151ed81673aadadc857717d862': 51}
+Old hash count: 0
+Unexpected hash count: 0
+Missing hash count: 0
+
+MODEL / FEATURE BINDING
+Registry binding: PASS
+Model artifact binding: PASS
+Feature artifact binding: PASS
+Pipeline version: v1
+Pipeline hash: f0fa3983b0114cc63635a51f26ef954bd4f64b151ed81673aadadc857717d862
+
+TEMPORAL INTEGRITY
+Maximum feature/input date: 2026-09-10
+Allowed maximum: 2026-09-10
+Future-data leakage: 0
+Temporal integrity: PASS
+
+NASDAQ FEATURES
+nasdaq_ret_5d missing/null: 0
+nasdaq_ret_20d missing/null: 0
+Other NASDAQ-derived feature issues: 0
+NASDAQ feature population: PASS
+
+FEATURE SCHEMA
+Feature dimensionality: 57
+Schema compatibility: PASS
+Feature ordering: PASS
+Feature schema verification: PASS
+
+LIFECYCLE
+Lifecycle state distribution: {'PENDING': 51}
+Premature settlement: 0
+Premature evaluation: 0
+September 10 cohort maturity state: PASS
+
+PERSISTENCE
+Incomplete records: 0
+Partial persistence: NO
+Persistence integrity: PASS
+
+PIPELINE STATE
+START: SUCCESS
+ACQUIRE_LOCK: SUCCESS
+PREDICTION_GENERATION: SUCCESS
+PREDICTION_VALIDATION: SUCCESS
+API_HEALTH: SUCCESS
+Terminal status: SUCCESS
+
+LOCK STATE
+Orphaned lock: 0
+Lock integrity: PASS
+
+REGISTRY STATE
+ACTIVE v1: 51
+Current hash: 51
+Old hash: 0
+Unexpected hash: 0
+Duplicate tickers: 0
+
+MANIFEST STATE
+Missing: 0
+Invalid: 0
+Old hash: 0
+Unexpected hash: 0
+Registry/manifest mismatches: 0
+
+ARTIFACT STATE
+Missing artifacts: 0
+Hash mismatches: 0
+Artifact integrity: PASS
+
+EXISTING COHORT INTEGRITY
+Unexpected previous-cohort changes: 0
+Previous cohort integrity: PASS
+
+DESIGN B REGRESSION
+NASDAQ failure regression detected: 0
+Design B production continuity: PASS
+
+SIDE EFFECTS
+Unexpected prediction changes: 0
+Unexpected registry changes: 0
+Unexpected manifest changes: 0
+Unexpected cohort changes: 0
+Unexpected artifact changes: 0
+
+DATA QUALITY
+Missing required fields: 0
+Invalid feature values: 0
+Duplicate IDs: 0
+Other integrity violations: 0
+
+============================================================
+FINAL VERDICT: PASS
+============================================================

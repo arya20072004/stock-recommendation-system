@@ -1,0 +1,679 @@
+[
+  {
+    "_id": "6a9ed3648e40542056bd62f8",
+    "run_id": "649f0c15-a4df-4d4d-86a0-fd5a2580575b",
+    "degraded_stages": [
+      "PREDICTION_GENERATION"
+    ],
+    "duration_ms": 2172953,
+    "errors": [
+      "PREDICTION_GENERATION: 51 tickers failed local generation",
+      "PREDICTION_VALIDATION: Prediction coverage failure. Generated 0 < required 46. Stale: set(), Failed: {'ETERNAL.NS', 'ADANIENT.NS', 'LT.NS', 'TCS.NS', 'BRITANNIA.NS', 'HCLTECH.NS', 'SBIN.NS', 'ULTRACEMCO.NS', 'HINDUNILVR.NS', 'INFY.NS', 'TATACONSUM.NS', 'SUNPHARMA.NS', 'TATASTEEL.NS', 'HEROMOTOCO.NS', 'RELIANCE.NS', 'DRREDDY.NS', 'TECHM.NS', 'HDFCLIFE.NS', 'MARUTI.NS', 'AXISBANK.NS', 'BHARTIARTL.NS', 'JIOFIN.NS', 'BAJAJFINSV.NS', 'POWERGRID.NS', 'APOLLOHOSP.NS', 'GRASIM.NS', 'EICHERMOT.NS', 'JSWSTEEL.NS', 'M&M.NS', 'TITAN.NS', 'SBILIFE.NS', 'INDIGO.NS', 'SHRIRAMFIN.NS', 'WIPRO.NS', 'BAJFINANCE.NS', 'COALINDIA.NS', 'NESTLEIND.NS', 'BAJAJ-AUTO.NS', 'KOTAKBANK.NS', 'NTPC.NS', 'HDFCBANK.NS', 'ONGC.NS', 'ASIANPAINT.NS', 'HINDALCO.NS', 'BEL.NS', 'ICICIBANK.NS', 'TRENT.NS', 'MAXHEALTH.NS', 'ITC.NS', 'CIPLA.NS', 'ADANIPORTS.NS'}"
+    ],
+    "market_date": "2026-09-08",
+    "owner": "649f0c15-a4df-4d4d-86a0-fd5a2580575b",
+    "stages": {
+      "START": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-07 15:08:19.040000",
+        "started_at": "2026-09-07 15:08:19.040000"
+      },
+      "ACQUIRE_LOCK": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-07 15:08:19.112000",
+        "started_at": "2026-09-07 15:08:19.112000"
+      },
+      "TRADING_SESSION": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-07 15:08:20.483000",
+        "started_at": "2026-09-07 15:08:20.483000"
+      },
+      "COLLECT_PCR": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-07 15:33:46.514000",
+        "started_at": "2026-09-07 15:33:46.514000"
+      },
+      "COLLECT_SECTOR": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-07 15:37:07.506000",
+        "started_at": "2026-09-07 15:37:07.506000"
+      },
+      "COLLECT_FII_DII": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-07 15:37:09.948000",
+        "started_at": "2026-09-07 15:37:09.948000"
+      },
+      "COLLECT_NEWS": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-07 15:39:22.095000",
+        "started_at": "2026-09-07 15:39:22.095000"
+      },
+      "SENTIMENT": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-07 15:39:28.014000",
+        "started_at": "2026-09-07 15:39:28.014000"
+      },
+      "COLLECT_OHLCV": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-07 15:43:03.185000",
+        "started_at": "2026-09-07 15:43:03.185000",
+        "metrics": {
+          "successful": 51,
+          "failed": 0
+        }
+      },
+      "OHLCV_INTEGRITY": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-07 15:43:03.353000",
+        "started_at": "2026-09-07 15:43:03.353000",
+        "metrics": {
+          "processed": 51,
+          "missing": 0
+        }
+      },
+      "SETTLEMENT": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-07 15:43:20.782000",
+        "started_at": "2026-09-07 15:43:20.782000",
+        "metrics": {
+          "READY_TO_SETTLE": 51,
+          "NOT_MATURE": 510,
+          "LEGACY_UNSETTLEABLE": 134,
+          "MISSING_MARKET_DATA": 0,
+          "INVALID_PREDICTION_RECORD": 0,
+          "ALREADY_EVALUATED": 0,
+          "ERRORS": 0
+        }
+      },
+      "PREDICTION_GENERATION": {
+        "status": "DEGRADED",
+        "timestamp": "2026-09-07 15:44:31.485000",
+        "started_at": "2026-09-07 15:44:31.485000",
+        "metrics": {
+          "generated": 0,
+          "skipped": 0,
+          "stale": [],
+          "existing": 0,
+          "failed": [
+            "ADANIENT.NS",
+            "ADANIPORTS.NS",
+            "APOLLOHOSP.NS",
+            "ASIANPAINT.NS",
+            "AXISBANK.NS",
+            "BAJAJ-AUTO.NS",
+            "BAJFINANCE.NS",
+            "BAJAJFINSV.NS",
+            "BEL.NS",
+            "BHARTIARTL.NS",
+            "BRITANNIA.NS",
+            "CIPLA.NS",
+            "COALINDIA.NS",
+            "DRREDDY.NS",
+            "EICHERMOT.NS",
+            "ETERNAL.NS",
+            "GRASIM.NS",
+            "HCLTECH.NS",
+            "HDFCBANK.NS",
+            "HDFCLIFE.NS",
+            "HEROMOTOCO.NS",
+            "HINDALCO.NS",
+            "HINDUNILVR.NS",
+            "ICICIBANK.NS",
+            "INDIGO.NS",
+            "INFY.NS",
+            "ITC.NS",
+            "JIOFIN.NS",
+            "JSWSTEEL.NS",
+            "KOTAKBANK.NS",
+            "LT.NS",
+            "M&M.NS",
+            "MARUTI.NS",
+            "MAXHEALTH.NS",
+            "NESTLEIND.NS",
+            "NTPC.NS",
+            "ONGC.NS",
+            "POWERGRID.NS",
+            "RELIANCE.NS",
+            "SBILIFE.NS",
+            "SBIN.NS",
+            "SHRIRAMFIN.NS",
+            "SUNPHARMA.NS",
+            "TATACONSUM.NS",
+            "TATASTEEL.NS",
+            "TCS.NS",
+            "TECHM.NS",
+            "TITAN.NS",
+            "TRENT.NS",
+            "ULTRACEMCO.NS",
+            "WIPRO.NS"
+          ],
+          "errors": [
+            "ADANIENT.NS: PredictionDataNotReadyError - ADANIENT.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "ADANIPORTS.NS: PredictionDataNotReadyError - ADANIPORTS.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "APOLLOHOSP.NS: PredictionDataNotReadyError - APOLLOHOSP.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "ASIANPAINT.NS: PredictionDataNotReadyError - ASIANPAINT.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "AXISBANK.NS: PredictionDataNotReadyError - AXISBANK.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "BAJAJ-AUTO.NS: PredictionDataNotReadyError - BAJAJ-AUTO.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "BAJFINANCE.NS: PredictionDataNotReadyError - BAJFINANCE.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "BAJAJFINSV.NS: PredictionDataNotReadyError - BAJAJFINSV.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "BEL.NS: PredictionDataNotReadyError - BEL.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "BHARTIARTL.NS: PredictionDataNotReadyError - BHARTIARTL.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "BRITANNIA.NS: PredictionDataNotReadyError - BRITANNIA.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "CIPLA.NS: PredictionDataNotReadyError - CIPLA.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "COALINDIA.NS: PredictionDataNotReadyError - COALINDIA.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "DRREDDY.NS: PredictionDataNotReadyError - DRREDDY.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "EICHERMOT.NS: PredictionDataNotReadyError - EICHERMOT.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "ETERNAL.NS: PredictionDataNotReadyError - ETERNAL.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "GRASIM.NS: PredictionDataNotReadyError - GRASIM.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "HCLTECH.NS: PredictionDataNotReadyError - HCLTECH.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "HDFCBANK.NS: PredictionDataNotReadyError - HDFCBANK.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "HDFCLIFE.NS: PredictionDataNotReadyError - HDFCLIFE.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "HEROMOTOCO.NS: PredictionDataNotReadyError - HEROMOTOCO.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "HINDALCO.NS: PredictionDataNotReadyError - HINDALCO.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "HINDUNILVR.NS: PredictionDataNotReadyError - HINDUNILVR.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "ICICIBANK.NS: PredictionDataNotReadyError - ICICIBANK.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "INDIGO.NS: PredictionDataNotReadyError - INDIGO.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "INFY.NS: PredictionDataNotReadyError - INFY.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "ITC.NS: PredictionDataNotReadyError - ITC.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "JIOFIN.NS: PredictionDataNotReadyError - JIOFIN.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "JSWSTEEL.NS: PredictionDataNotReadyError - JSWSTEEL.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "KOTAKBANK.NS: PredictionDataNotReadyError - KOTAKBANK.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "LT.NS: PredictionDataNotReadyError - LT.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "M&M.NS: PredictionDataNotReadyError - M&M.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "MARUTI.NS: PredictionDataNotReadyError - MARUTI.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "MAXHEALTH.NS: PredictionDataNotReadyError - MAXHEALTH.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "NESTLEIND.NS: PredictionDataNotReadyError - NESTLEIND.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "NTPC.NS: PredictionDataNotReadyError - NTPC.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "ONGC.NS: PredictionDataNotReadyError - ONGC.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "POWERGRID.NS: PredictionDataNotReadyError - POWERGRID.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "RELIANCE.NS: PredictionDataNotReadyError - RELIANCE.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "SBILIFE.NS: PredictionDataNotReadyError - SBILIFE.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "SBIN.NS: PredictionDataNotReadyError - SBIN.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "SHRIRAMFIN.NS: PredictionDataNotReadyError - SHRIRAMFIN.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "SUNPHARMA.NS: PredictionDataNotReadyError - SUNPHARMA.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "TATACONSUM.NS: PredictionDataNotReadyError - TATACONSUM.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "TATASTEEL.NS: PredictionDataNotReadyError - TATASTEEL.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "TCS.NS: PredictionDataNotReadyError - TCS.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "TECHM.NS: PredictionDataNotReadyError - TECHM.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "TITAN.NS: PredictionDataNotReadyError - TITAN.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "TRENT.NS: PredictionDataNotReadyError - TRENT.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "ULTRACEMCO.NS: PredictionDataNotReadyError - ULTRACEMCO.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']",
+            "WIPRO.NS: PredictionDataNotReadyError - WIPRO.NS: latest market row is not inference-ready. latest_market_date=2026-09-08 00:00:00, last_fully_valid_date=2026-09-07 00:00:00, missing_feature_count=2, missing_features=['nasdaq_ret_5d', 'nasdaq_ret_20d']"
+          ]
+        }
+      },
+      "PREDICTION_VALIDATION": {
+        "status": "FAILED",
+        "timestamp": "2026-09-07 15:44:31.520000",
+        "started_at": "2026-09-07 15:44:31.520000"
+      }
+    },
+    "started_at": "2026-09-07 15:08:18.586000",
+    "status": "FAILED",
+    "completed_at": "2026-09-07 15:44:31.539000"
+  },
+  {
+    "_id": "6a9c289d8e40542056bd25f5",
+    "run_id": "53633ae2-1e7a-4a47-a7dd-222a86f91918",
+    "degraded_stages": [],
+    "duration_ms": 2132149,
+    "errors": [],
+    "market_date": "2026-09-07",
+    "owner": "53633ae2-1e7a-4a47-a7dd-222a86f91918",
+    "stages": {
+      "START": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-05 14:35:08.865000",
+        "started_at": "2026-09-05 14:35:08.865000"
+      },
+      "ACQUIRE_LOCK": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-05 14:35:08.930000",
+        "started_at": "2026-09-05 14:35:08.930000"
+      },
+      "TRADING_SESSION": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-05 14:35:10.449000",
+        "started_at": "2026-09-05 14:35:10.449000"
+      },
+      "COLLECT_PCR": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-05 15:00:26.457000",
+        "started_at": "2026-09-05 15:00:26.457000"
+      },
+      "COLLECT_SECTOR": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-05 15:04:05.977000",
+        "started_at": "2026-09-05 15:04:05.977000"
+      },
+      "COLLECT_FII_DII": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-05 15:04:07.077000",
+        "started_at": "2026-09-05 15:04:07.077000"
+      },
+      "COLLECT_NEWS": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-05 15:06:11.189000",
+        "started_at": "2026-09-05 15:06:11.189000"
+      },
+      "SENTIMENT": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-05 15:06:16.179000",
+        "started_at": "2026-09-05 15:06:16.179000"
+      },
+      "COLLECT_OHLCV": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-05 15:09:44.223000",
+        "started_at": "2026-09-05 15:09:44.223000",
+        "metrics": {
+          "successful": 51,
+          "failed": 0
+        }
+      },
+      "OHLCV_INTEGRITY": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-05 15:09:44.317000",
+        "started_at": "2026-09-05 15:09:44.317000",
+        "metrics": {
+          "processed": 51,
+          "missing": 0
+        }
+      },
+      "SETTLEMENT": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-05 15:09:51.142000",
+        "started_at": "2026-09-05 15:09:51.142000",
+        "metrics": {
+          "READY_TO_SETTLE": 0,
+          "NOT_MATURE": 510,
+          "LEGACY_UNSETTLEABLE": 134,
+          "MISSING_MARKET_DATA": 0,
+          "INVALID_PREDICTION_RECORD": 0,
+          "ALREADY_EVALUATED": 0,
+          "ERRORS": 0
+        }
+      },
+      "PREDICTION_GENERATION": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-05 15:10:39.358000",
+        "started_at": "2026-09-05 15:10:39.358000",
+        "metrics": {
+          "generated": 51,
+          "skipped": 0,
+          "stale": [],
+          "existing": 0,
+          "failed": [],
+          "errors": []
+        }
+      },
+      "PREDICTION_VALIDATION": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-05 15:10:39.434000",
+        "started_at": "2026-09-05 15:10:39.434000"
+      },
+      "API_HEALTH": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-05 15:10:40.493000",
+        "started_at": "2026-09-05 15:10:40.493000",
+        "metrics": {
+          "expected_count": 51,
+          "returned_count": 51
+        }
+      }
+    },
+    "started_at": "2026-09-05 14:35:08.356000",
+    "status": "SUCCESS",
+    "completed_at": "2026-09-05 15:10:40.506000"
+  },
+  {
+    "_id": "6a9ba4cf8e40542056bd1794",
+    "run_id": "3b57074b-7c10-42c6-8c0a-c3df23473b97",
+    "degraded_stages": [],
+    "duration_ms": 704,
+    "errors": [],
+    "market_date": null,
+    "owner": "3b57074b-7c10-42c6-8c0a-c3df23473b97",
+    "stages": {
+      "START": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-05 05:12:46.117000",
+        "started_at": "2026-09-05 05:12:46.117000"
+      },
+      "ACQUIRE_LOCK": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-05 05:12:46.183000",
+        "started_at": "2026-09-05 05:12:46.183000"
+      }
+    },
+    "started_at": "2026-09-05 05:12:45.496000",
+    "status": "BLOCKED",
+    "blocked_reason": "BEFORE_CUTOFF",
+    "completed_at": "2026-09-05 05:12:46.201000"
+  },
+  {
+    "_id": "6a9b0689f79cf9675ed3ad86",
+    "run_id": "abf42806-c460-42fd-a2a0-555d737b1d5f",
+    "degraded_stages": [
+      "PREDICTION_GENERATION"
+    ],
+    "duration_ms": 2074821,
+    "errors": [
+      "PREDICTION_GENERATION: 51 tickers failed local generation",
+      "PREDICTION_VALIDATION: Prediction coverage failure. Generated 0 < required 46. Stale: set(), Failed: {'ICICIBANK.NS', 'INDIGO.NS', 'KOTAKBANK.NS', 'LT.NS', 'ADANIENT.NS', 'HINDALCO.NS', 'AXISBANK.NS', 'HDFCLIFE.NS', 'BHARTIARTL.NS', 'BAJAJ-AUTO.NS', 'ITC.NS', 'TCS.NS', 'HEROMOTOCO.NS', 'APOLLOHOSP.NS', 'BAJFINANCE.NS', 'WIPRO.NS', 'ULTRACEMCO.NS', 'BEL.NS', 'M&M.NS', 'POWERGRID.NS', 'SHRIRAMFIN.NS', 'SUNPHARMA.NS', 'ASIANPAINT.NS', 'INFY.NS', 'BRITANNIA.NS', 'MARUTI.NS', 'ETERNAL.NS', 'ONGC.NS', 'MAXHEALTH.NS', 'ADANIPORTS.NS', 'NTPC.NS', 'TECHM.NS', 'DRREDDY.NS', 'CIPLA.NS', 'COALINDIA.NS', 'BAJAJFINSV.NS', 'TRENT.NS', 'JIOFIN.NS', 'NESTLEIND.NS', 'TITAN.NS', 'HDFCBANK.NS', 'HCLTECH.NS', 'GRASIM.NS', 'SBIN.NS', 'EICHERMOT.NS', 'HINDUNILVR.NS', 'SBILIFE.NS', 'TATASTEEL.NS', 'TATACONSUM.NS', 'JSWSTEEL.NS', 'RELIANCE.NS'}"
+    ],
+    "market_date": "2026-09-07",
+    "owner": "abf42806-c460-42fd-a2a0-555d737b1d5f",
+    "stages": {
+      "START": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-04 17:57:27.987000",
+        "started_at": "2026-09-04 17:57:27.987000"
+      },
+      "ACQUIRE_LOCK": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-04 17:57:28.050000",
+        "started_at": "2026-09-04 17:57:28.050000"
+      },
+      "TRADING_SESSION": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-04 17:57:29.394000",
+        "started_at": "2026-09-04 17:57:29.394000"
+      },
+      "COLLECT_PCR": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-04 18:21:49.197000",
+        "started_at": "2026-09-04 18:21:49.197000"
+      },
+      "COLLECT_SECTOR": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-04 18:25:25.477000",
+        "started_at": "2026-09-04 18:25:25.477000"
+      },
+      "COLLECT_FII_DII": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-04 18:25:26.727000",
+        "started_at": "2026-09-04 18:25:26.727000"
+      },
+      "COLLECT_NEWS": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-04 18:27:19.619000",
+        "started_at": "2026-09-04 18:27:19.619000"
+      },
+      "SENTIMENT": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-04 18:27:26.339000",
+        "started_at": "2026-09-04 18:27:26.339000"
+      },
+      "COLLECT_OHLCV": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-04 18:30:56.222000",
+        "started_at": "2026-09-04 18:30:56.222000",
+        "metrics": {
+          "successful": 51,
+          "failed": 0
+        }
+      },
+      "OHLCV_INTEGRITY": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-04 18:30:56.307000",
+        "started_at": "2026-09-04 18:30:56.307000",
+        "metrics": {
+          "processed": 51,
+          "missing": 0
+        }
+      },
+      "SETTLEMENT": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-04 18:31:07.009000",
+        "started_at": "2026-09-04 18:31:07.009000",
+        "metrics": {
+          "READY_TO_SETTLE": 51,
+          "NOT_MATURE": 510,
+          "LEGACY_UNSETTLEABLE": 134,
+          "MISSING_MARKET_DATA": 0,
+          "INVALID_PREDICTION_RECORD": 0,
+          "ALREADY_EVALUATED": 0,
+          "ERRORS": 0
+        }
+      },
+      "PREDICTION_GENERATION": {
+        "status": "DEGRADED",
+        "timestamp": "2026-09-04 18:32:02.273000",
+        "started_at": "2026-09-04 18:32:02.273000",
+        "metrics": {
+          "generated": 0,
+          "skipped": 0,
+          "stale": [],
+          "existing": 0,
+          "failed": [
+            "ADANIENT.NS",
+            "ADANIPORTS.NS",
+            "APOLLOHOSP.NS",
+            "ASIANPAINT.NS",
+            "AXISBANK.NS",
+            "BAJAJ-AUTO.NS",
+            "BAJFINANCE.NS",
+            "BAJAJFINSV.NS",
+            "BEL.NS",
+            "BHARTIARTL.NS",
+            "BRITANNIA.NS",
+            "CIPLA.NS",
+            "COALINDIA.NS",
+            "DRREDDY.NS",
+            "EICHERMOT.NS",
+            "ETERNAL.NS",
+            "GRASIM.NS",
+            "HCLTECH.NS",
+            "HDFCBANK.NS",
+            "HDFCLIFE.NS",
+            "HEROMOTOCO.NS",
+            "HINDALCO.NS",
+            "HINDUNILVR.NS",
+            "ICICIBANK.NS",
+            "INDIGO.NS",
+            "INFY.NS",
+            "ITC.NS",
+            "JIOFIN.NS",
+            "JSWSTEEL.NS",
+            "KOTAKBANK.NS",
+            "LT.NS",
+            "M&M.NS",
+            "MARUTI.NS",
+            "MAXHEALTH.NS",
+            "NESTLEIND.NS",
+            "NTPC.NS",
+            "ONGC.NS",
+            "POWERGRID.NS",
+            "RELIANCE.NS",
+            "SBILIFE.NS",
+            "SBIN.NS",
+            "SHRIRAMFIN.NS",
+            "SUNPHARMA.NS",
+            "TATACONSUM.NS",
+            "TATASTEEL.NS",
+            "TCS.NS",
+            "TECHM.NS",
+            "TITAN.NS",
+            "TRENT.NS",
+            "ULTRACEMCO.NS",
+            "WIPRO.NS"
+          ],
+          "errors": [
+            "ADANIENT.NS: PredictionDataNotReadyError - ADANIENT.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "ADANIPORTS.NS: PredictionDataNotReadyError - ADANIPORTS.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "APOLLOHOSP.NS: PredictionDataNotReadyError - APOLLOHOSP.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "ASIANPAINT.NS: PredictionDataNotReadyError - ASIANPAINT.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "AXISBANK.NS: PredictionDataNotReadyError - AXISBANK.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "BAJAJ-AUTO.NS: PredictionDataNotReadyError - BAJAJ-AUTO.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "BAJFINANCE.NS: PredictionDataNotReadyError - BAJFINANCE.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "BAJAJFINSV.NS: PredictionDataNotReadyError - BAJAJFINSV.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "BEL.NS: PredictionDataNotReadyError - BEL.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "BHARTIARTL.NS: PredictionDataNotReadyError - BHARTIARTL.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "BRITANNIA.NS: PredictionDataNotReadyError - BRITANNIA.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "CIPLA.NS: PredictionDataNotReadyError - CIPLA.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "COALINDIA.NS: PredictionDataNotReadyError - COALINDIA.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "DRREDDY.NS: PredictionDataNotReadyError - DRREDDY.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "EICHERMOT.NS: PredictionDataNotReadyError - EICHERMOT.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "ETERNAL.NS: PredictionDataNotReadyError - ETERNAL.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "GRASIM.NS: PredictionDataNotReadyError - GRASIM.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "HCLTECH.NS: PredictionDataNotReadyError - HCLTECH.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "HDFCBANK.NS: PredictionDataNotReadyError - HDFCBANK.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "HDFCLIFE.NS: PredictionDataNotReadyError - HDFCLIFE.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "HEROMOTOCO.NS: PredictionDataNotReadyError - HEROMOTOCO.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "HINDALCO.NS: PredictionDataNotReadyError - HINDALCO.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "HINDUNILVR.NS: PredictionDataNotReadyError - HINDUNILVR.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "ICICIBANK.NS: PredictionDataNotReadyError - ICICIBANK.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "INDIGO.NS: PredictionDataNotReadyError - INDIGO.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "INFY.NS: PredictionDataNotReadyError - INFY.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "ITC.NS: PredictionDataNotReadyError - ITC.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "JIOFIN.NS: PredictionDataNotReadyError - JIOFIN.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "JSWSTEEL.NS: PredictionDataNotReadyError - JSWSTEEL.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "KOTAKBANK.NS: PredictionDataNotReadyError - KOTAKBANK.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "LT.NS: PredictionDataNotReadyError - LT.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "M&M.NS: PredictionDataNotReadyError - M&M.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "MARUTI.NS: PredictionDataNotReadyError - MARUTI.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "MAXHEALTH.NS: PredictionDataNotReadyError - MAXHEALTH.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "NESTLEIND.NS: PredictionDataNotReadyError - NESTLEIND.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "NTPC.NS: PredictionDataNotReadyError - NTPC.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "ONGC.NS: PredictionDataNotReadyError - ONGC.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "POWERGRID.NS: PredictionDataNotReadyError - POWERGRID.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "RELIANCE.NS: PredictionDataNotReadyError - RELIANCE.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "SBILIFE.NS: PredictionDataNotReadyError - SBILIFE.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "SBIN.NS: PredictionDataNotReadyError - SBIN.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "SHRIRAMFIN.NS: PredictionDataNotReadyError - SHRIRAMFIN.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "SUNPHARMA.NS: PredictionDataNotReadyError - SUNPHARMA.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "TATACONSUM.NS: PredictionDataNotReadyError - TATACONSUM.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "TATASTEEL.NS: PredictionDataNotReadyError - TATASTEEL.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "TCS.NS: PredictionDataNotReadyError - TCS.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "TECHM.NS: PredictionDataNotReadyError - TECHM.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "TITAN.NS: PredictionDataNotReadyError - TITAN.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "TRENT.NS: PredictionDataNotReadyError - TRENT.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "ULTRACEMCO.NS: PredictionDataNotReadyError - ULTRACEMCO.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']",
+            "WIPRO.NS: PredictionDataNotReadyError - WIPRO.NS: latest market row is not inference-ready. latest_market_date=2026-09-07 00:00:00, last_fully_valid_date=2026-09-04 00:00:00, missing_feature_count=4, missing_features=['vix_level', 'vix_ret_1d', 'vix_chg_5d', 'vix_vol_10d']"
+          ]
+        }
+      },
+      "PREDICTION_VALIDATION": {
+        "status": "FAILED",
+        "timestamp": "2026-09-04 18:32:02.302000",
+        "started_at": "2026-09-04 18:32:02.302000"
+      }
+    },
+    "started_at": "2026-09-04 17:57:27.501000",
+    "status": "FAILED",
+    "completed_at": "2026-09-04 18:32:02.322000"
+  },
+  {
+    "_id": "6a99a11bf79cf9675ed36406",
+    "run_id": "4c83bf0b-5f8e-4aab-ae82-d36fff99e2af",
+    "degraded_stages": [],
+    "duration_ms": 2211657,
+    "errors": [],
+    "market_date": "2026-09-04",
+    "owner": "4c83bf0b-5f8e-4aab-ae82-d36fff99e2af",
+    "stages": {
+      "START": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-03 16:32:25.732000",
+        "started_at": "2026-09-03 16:32:25.732000"
+      },
+      "ACQUIRE_LOCK": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-03 16:32:25.830000",
+        "started_at": "2026-09-03 16:32:25.830000"
+      },
+      "TRADING_SESSION": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-03 16:32:27.410000",
+        "started_at": "2026-09-03 16:32:27.410000"
+      },
+      "COLLECT_PCR": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-03 17:00:00.452000",
+        "started_at": "2026-09-03 17:00:00.452000"
+      },
+      "COLLECT_SECTOR": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-03 17:03:08.009000",
+        "started_at": "2026-09-03 17:03:08.009000"
+      },
+      "COLLECT_FII_DII": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-03 17:03:09.098000",
+        "started_at": "2026-09-03 17:03:09.098000"
+      },
+      "COLLECT_NEWS": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-03 17:04:55.963000",
+        "started_at": "2026-09-03 17:04:55.963000"
+      },
+      "SENTIMENT": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-03 17:05:04.525000",
+        "started_at": "2026-09-03 17:05:04.525000"
+      },
+      "COLLECT_OHLCV": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-03 17:08:19.152000",
+        "started_at": "2026-09-03 17:08:19.152000",
+        "metrics": {
+          "successful": 51,
+          "failed": 0
+        }
+      },
+      "OHLCV_INTEGRITY": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-03 17:08:20.704000",
+        "started_at": "2026-09-03 17:08:20.704000",
+        "metrics": {
+          "processed": 51,
+          "missing": 0
+        }
+      },
+      "SETTLEMENT": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-03 17:08:29.656000",
+        "started_at": "2026-09-03 17:08:29.656000",
+        "metrics": {
+          "READY_TO_SETTLE": 51,
+          "NOT_MATURE": 510,
+          "LEGACY_UNSETTLEABLE": 134,
+          "MISSING_MARKET_DATA": 0,
+          "INVALID_PREDICTION_RECORD": 0,
+          "ALREADY_EVALUATED": 0,
+          "ERRORS": 0
+        }
+      },
+      "PREDICTION_GENERATION": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-03 17:09:15.933000",
+        "started_at": "2026-09-03 17:09:15.933000",
+        "metrics": {
+          "generated": 51,
+          "skipped": 0,
+          "stale": [],
+          "existing": 0,
+          "failed": [],
+          "errors": []
+        }
+      },
+      "PREDICTION_VALIDATION": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-03 17:09:16.005000",
+        "started_at": "2026-09-03 17:09:16.005000"
+      },
+      "API_HEALTH": {
+        "status": "SUCCESS",
+        "timestamp": "2026-09-03 17:09:16.980000",
+        "started_at": "2026-09-03 17:09:16.980000",
+        "metrics": {
+          "expected_count": 51,
+          "returned_count": 51
+        }
+      }
+    },
+    "started_at": "2026-09-03 16:32:25.334000",
+    "status": "SUCCESS",
+    "completed_at": "2026-09-03 17:09:16.991000"
+  }
+]
