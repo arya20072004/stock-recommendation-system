@@ -46,7 +46,7 @@ export function PriceChart({ chartData, range, onRangeChange, loading, direction
                 <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 11 }} minTickGap={24} />
                 <YAxis dataKey="close" axisLine={false} tickLine={false} tick={false} width={24} domain={['dataMin', 'dataMax']} />
                 <Tooltip content={<ChartTooltip />} cursor={{ stroke: 'var(--border-primary)', strokeWidth: 1 }} />
-                <Area type="monotone" dataKey="close" stroke={cssColor} strokeWidth={2} fill="url(#stock-price-area)" isAnimationActive={false} />
+                <Area type="monotone" dataKey="close" stroke={cssColor} strokeWidth={2} fill="url(#stock-price-area)" isAnimationActive={false} connectNulls={true} />
               </AreaChart>
             </ResponsiveContainer>
           </div>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, memo } from 'react'
 import { resolveTradingViewWidgetSymbol, toTradingViewUrl } from '../../utils/tradingViewSymbols'
+import { useTheme } from '../../context/ThemeContext'
 
 const WIDGET_SCRIPT_SRC = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js'
 
@@ -11,6 +12,7 @@ const WIDGET_SCRIPT_SRC = 'https://s3.tradingview.com/external-embedding/embed-w
 function TradingViewAdvancedChartInner({ ticker }) {
   const containerRef = useRef(null)
   const [status, setStatus] = useState('loading')
+  const { resolvedTheme } = useTheme()
 
   const resolution = resolveTradingViewWidgetSymbol(ticker)
   const symbol = resolution?.widget
@@ -56,11 +58,11 @@ function TradingViewAdvancedChartInner({ ticker }) {
       symbol: symbol,
       interval: 'D',
       timezone: 'Asia/Kolkata',
-      theme: 'dark',
+      theme: resolvedTheme === 'light' ? 'light' : 'dark',
       style: '1',
       locale: 'en',
-      backgroundColor: 'rgba(14, 18, 27, 1)',
-      gridColor: 'rgba(37, 45, 58, 0.5)',
+      backgroundColor: resolvedTheme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(14, 18, 27, 1)',
+      gridColor: resolvedTheme === 'light' ? 'rgba(42, 46, 57, 0.06)' : 'rgba(37, 45, 58, 0.5)',
       allow_symbol_change: false,
       calendar: false,
       details: false,
@@ -94,7 +96,7 @@ function TradingViewAdvancedChartInner({ ticker }) {
     return () => {
       node.replaceChildren()
     }
-  }, [symbol, ticker, symbolLabel])
+  }, [symbol, ticker, symbolLabel, resolvedTheme])
 
   if (!ticker || !symbol) {
     return (

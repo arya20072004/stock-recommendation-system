@@ -10,7 +10,7 @@ export function ConfidenceIndicator({ confidence, tier, className = '' }) {
   }
 
   const formatted = typeof confidence === 'number' 
-    ? `${(confidence * 100).toFixed(0)}%` 
+    ? `${(confidence > 1 ? confidence : confidence * 100).toFixed(0)}%` 
     : confidence
 
   return <span className={`confidence-indicator ${className}`}>{formatted}</span>
