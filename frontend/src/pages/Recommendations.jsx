@@ -102,7 +102,7 @@ export function Recommendations() {
       header: 'Stock',
       render: (val, row) => (
         <Link to={`/stocks/${encodeURIComponent(row.ticker)}`} className="table-stock-link">
-          <StockIdentity ticker={row.ticker} />
+          <StockIdentity ticker={row.ticker} disableLink />
         </Link>
       )
     },

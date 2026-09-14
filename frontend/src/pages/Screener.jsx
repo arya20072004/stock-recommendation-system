@@ -185,7 +185,7 @@ export function Screener() {
       header: 'Stock',
       render: (val, row) => (
         <Link to={`/stocks/${encodeURIComponent(row.ticker)}`} className="table-stock-link">
-          <StockIdentity ticker={row.ticker} companyName={row.company_name} />
+          <StockIdentity ticker={row.ticker} companyName={row.company_name} disableLink />
         </Link>
       )
     },
