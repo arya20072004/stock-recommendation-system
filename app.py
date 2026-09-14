@@ -500,7 +500,7 @@ def get_news_detail(news_id):
             tickers = list(set(d.get("ticker") for d in matching_docs if d.get("ticker")))
             doc["tickers"] = tickers
 
-        return jsonify(normalize_news_article(doc, deduplicated=True))
+        return jsonify(normalize_news_article(doc))
     except Exception as e:
         return jsonify({"error": "Invalid news ID or request"}), 400
 @app.route('/api/predictions/history')
