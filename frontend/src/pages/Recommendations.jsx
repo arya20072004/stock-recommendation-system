@@ -4,6 +4,7 @@ import { Badge } from '../components/common/Badge'
 import { Button } from '../components/common/Button'
 import { Card } from '../components/common/Card'
 import { EmptyState } from '../components/common/EmptyState'
+import { ErrorState } from '../components/common/ErrorState'
 import { LoadingState } from '../components/common/LoadingState'
 import { SearchInput } from '../components/common/SearchInput'
 import { Select } from '../components/common/Select'
@@ -82,7 +83,7 @@ export function Recommendations() {
     return (
       <div className="recommendations-workspace">
         <PageHeader title="Recommendations" description="AI-generated market opportunities." />
-        <EmptyState title="Failed to load recommendations" description={error} />
+        <ErrorState title="Failed to load recommendations" description={error} />
       </div>
     )
   }

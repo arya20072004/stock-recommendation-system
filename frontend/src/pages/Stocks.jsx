@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Badge } from '../components/common/Badge'
 import { EmptyState } from '../components/common/EmptyState'
+import { ErrorState } from '../components/common/ErrorState'
 import { LoadingState } from '../components/common/LoadingState'
 import { SearchInput } from '../components/common/SearchInput'
 import { Select } from '../components/common/Select'
@@ -83,7 +84,7 @@ export function Stocks() {
     return (
       <div className="stocks-page">
         <PageHeader title="Stocks" description="Explore companies tracked by the recommendation system." />
-        <EmptyState title="Failed to load stocks" description={error} />
+        <ErrorState title="Failed to load stocks" description={error} />
       </div>
     )
   }

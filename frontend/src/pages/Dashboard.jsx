@@ -94,7 +94,7 @@ export function Dashboard() {
                       <div><span className="metric-label">Change</span><ChangeDisplay percentageChange={rec.day_change_pct} /></div>
                     </>
                   }
-                  status={<ConfidenceIndicator value={rec.confidence} tier={rec.confidence_tier} />}
+                  status={<ConfidenceIndicator confidence={rec.confidence} tier={rec.confidence_tier} />}
                 />
               )) : (
                 <div className="empty-signals">No active signals available.</div>

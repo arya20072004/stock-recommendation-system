@@ -150,7 +150,7 @@ export function StockDetails() {
     return (
       <div className="stock-details">
         <button className="back-link" onClick={goBack}><ArrowLeft size={16} aria-hidden="true" />Back</button>
-        <EmptyState title="Failed to load stock" description={error} />
+        <ErrorState title="Failed to load stock" description={error} />
       </div>
     )
   }
@@ -166,7 +166,7 @@ export function StockDetails() {
   const historyColumns = [
     { key: 'market_date', header: 'Date', render: (val) => <span className="mono">{val}</span> },
     { key: 'recommendation', header: 'Signal', render: (val) => <SignalIndicator signal={val} /> },
-    { key: 'confidence', header: 'Confidence', render: (val) => <ConfidenceIndicator value={val} /> },
+    { key: 'confidence', header: 'Confidence', render: (val) => <ConfidenceIndicator confidence={val} /> },
     { key: 'outcome', header: 'Outcome', render: (val) => <PredictionStatus status={val} /> },
     { key: 'actual_return', header: 'Return', align: 'right', render: (val) => val != null ? <span className="mono" style={{ color: val > 0 ? 'var(--positive)' : val < 0 ? 'var(--negative)' : 'var(--text-secondary)' }}>{val > 0 ? '+' : ''}{(val * 100).toFixed(2)}%</span> : '—' }
   ]
@@ -380,7 +380,7 @@ export function StockDetails() {
                         </div>
                         <div className="mi-mobile-card-row">
                           <span className="mi-mobile-card-label">Confidence</span>
-                          <span className="mi-mobile-card-value"><ConfidenceIndicator value={record.confidence} /></span>
+                          <span className="mi-mobile-card-value"><ConfidenceIndicator confidence={record.confidence} /></span>
                         </div>
                         <div className="mi-mobile-card-row">
                           <span className="mi-mobile-card-label">Outcome</span>

@@ -5,6 +5,7 @@ import { Badge } from '../components/common/Badge'
 import { Button } from '../components/common/Button'
 import { Card } from '../components/common/Card'
 import { EmptyState } from '../components/common/EmptyState'
+import { ErrorState } from '../components/common/ErrorState'
 import { LoadingState } from '../components/common/LoadingState'
 import { Select } from '../components/common/Select'
 import { SearchInput } from '../components/common/SearchInput'
@@ -98,7 +99,7 @@ export function Screener() {
     return (
       <div className="screener-workspace">
         <PageHeader title="Screener" description="Find stocks matching your filtering criteria." />
-        <EmptyState title="Failed to load screener data" description={error} />
+        <ErrorState title="Failed to load screener data" description={error} />
       </div>
     )
   }
