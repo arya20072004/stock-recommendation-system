@@ -100,7 +100,8 @@ export function Watchlist() {
           {/* Desktop table */}
           <Card className="wl-table-card">
             <div className="wl-table" role="table" aria-label="Watchlist stocks">
-              <div className="wl-table__header" role="row">
+              <div role="rowgroup">
+                <div className="wl-table__header" role="row">
                 <span role="columnheader">Stock</span>
                 <span role="columnheader">Price</span>
                 <span role="columnheader">Today</span>
@@ -109,6 +110,8 @@ export function Watchlist() {
                 <span role="columnheader">Risk</span>
                 <span role="columnheader"><span className="sr-only">Actions</span></span>
               </div>
+              </div>
+              <div role="rowgroup">
               {stocks.map(stock => {
                 const direction = directionForValue(stock.day_change_pct)
                 const Icon = direction === 'negative' ? ArrowDownRight : ArrowUpRight
@@ -116,9 +119,11 @@ export function Watchlist() {
                 const displaySymbol = stock.ticker.replace(/\.NS$/, '')
                 return (
                   <div className="wl-table__row" role="row" key={stock.ticker}>
-                    <Link to={`/stocks/${encodeURIComponent(stock.ticker)}`} className="wl-table__stock-link" role="cell" aria-label={`${displaySymbol} — ${stock.company_name}`}>
-                      <strong>{displaySymbol}</strong><span>{stock.company_name}</span>
-                    </Link>
+                    <div role="cell">
+                      <Link to={`/stocks/${encodeURIComponent(stock.ticker)}`} className="wl-table__stock-link" aria-label={`${displaySymbol} — ${stock.company_name}`}>
+                        <strong>{displaySymbol}</strong><span>{stock.company_name}</span>
+                      </Link>
+                    </div>
                     <span role="cell" className="mono">{stock.last_close != null ? formatCurrency(stock.last_close) : '—'}</span>
                     <span role="cell" className={`wl-table__change wl-table__change--${direction} mono`}>
                       <Icon aria-hidden="true" size={14} />{stock.day_change_pct != null ? formatPercent(stock.day_change_pct) : '—'}
@@ -134,6 +139,7 @@ export function Watchlist() {
                   </div>
                 )
               })}
+              </div>
             </div>
           </Card>
 

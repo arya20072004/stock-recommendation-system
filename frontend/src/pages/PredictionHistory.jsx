@@ -4,6 +4,7 @@ import { PageHeader } from '../components/layout/PageHeader'
 import { Card } from '../components/common/Card'
 import { DataTable } from '../components/common/DataTable'
 import { MobileDataCard } from '../components/common/MobileDataCard'
+import { Button } from '../components/common/Button'
 import { Select } from '../components/common/Select'
 import { Pagination } from '../components/common/Pagination'
 import { LoadingState } from '../components/common/LoadingState'
@@ -164,7 +165,7 @@ export function PredictionHistory() {
   }, [searchParams, setSearchParams])
 
   const columns = useMemo(() => [
-    { key: 'predictionDate', header: 'Prediction Date', render: (_, record) => <div>{formatDate(record.prediction_timestamp || record.market_date)}</div> },
+    { key: 'predictionDate', header: 'Prediction Date', render: (_, record) => <div><Link to={`/predictions/${record._id}`} className="ph-detail-link" aria-label={`View details for prediction on ${formatDate(record.prediction_timestamp || record.market_date)}`}>{formatDate(record.prediction_timestamp || record.market_date)}</Link></div> },
     { key: 'stock', header: 'Stock', render: (_, record) => <StockIdentity ticker={record.symbol} linkTo={`/stocks/${record.symbol}`} /> },
     { key: 'signal', header: 'Signal', render: (_, record) => <SignalIndicator signal={record.recommendation} /> },
     { key: 'confidence', header: 'Confidence', render: (_, record) => <ConfidenceIndicator confidence={record.confidence} tier={record.confidence_tier} size="sm" /> },
@@ -311,6 +312,7 @@ export function PredictionHistory() {
                 }
                 status={<PredictionStatus status={record.outcome} />}
                 metadata={<span>Model: <span className="ph-model-hash" title={record.model_version}>{truncateHash(record.model_version)}</span></span>}
+                action={<Button as={Link} to={`/predictions/${record._id}`} variant="outline" className="full-width">View Details</Button>}
               />
             ))}
           </div>

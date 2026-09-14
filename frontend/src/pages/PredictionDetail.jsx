@@ -11,6 +11,14 @@ export function PredictionDetail() {
   const [error, setError] = useState(false);
   const [showAllFeatures, setShowAllFeatures] = useState(false);
 
+  const handleBack = () => {
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate(`/predictions/history${data?.symbol ? `?ticker=${data.symbol}` : ''}`);
+    }
+  };
+
   useEffect(() => {
     const fetchDetail = async () => {
       setLoading(true);
@@ -41,9 +49,9 @@ export function PredictionDetail() {
   if (error) {
     return (
       <div className="prediction-history-page">
-        <div className="back-link" onClick={() => navigate('/predictions/history')}>
-          <ArrowLeft size={16} /> Back
-        </div>
+        <button type="button" className="back-link" onClick={handleBack} aria-label="Go back">
+          <ArrowLeft size={16} aria-hidden="true" /> Back
+        </button>
         <div style={{textAlign: 'center', padding: '48px', color: 'var(--color-status-error)'}}>
           Unable to load prediction detail.
         </div>
@@ -87,10 +95,10 @@ export function PredictionDetail() {
 
   return (
     <div className="prediction-history-page fade-in">
-      <div className="back-link" onClick={() => navigate('/predictions/history')}>
-        <ArrowLeft size={16} />
-        Back to Prediction History
-      </div>
+      <button type="button" className="back-link" onClick={handleBack} aria-label="Go back">
+        <ArrowLeft size={16} aria-hidden="true" />
+        Back
+      </button>
 
       <div className="detail-header">
         <div>
