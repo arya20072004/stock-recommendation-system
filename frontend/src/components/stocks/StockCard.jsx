@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Card } from '../common/Card'
-import { RecommendationBadge } from '../recommendations/RecommendationBadge'
+import { SignalIndicator } from '../common/SignalIndicator'
 import { directionForValue, formatCurrency, formatPercent, formatSectorName } from '../../utils/formatters'
 
 export function StockCard({ stock }) {
@@ -19,7 +19,7 @@ export function StockCard({ stock }) {
           <span className={`stock-card__change stock-card__change--${direction} mono`}>{stock.day_change_pct != null ? formatPercent(stock.day_change_pct) : '—'}</span>
         </div>
         <div className="stock-card__signal">
-          <RecommendationBadge signal={stock.recommendation} />
+          <SignalIndicator signal={stock.recommendation} />
           <span className="stock-card__confidence mono">{stock.confidence}%</span>
         </div>
       </Card>

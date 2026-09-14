@@ -78,9 +78,9 @@ export function ModelIntelligence() {
     
     // We map to CSS variable strings. Recharts fill attribute supports CSS variables in modern browsers.
     return [
-      { name: 'SELL', Test: testDist['SELL'] || 0, color: 'var(--color-signal-sell, #ef4444)' },
-      { name: 'HOLD', Test: testDist['HOLD'] || 0, color: 'var(--text-secondary, #a1a1aa)' },
-      { name: 'BUY', Test: testDist['BUY'] || 0, color: 'var(--color-signal-buy, #22c55e)' }
+      { name: 'SELL', Test: testDist['SELL'] || 0, color: 'var(--color-signal-sell)' },
+      { name: 'HOLD', Test: testDist['HOLD'] || 0, color: 'var(--color-signal-hold)' },
+      { name: 'BUY', Test: testDist['BUY'] || 0, color: 'var(--color-signal-buy)' }
     ]
   }, [intelligence])
 

@@ -44,7 +44,7 @@ export function PredictionDetail() {
         <div className="back-link" onClick={() => navigate('/predictions/history')}>
           <ArrowLeft size={16} /> Back
         </div>
-        <div style={{textAlign: 'center', padding: '48px', color: 'var(--negative, #ef4444)'}}>
+        <div style={{textAlign: 'center', padding: '48px', color: 'var(--color-status-error)'}}>
           Unable to load prediction detail.
         </div>
       </div>
@@ -52,7 +52,7 @@ export function PredictionDetail() {
   }
 
   if (!data) {
-    return <div className="prediction-history-page" style={{textAlign: 'center', padding: '48px', color: 'var(--text-muted, #a1a1aa)'}}>Prediction not found.</div>;
+    return <div className="prediction-history-page" style={{textAlign: 'center', padding: '48px', color: 'var(--color-text-muted)'}}>Prediction not found.</div>;
   }
 
   const getBadgeClass = (value) => {

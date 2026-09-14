@@ -9,7 +9,7 @@ import { LoadingState } from '../components/common/LoadingState'
 import { ErrorState } from '../components/common/ErrorState'
 import { UnavailableState } from '../components/common/UnavailableState'
 import { ConfidenceBar } from '../components/recommendations/ConfidenceBar'
-import { RecommendationBadge } from '../components/recommendations/RecommendationBadge'
+// SignalIndicator already imported from common
 import { RiskBadge } from '../components/recommendations/RiskBadge'
 import { TradingViewAdvancedChart } from '../components/tradingview/TradingViewAdvancedChart'
 import { SentimentIndicator } from '../components/common/SentimentIndicator'
@@ -124,7 +124,7 @@ export function StockDetails() {
     if (window.history.length > 1) {
       navigate(-1)
     } else {
-      navigate('/stocks')
+      navigate('/screener')
     }
   }
 
@@ -141,7 +141,7 @@ export function StockDetails() {
     return (
       <div className="stock-details">
         <button className="back-link" onClick={goBack}><ArrowLeft size={16} aria-hidden="true" />Back</button>
-        <EmptyState title="Stock not found" description={`No data exists for "${decodedTicker}".`} action={{ label: 'Browse stocks', onClick: () => navigate('/stocks') }} />
+        <EmptyState title="Stock not found" description={`No data exists for "${decodedTicker}".`} action={{ label: 'Go to Screener', onClick: () => navigate('/screener') }} />
       </div>
     )
   }
@@ -208,7 +208,7 @@ export function StockDetails() {
             <h2 id="signal-heading-mobile" className="section-label">Model signal</h2>
             {prediction ? (
               <Card className="signal-card">
-                <RecommendationBadge signal={prediction.recommendation} />
+                <SignalIndicator signal={prediction.recommendation} className="recommendation-badge" />
                 <ConfidenceBar value={prediction.confidence} tone={signalTones[prediction.recommendation] ?? 'positive'} />
                 <div className="signal-card__metrics">
                   <div>
@@ -270,7 +270,7 @@ export function StockDetails() {
             <h2 id="signal-heading" className="section-label">Model signal</h2>
             {prediction ? (
               <Card className="signal-card">
-                <RecommendationBadge signal={prediction.recommendation} />
+                <SignalIndicator signal={prediction.recommendation} className="recommendation-badge" />
                 <ConfidenceBar value={prediction.confidence} tone={signalTones[prediction.recommendation] ?? 'positive'} />
                 <div className="signal-card__metrics">
                   <div>

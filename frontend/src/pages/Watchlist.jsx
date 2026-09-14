@@ -9,7 +9,7 @@ import { ErrorState } from '../components/common/ErrorState'
 import { LoadingState } from '../components/common/LoadingState'
 import { PageHeader } from '../components/layout/PageHeader'
 import { ConfidenceBar } from '../components/recommendations/ConfidenceBar'
-import { RecommendationBadge } from '../components/recommendations/RecommendationBadge'
+import { SignalIndicator } from '../components/common/SignalIndicator'
 import { RiskBadge } from '../components/recommendations/RiskBadge'
 import { useWatchlist } from '../context/WatchlistContext'
 import { fetchStocksSummary } from '../api/stocks'
@@ -86,14 +86,14 @@ export function Watchlist() {
         <EmptyState
           title="Your watchlist is empty"
           description="Browse stocks or recommendations and add companies you want to monitor."
-          action={{ label: 'Browse Stocks', onClick: () => navigate('/stocks') }}
+          action={{ label: 'Go to Screener', onClick: () => navigate('/screener') }}
         />
       ) : stocks.length === 0 ? (
         /* Tickers saved but none found in backend snapshot — do not fabricate data */
         <EmptyState
           title="No data available"
           description="Your saved stocks were not found in the current backend snapshot."
-          action={{ label: 'Browse Stocks', onClick: () => navigate('/stocks') }}
+          action={{ label: 'Go to Screener', onClick: () => navigate('/screener') }}
         />
       ) : (
         <>
@@ -123,7 +123,7 @@ export function Watchlist() {
                     <span role="cell" className={`wl-table__change wl-table__change--${direction} mono`}>
                       <Icon aria-hidden="true" size={14} />{stock.day_change_pct != null ? formatPercent(stock.day_change_pct) : '—'}
                     </span>
-                    <span role="cell"><RecommendationBadge signal={stock.recommendation} /></span>
+                    <span role="cell"><SignalIndicator signal={stock.recommendation} /></span>
                     <span role="cell"><ConfidenceBar value={stock.confidence} tone={signalTones[stock.recommendation] ?? 'positive'} compact /></span>
                     <span role="cell"><RiskBadge risk={stock.confidence_tier} /></span>
                     <span role="cell" className="wl-table__action">
@@ -158,7 +158,7 @@ export function Watchlist() {
                     <span className={`wl-table__change wl-table__change--${direction} mono`}>{stock.day_change_pct != null ? formatPercent(stock.day_change_pct) : '—'}</span>
                   </div>
                   <div className="wl-card__metrics">
-                    <div><span>Signal</span><RecommendationBadge signal={stock.recommendation} /></div>
+                    <div><span>Signal</span><SignalIndicator signal={stock.recommendation} /></div>
                     <div><span>Confidence</span><strong className="mono">{stock.confidence != null ? `${stock.confidence.toFixed(1)}%` : '—'}</strong></div>
                     <div><span>Risk</span><RiskBadge risk={stock.confidence_tier} /></div>
                   </div>

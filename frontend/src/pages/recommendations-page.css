@@ -68,20 +68,20 @@
 }
 
 .signal-filter-button--buy[aria-pressed="true"] {
-  background: var(--color-status-success-bg, rgba(0, 200, 83, 0.15));
-  color: var(--color-status-success, #00C853);
+  background: color-mix(in srgb, var(--color-signal-buy) 15%, transparent);
+  color: var(--color-signal-buy);
   border-color: transparent;
 }
 
 .signal-filter-button--hold[aria-pressed="true"] {
-  background: var(--color-status-warning-bg, rgba(255, 170, 0, 0.15));
-  color: var(--color-status-warning, #FFAA00);
+  background: color-mix(in srgb, var(--color-signal-hold) 15%, transparent);
+  color: var(--color-signal-hold);
   border-color: transparent;
 }
 
 .signal-filter-button--sell[aria-pressed="true"] {
-  background: var(--color-status-error-bg, rgba(213, 0, 0, 0.15));
-  color: var(--color-status-error, #D50000);
+  background: color-mix(in srgb, var(--color-signal-sell) 15%, transparent);
+  color: var(--color-signal-sell);
   border-color: transparent;
 }
 
