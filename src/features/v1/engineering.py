@@ -7,6 +7,7 @@ and app.py.  Moving these here guarantees training/inference parity.
 
 import calendar
 import logging
+import time
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
@@ -247,6 +248,16 @@ def apply_threshold_calibration(proba, thresholds):
 
 _MACRO_CACHE = {}
 
+MACRO_TICKERS = [
+    "^NSEI",
+    "^NDX",
+    "INR=X",
+    "BZ=F",
+    "GC=F",
+    "HG=F",
+    "^INDIAVIX",
+]
+
 def _validate_macro_asset(df, asset_name, required_column="Close", min_valid_rows=10):
     """
     Validates externally downloaded macro data.
@@ -277,8 +288,8 @@ def _validate_macro_asset(df, asset_name, required_column="Close", min_valid_row
     
     return True, df
 
-def _fetch_cached_macro(ticker, start_date, end_date):
-    """Fetches macro data using a run-local memory cache and backfills gaps for benchmark."""
+def _fetch_cached_macro(ticker, start_date, end_date, max_retries=3, backoff_base=0.1):
+    """Fetches macro data using a run-local memory cache and backfills gaps for benchmark with bounded transient retries."""
     req_start = pd.Timestamp(start_date)
     req_end = pd.Timestamp(end_date)
 
@@ -287,20 +298,43 @@ def _fetch_cached_macro(ticker, start_date, end_date):
         if not cached.empty and cached.index.min() <= req_start and cached.index.max() >= req_end:
             return cached.loc[req_start:req_end].copy()
 
-    try:
-        df = yf.download(
-            ticker,
-            start=start_date,
-            end=end_date + timedelta(days=1),
-            progress=False,
-            auto_adjust=True,
-            timeout=10
-        )
-        if isinstance(df.columns, pd.MultiIndex):
-            df.columns = df.columns.get_level_values(0)
-    except Exception as ex:
-        logger.warning(f"macro: {ticker} download failed — {ex}")
-        df = pd.DataFrame()
+    df = pd.DataFrame()
+    last_ex = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            downloaded = yf.download(
+                ticker,
+                start=start_date,
+                end=end_date + timedelta(days=1),
+                progress=False,
+                auto_adjust=True,
+                timeout=10
+            )
+            if isinstance(downloaded.columns, pd.MultiIndex):
+                downloaded.columns = downloaded.columns.get_level_values(0)
+
+            if downloaded is not None and not downloaded.empty:
+                df = downloaded
+                if attempt > 1:
+                    logger.info(f"macro: {ticker} download succeeded on attempt {attempt}/{max_retries}")
+                break
+            else:
+                last_ex = "empty dataframe returned"
+        except Exception as ex:
+            last_ex = ex
+
+        # Transient failure encountered
+        if attempt < max_retries:
+            backoff_seconds = backoff_base * (2 ** (attempt - 1))
+            logger.warning(
+                f"macro: {ticker} download attempt {attempt}/{max_retries} failed — {last_ex}. "
+                f"Retrying in {backoff_seconds:.2f}s..."
+            )
+            time.sleep(backoff_seconds)
+        else:
+            logger.warning(
+                f"macro: {ticker} download failed after {max_retries} attempts — {last_ex}. Failing closed."
+            )
 
     # Apply historical gap repair for Nifty 50 and India VIX
     if ticker in ["^NSEI", "^INDIAVIX"] and not df.empty:
@@ -334,6 +368,33 @@ def _fetch_cached_macro(ticker, start_date, end_date):
         return pd.DataFrame()
 
     return _MACRO_CACHE[ticker].loc[req_start:req_end].copy()
+
+def warm_macro_cache(start_date=None, end_date=None, tickers=None):
+    """
+    Warms _MACRO_CACHE for macro assets before ticker-by-ticker inference.
+    Ensures shared macro data acquisition is deterministic and eliminates ticker-order dependency.
+    """
+    if tickers is None:
+        tickers = MACRO_TICKERS
+    if end_date is None:
+        end_date = datetime.now()
+    if start_date is None:
+        start_date = end_date - timedelta(days=HISTORY_YEARS * 365 + 30)
+
+    logger.info(
+        f"Warming macro cache for {len(tickers)} macro assets "
+        f"from {pd.Timestamp(start_date).date()} to {pd.Timestamp(end_date).date()}..."
+    )
+    warmed = {}
+    for t in tickers:
+        try:
+            df = _fetch_cached_macro(t, start_date, end_date)
+            warmed[t] = len(df) if df is not None else 0
+            logger.info(f"Macro cache warmed: {t} -> {warmed[t]} rows")
+        except Exception as e:
+            logger.warning(f"Macro cache warming failed for {t}: {e}")
+            warmed[t] = 0
+    return warmed
 
 def _prepare_nifty_data(start_date, end_date, prediction_target_date=None):
     nifty_df = _fetch_cached_macro("^NSEI", start_date, end_date)

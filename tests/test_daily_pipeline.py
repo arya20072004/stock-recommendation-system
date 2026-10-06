@@ -31,7 +31,7 @@ def _setup_bhavcopy_mock(mock_fetch, *valid_dates):
 @patch("src.data.pcr_builder._fetch_bhavcopy")
 @patch("src.pipeline.daily.datetime")
 @patch("src.pipeline.daily.MongoClient")
-def test_resolve_trading_session_monday_friday(mock_mongo, mock_datetime, mock_fetch, mock_db):
+def test_resolve_trading_session_normal_weekday(mock_mongo, mock_datetime, mock_fetch, mock_db):
     client, db = mock_db
     mock_mongo.return_value = client
     
@@ -45,6 +45,136 @@ def test_resolve_trading_session_monday_friday(mock_mongo, mock_datetime, mock_f
     pipeline.resolve_trading_session()
     
     assert pipeline.last_completed_session == wednesday.date()
+    assert pipeline.prediction_target_date == datetime(2026, 8, 6).date()
+
+@patch("src.data.pcr_builder._fetch_bhavcopy")
+@patch("src.pipeline.daily.datetime")
+@patch("src.pipeline.daily.MongoClient")
+def test_resolve_trading_session_normal_monday(mock_mongo, mock_datetime, mock_fetch, mock_db):
+    client, db = mock_db
+    mock_mongo.return_value = client
+    
+    monday = datetime(2026, 9, 28, 20, 35, 0, tzinfo=IST)
+    mock_datetime.now.return_value = monday
+    mock_datetime.combine = datetime.combine
+    mock_datetime.min = datetime.min
+    _setup_bhavcopy_mock(mock_fetch, monday.date())
+    
+    pipeline = DailyPipeline(mongo_uri="mongodb://mock", dry_run=True, force=False)
+    pipeline.resolve_trading_session()
+    
+    assert pipeline.last_completed_session == monday.date()
+    assert pipeline.prediction_target_date == datetime(2026, 9, 29).date()
+
+@patch("src.data.pcr_builder._fetch_bhavcopy")
+@patch("src.pipeline.daily.datetime")
+@patch("src.pipeline.daily.MongoClient")
+def test_resolve_trading_session_monday_delayed_bhavcopy(mock_mongo, mock_datetime, mock_fetch, mock_db):
+    client, db = mock_db
+    mock_mongo.return_value = client
+    
+    monday = datetime(2026, 9, 28, 20, 35, 0, tzinfo=IST)
+    mock_datetime.now.return_value = monday
+    mock_datetime.combine = datetime.combine
+    mock_datetime.min = datetime.min
+    mock_fetch.return_value = None  # Bhavcopy unavailable
+    
+    pipeline = DailyPipeline(mongo_uri="mongodb://mock", dry_run=True, force=False)
+    with pytest.raises(RuntimeError, match="DATA_NOT_YET_AVAILABLE"):
+        pipeline.resolve_trading_session()
+        
+    assert pipeline.status == "BLOCKED"
+    assert pipeline.blocked_reason == "DATA_NOT_YET_AVAILABLE"
+
+@patch("src.data.pcr_builder._fetch_bhavcopy")
+@patch("src.pipeline.daily.datetime")
+@patch("src.pipeline.daily.MongoClient")
+def test_resolve_trading_session_weekend(mock_mongo, mock_datetime, mock_fetch, mock_db):
+    client, db = mock_db
+    mock_mongo.return_value = client
+    
+    saturday = datetime(2026, 8, 8, 10, 0, 0, tzinfo=IST)
+    mock_datetime.now.return_value = saturday
+    mock_datetime.combine = datetime.combine
+    mock_datetime.min = datetime.min
+    
+    prev_friday = datetime(2026, 8, 7).date()
+    _setup_bhavcopy_mock(mock_fetch, prev_friday)
+    
+    pipeline = DailyPipeline(mongo_uri="mongodb://mock", dry_run=True, force=True)
+    pipeline.resolve_trading_session()
+    
+    assert pipeline.last_completed_session == prev_friday
+    assert pipeline.prediction_target_date == datetime(2026, 8, 10).date()
+
+@patch("src.data.pcr_builder._fetch_bhavcopy")
+@patch("src.pipeline.daily.datetime")
+@patch("src.pipeline.daily.MongoClient")
+def test_resolve_trading_session_holiday(mock_mongo, mock_datetime, mock_fetch, mock_db):
+    client, db = mock_db
+    mock_mongo.return_value = client
+    
+    # 2026-05-01 is Maharashtra Day (Friday, verified non-session in canonical calendar)
+    holiday = datetime(2026, 5, 1, 22, 0, 0, tzinfo=IST)
+    mock_datetime.now.return_value = holiday
+    mock_datetime.combine = datetime.combine
+    mock_datetime.min = datetime.min
+    
+    prev_thursday = datetime(2026, 4, 30).date()
+    _setup_bhavcopy_mock(mock_fetch, prev_thursday) 
+    
+    pipeline = DailyPipeline(mongo_uri="mongodb://mock", dry_run=True, force=False)
+    pipeline.resolve_trading_session()
+    
+    assert pipeline.last_completed_session == prev_thursday
+    assert pipeline.prediction_target_date == datetime(2026, 5, 4).date()  # Next Monday
+
+@patch("src.data.pcr_builder._fetch_bhavcopy")
+@patch("src.pipeline.daily.datetime")
+@patch("src.pipeline.daily.MongoClient")
+def test_resolve_trading_session_monday_following_friday_unavailable_bhavcopy(mock_mongo, mock_datetime, mock_fetch, mock_db):
+    """
+    Critical regression test for September 28, 2026 incident:
+    Even though Friday Sep 25 Bhavcopy is available, Monday Sep 28 is a valid session.
+    When Monday Bhavcopy is unavailable, it MUST NOT fall back to Sep 25.
+    """
+    client, db = mock_db
+    mock_mongo.return_value = client
+    
+    monday = datetime(2026, 9, 28, 20, 35, 0, tzinfo=IST)
+    mock_datetime.now.return_value = monday
+    mock_datetime.combine = datetime.combine
+    mock_datetime.min = datetime.min
+    
+    # Friday is valid in mock, but Monday is NOT
+    _setup_bhavcopy_mock(mock_fetch, datetime(2026, 9, 25).date())
+    
+    pipeline = DailyPipeline(mongo_uri="mongodb://mock", dry_run=True, force=False)
+    with pytest.raises(RuntimeError, match="DATA_NOT_YET_AVAILABLE"):
+        pipeline.resolve_trading_session()
+        
+    assert pipeline.status == "BLOCKED"
+    assert pipeline.blocked_reason == "DATA_NOT_YET_AVAILABLE"
+    assert pipeline.last_completed_session is None
+
+@patch("src.data.pcr_builder._fetch_bhavcopy")
+@patch("src.pipeline.daily.datetime")
+@patch("src.pipeline.daily.MongoClient")
+def test_resolve_trading_session_target_date_correctness(mock_mongo, mock_datetime, mock_fetch, mock_db):
+    client, db = mock_db
+    mock_mongo.return_value = client
+    
+    monday = datetime(2026, 9, 28, 22, 0, 0, tzinfo=IST)
+    mock_datetime.now.return_value = monday
+    mock_datetime.combine = datetime.combine
+    mock_datetime.min = datetime.min
+    _setup_bhavcopy_mock(mock_fetch, monday.date())
+    
+    pipeline = DailyPipeline(mongo_uri="mongodb://mock", dry_run=True, force=False)
+    pipeline.resolve_trading_session()
+    
+    assert pipeline.last_completed_session == datetime(2026, 9, 28).date()
+    assert pipeline.prediction_target_date == datetime(2026, 9, 29).date()
 
 @patch("src.pipeline.daily.datetime")
 @patch("src.pipeline.daily.MongoClient")
@@ -83,62 +213,28 @@ def test_resolve_trading_session_before_cutoff_force(mock_mongo, mock_datetime, 
 @patch("src.data.pcr_builder._fetch_bhavcopy")
 @patch("src.pipeline.daily.datetime")
 @patch("src.pipeline.daily.MongoClient")
-def test_resolve_trading_session_weekend(mock_mongo, mock_datetime, mock_fetch, mock_db):
+def test_resolve_trading_session_no_false_missed_sessions(mock_mongo, mock_datetime, mock_fetch, mock_db):
     client, db = mock_db
     mock_mongo.return_value = client
     
-    saturday = datetime(2026, 8, 8, 10, 0, 0, tzinfo=IST)
-    mock_datetime.now.return_value = saturday
+    # Simulate prior run completed with market_date="2026-09-28" (e.g. from Sep 25)
+    db.pipeline_runs.find_one.return_value = {
+        "status": "SUCCESS",
+        "market_date": "2026-09-28"
+    }
+    
+    monday = datetime(2026, 9, 28, 20, 35, 0, tzinfo=IST)
+    mock_datetime.now.return_value = monday
     mock_datetime.combine = datetime.combine
     mock_datetime.min = datetime.min
-    
-    prev_friday = datetime(2026, 8, 7).date()
-    _setup_bhavcopy_mock(mock_fetch, prev_friday)
-    
-    pipeline = DailyPipeline(mongo_uri="mongodb://mock", dry_run=True, force=True)
-    pipeline.resolve_trading_session()
-    
-    assert pipeline.last_completed_session == prev_friday
-
-@patch("src.data.pcr_builder._fetch_bhavcopy")
-@patch("src.pipeline.daily.datetime")
-@patch("src.pipeline.daily.MongoClient")
-def test_resolve_trading_session_holiday(mock_mongo, mock_datetime, mock_fetch, mock_db):
-    client, db = mock_db
-    mock_mongo.return_value = client
-    
-    wednesday_holiday = datetime(2026, 8, 5, 22, 0, 0, tzinfo=IST)
-    mock_datetime.now.return_value = wednesday_holiday
-    mock_datetime.combine = datetime.combine
-    mock_datetime.min = datetime.min
-    
-    prev_tuesday = datetime(2026, 8, 4).date()
-    _setup_bhavcopy_mock(mock_fetch, prev_tuesday) 
+    mock_datetime.strptime = datetime.strptime
+    _setup_bhavcopy_mock(mock_fetch, monday.date())
     
     pipeline = DailyPipeline(mongo_uri="mongodb://mock", dry_run=True, force=False)
     pipeline.resolve_trading_session()
     
-    assert pipeline.last_completed_session == prev_tuesday
-
-@patch("src.data.pcr_builder._fetch_bhavcopy")
-@patch("src.pipeline.daily.datetime")
-@patch("src.pipeline.daily.MongoClient")
-def test_resolve_trading_session_day_after_holiday(mock_mongo, mock_datetime, mock_fetch, mock_db):
-    client, db = mock_db
-    mock_mongo.return_value = client
-    
-    thursday = datetime(2026, 8, 6, 22, 0, 0, tzinfo=IST)
-    mock_datetime.now.return_value = thursday
-    mock_datetime.combine = datetime.combine
-    mock_datetime.min = datetime.min
-    
-    prev_monday = datetime(2026, 8, 3).date()
-    _setup_bhavcopy_mock(mock_fetch, prev_monday) 
-    
-    pipeline = DailyPipeline(mongo_uri="mongodb://mock", dry_run=True, force=False)
-    pipeline.resolve_trading_session()
-    
-    assert pipeline.last_completed_session == prev_monday
+    assert pipeline.last_completed_session == monday.date()
+    assert pipeline.prediction_target_date == datetime(2026, 9, 29).date()
 
 # ======================================================================
 # FIX 2: Atomic MongoDB Execution Lock Tests

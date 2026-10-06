@@ -199,18 +199,68 @@ def _compute_daily_pcr(dt: datetime, stock_tickers: list[str] | None = None) -> 
     return records
 
 
-def build_pcr_history(client: MongoClient, start_date: datetime = None, end_date: datetime = None):
+def build_pcr_history(
+    client: MongoClient,
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
+    full_backfill: bool = False
+) -> dict:
+    """
+    Collects daily NIFTY and stock PCR records.
+    In incremental mode (default), checks MongoDB pcr_data for the latest recorded date,
+    resolves missing canonical NSE trading sessions up to end_date, and fetches only new dates.
+    If full_backfill=True or the database is uninitialized, performs a historical bootstrap.
+    """
     db = client["stock_market_db"]
-    end_date = end_date or datetime.now()
-    start_date = start_date or (end_date - timedelta(days=365 * HISTORY_YEARS + 30))
+    import src.data.session_calendar as session_calendar
 
-    all_dates = pd.bdate_range(start_date, end_date)  # trading-day proxy; NSE holidays will just 404/empty-skip
-    logger.info("Backfilling PCR for %d candidate trading days", len(all_dates))
+    # Normalize end_date to date object
+    if end_date is None:
+        target_end_date = datetime.now().date()
+    elif isinstance(end_date, datetime):
+        target_end_date = end_date.date()
+    else:
+        target_end_date = end_date
+
+    # Normalize start_date if provided
+    target_start_date = start_date.date() if isinstance(start_date, datetime) else start_date
+
+    if full_backfill:
+        if target_start_date is None:
+            target_start_date = target_end_date - timedelta(days=365 * HISTORY_YEARS + 30)
+        logger.info("Executing full historical PCR backfill from %s to %s", target_start_date, target_end_date)
+        candidate_dates = [ts.date() for ts in pd.bdate_range(target_start_date, target_end_date)]
+    else:
+        if target_start_date is None:
+            max_doc = db.pcr_data.find_one({"underlying": "NIFTY"}, sort=[("date", -1)])
+            if max_doc and "date" in max_doc:
+                max_dt = max_doc["date"]
+                max_date = max_dt.date() if isinstance(max_dt, datetime) else max_dt
+                target_start_date = session_calendar.next_session(max_date)
+            else:
+                target_start_date = target_end_date - timedelta(days=365 * HISTORY_YEARS + 30)
+                logger.info("PCR database uninitialized. Bootstrapping history from %s to %s", target_start_date, target_end_date)
+
+        # Collect only canonical trading sessions in [target_start_date, target_end_date]
+        candidate_dates = []
+        if target_start_date <= target_end_date:
+            curr = target_start_date
+            while curr <= target_end_date:
+                if session_calendar.is_session(curr):
+                    candidate_dates.append(curr)
+                curr += timedelta(days=1)
+
+        if not candidate_dates:
+            logger.info("PCR data is already up to date through %s (0 missing sessions)", target_end_date)
+            return {"fetched": 0, "skipped": 0, "candidate_days": 0}
+
+        logger.info("Collecting incremental PCR for %d candidate trading days (%s to %s)",
+                    len(candidate_dates), candidate_dates[0], candidate_dates[-1])
 
     ops = []
     fetched, skipped = 0, 0
-    for i, ts in enumerate(all_dates):
-        dt = ts.to_pydatetime()
+    for i, day in enumerate(candidate_dates):
+        dt = datetime.combine(day, datetime.min.time()) if not isinstance(day, datetime) else day
         recs = _compute_daily_pcr(dt, stock_tickers=TICKERS)
         if not recs:
             skipped += 1
@@ -226,25 +276,41 @@ def build_pcr_history(client: MongoClient, start_date: datetime = None, end_date
         if len(ops) >= 250:
             db.pcr_data.bulk_write(ops, ordered=False)
             ops = []
-        if i % 50 == 0:
-            logger.info("Progress: %d/%d days (fetched=%d, skipped=%d)", i, len(all_dates), fetched, skipped)
+        if (i + 1) % 50 == 0:
+            logger.info("Progress: %d/%d days (fetched=%d, skipped=%d)", i + 1, len(candidate_dates), fetched, skipped)
         time.sleep(0.3)  # throttle — avoid tripping NSE rate limiting
 
     if ops:
         db.pcr_data.bulk_write(ops, ordered=False)
 
     db.pcr_data.create_index([("underlying", 1), ("date", 1)], unique=True)
-    logger.info("PCR backfill complete: %d records fetched, %d days skipped/holiday", fetched, skipped)
+    logger.info("PCR collection complete: %d records fetched, %d days skipped/holiday", fetched, skipped)
     logger.warning(
         "Stock-level PCR uses TICKER_TO_FO_SYMBOL_OVERRIDES for symbol mapping — "
         "spot-check a sample of tickers against a real Bhavcopy SYMBOL column "
         "before trusting results, especially TMPV.NS and ETERNAL.NS (unverified overrides)."
     )
+    return {"fetched": fetched, "skipped": skipped, "candidate_days": len(candidate_dates)}
+
+
+def backfill_full_pcr_history(client: MongoClient, start_date: datetime | None = None, end_date: datetime | None = None):
+    """Explicit convenience interface for performing a full 5-year historical PCR backfill."""
+    return build_pcr_history(client, start_date=start_date, end_date=end_date, full_backfill=True)
 
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="NSE F&O PCR Data Collector")
+    parser.add_argument("--full", action="store_true", help="Perform full 5-year historical backfill")
+    parser.add_argument("--start-date", type=str, default=None, help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end-date", type=str, default=None, help="End date (YYYY-MM-DD)")
+    args = parser.parse_args()
+
+    start = datetime.strptime(args.start_date, "%Y-%m-%d").date() if args.start_date else None
+    end = datetime.strptime(args.end_date, "%Y-%m-%d").date() if args.end_date else None
+
     client = MongoClient(MONGO_URI)
     try:
-        build_pcr_history(client)
+        build_pcr_history(client, start_date=start, end_date=end, full_backfill=args.full)
     finally:
         client.close()

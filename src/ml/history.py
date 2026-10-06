@@ -26,7 +26,7 @@ import logging
 import os
 import warnings
 
-from datetime import datetime, timezone, date
+from datetime import datetime, timezone, date, timedelta
 
 import joblib
 import pandas as pd
@@ -403,6 +403,18 @@ def generate_and_persist_predictions(client, last_completed_session: date, predi
     logger.info(
         "Starting historical prediction generation..."
     )
+
+    # ==================================================================
+    # Shared Macro Cache Warming
+    # ==================================================================
+    try:
+        from src.features.v1.engineering import warm_macro_cache
+        macro_end = datetime.combine(last_completed_session, datetime.min.time())
+        macro_start = macro_end - timedelta(days=5 * 365 + 30)
+        logger.info("Warming shared macro data before ticker generation...")
+        warm_macro_cache(macro_start, macro_end)
+    except Exception as e:
+        logger.warning(f"Macro cache warming encountered an error: {e}. Falling back to on-demand fetch.")
 
     # ==================================================================
     # Generate ticker snapshots

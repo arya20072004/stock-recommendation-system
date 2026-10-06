@@ -91,6 +91,9 @@ class DailyPipeline:
         elif stage_name in self.stages and "metrics" in self.stages[stage_name]:
             stage_record["metrics"] = self.stages[stage_name]["metrics"]
             
+        if error:
+            stage_record["error"] = error
+
         self.stages[stage_name] = stage_record
         
         if error:
@@ -370,42 +373,45 @@ class DailyPipeline:
         if now_ist.hour < 20:
             candidate -= timedelta(days=1)
             
+        import src.data.session_calendar as session_calendar
         from src.data.pcr_builder import _fetch_bhavcopy
         
         rejected = []
         max_lookback = 10
         lookback = 0
         
-        while lookback < max_lookback:
-            if candidate.weekday() >= 5:
-                rejected.append(str(candidate))
-                candidate -= timedelta(days=1)
-                lookback += 1
-                continue
-                
-            dt_candidate = datetime.combine(candidate, datetime.min.time())
-            bhav = _fetch_bhavcopy(dt_candidate)
+        while not session_calendar.is_session(candidate) and lookback < max_lookback:
+            rejected.append(str(candidate))
+            candidate -= timedelta(days=1)
+            lookback += 1
             
-            if bhav is not None and not bhav.empty:
-                self.last_completed_session = candidate
-                import src.data.session_calendar as session_calendar
-                self.prediction_target_date = session_calendar.next_session(self.last_completed_session)
+        if not session_calendar.is_session(candidate):
+            msg = f"Failed to resolve trading session within {max_lookback} days."
+            self.status = "BLOCKED"
+            self.blocked_reason = "NO_CONFIRMED_COMPLETED_SESSION"
+            self._log_stage("TRADING_SESSION", "FAILED", msg)
+            raise RuntimeError(msg)
+            
+        dt_candidate = datetime.combine(candidate, datetime.min.time())
+        bhav = _fetch_bhavcopy(dt_candidate)
+        
+        if bhav is not None and not bhav.empty:
+            self.last_completed_session = candidate
+            self.prediction_target_date = session_calendar.next_session(self.last_completed_session)
+            if rejected:
                 logger.info(f"Rejected non-trading dates: {rejected}")
-                logger.info(f"Resolved last completed session: {self.last_completed_session}")
-                logger.info(f"Resolved prediction target date: {self.prediction_target_date}")
-                self._log_stage("TRADING_SESSION", "SUCCESS")
-                self._detect_missed_sessions()
-                return
-            else:
-                rejected.append(str(candidate))
-                candidate -= timedelta(days=1)
-                lookback += 1
-                
-        msg = f"Failed to resolve trading session within {max_lookback} days."
-        self.status = "BLOCKED"
-        self.blocked_reason = "NO_CONFIRMED_COMPLETED_SESSION"
-        self._log_stage("TRADING_SESSION", "FAILED", msg)
-        raise RuntimeError(msg)
+            logger.info(f"Resolved last completed session: {self.last_completed_session}")
+            logger.info(f"Resolved prediction target date: {self.prediction_target_date}")
+            self._log_stage("TRADING_SESSION", "SUCCESS")
+            self._detect_missed_sessions()
+            return
+        else:
+            self.status = "BLOCKED"
+            self.blocked_reason = "DATA_NOT_YET_AVAILABLE"
+            msg = f"Blocked: Required market data for trading session {candidate} is not yet available (DATA_NOT_YET_AVAILABLE)."
+            logger.warning(msg)
+            self._log_stage("TRADING_SESSION", "BLOCKED", msg)
+            raise RuntimeError(msg)
 
     def collect_market_data(self):
         self._verify_ownership()
@@ -448,7 +454,7 @@ class DailyPipeline:
         from src.ml.sentiment import run as run_sentiment
 
         stages = {
-            "COLLECT_PCR": lambda: build_pcr_history(self.client),
+            "COLLECT_PCR": lambda: build_pcr_history(self.client, end_date=self.last_completed_session),
             "COLLECT_SECTOR": lambda: build_sector_indices(self.client),
             "COLLECT_FII_DII": lambda: fetch_and_store_latest(self.client),
             "COLLECT_NEWS": lambda: run_news(),
@@ -653,6 +659,7 @@ class DailyPipeline:
         logger.info("Running API health check...")
         try:
             import app
+            import collections
             from src.data.nifty50 import TICKERS
             app.app.testing = True
             with app.app.test_client() as client:
@@ -660,23 +667,85 @@ class DailyPipeline:
                 if resp.status_code == 200:
                     data = resp.get_json()
                     if isinstance(data, dict) and "data" in data:
+                        rows = data["data"]
                         expected = set(TICKERS)
-                        actual = {row["ticker"] for row in data["data"]}
-                        missing = expected - actual
-                        unexpected = actual - expected
+                        all_tickers = [row["ticker"] for row in rows]
+                        actual = set(all_tickers)
                         
-                        import collections
-                        all_tickers = [row["ticker"] for row in data["data"]]
+                        # 1. Check for duplicates in API response
                         duplicates = [t for t, c in collections.Counter(all_tickers).items() if c > 1]
-                        
-                        if missing or unexpected or duplicates:
-                            msg = f"API Ticker mismatch. Expected: {len(expected)}, Returned: {len(all_tickers)}, Missing: {missing}, Unexpected: {unexpected}, Duplicates: {duplicates}"
+                        if duplicates:
+                            msg = f"API Ticker duplicates detected: {duplicates}"
                             self._log_stage("API_HEALTH", "FAILED", msg)
                             raise RuntimeError(msg)
-                        else:
+                            
+                        # 2. Check for unexpected tickers outside canonical universe
+                        unexpected = actual - expected
+                        if unexpected:
+                            msg = f"API returned unexpected tickers outside canonical universe: {unexpected}"
+                            self._log_stage("API_HEALTH", "FAILED", msg)
+                            raise RuntimeError(msg)
+                            
+                        # 3. Check target cohort date alignment if configured
+                        if self.prediction_target_date:
+                            expected_date_str = self.prediction_target_date.strftime("%Y-%m-%d")
+                            mismatched_dates = [
+                                row["ticker"] for row in rows
+                                if row.get("market_date") and row.get("market_date") != expected_date_str
+                            ]
+                            if mismatched_dates:
+                                msg = f"API cohort date mismatch for tickers: {mismatched_dates} (expected {expected_date_str})"
+                                self._log_stage("API_HEALTH", "FAILED", msg)
+                                raise RuntimeError(msg)
+
+                        # 4. Check missing tickers against recognized localized failures
+                        missing = expected - actual
+                        if not missing:
+                            # Full universe success (51/51)
                             metrics = {"expected_count": len(expected), "returned_count": len(all_tickers)}
                             self._log_stage("API_HEALTH", "SUCCESS", metrics=metrics)
                             return
+
+                        # Localized missing tickers detected: inspect prediction validation & generation state
+                        generation_metrics = self.stages.get("PREDICTION_GENERATION", {}).get("metrics", {})
+                        stale_tickers = set(generation_metrics.get("stale", []))
+                        failed_tickers = set(generation_metrics.get("failed", []))
+                        explained_missing = stale_tickers | failed_tickers
+                        unexplained = missing - explained_missing
+
+                        validation_status = self.stages.get("PREDICTION_VALIDATION", {}).get("status")
+
+                        if unexplained:
+                            msg = (
+                                f"API Ticker mismatch. Missing tickers are unexplained by prediction generation: "
+                                f"unexplained={unexplained}, explained={explained_missing}"
+                            )
+                            self._log_stage("API_HEALTH", "FAILED", msg)
+                            raise RuntimeError(msg)
+
+                        if validation_status not in ("SUCCESS", "DEGRADED"):
+                            msg = f"API missing tickers cannot be accepted because PREDICTION_VALIDATION status is {validation_status}"
+                            self._log_stage("API_HEALTH", "FAILED", msg)
+                            raise RuntimeError(msg)
+
+                        # Check that API returned exactly the valid expected tickers (expected - explained_missing)
+                        expected_valid = expected - explained_missing
+                        if actual != expected_valid:
+                            msg = f"API returned tickers {actual} do not match expected valid set {expected_valid}"
+                            self._log_stage("API_HEALTH", "FAILED", msg)
+                            raise RuntimeError(msg)
+
+                        # Recognized localized degradation accepted
+                        metrics = {
+                            "expected_count": len(expected),
+                            "valid_expected_count": len(expected_valid),
+                            "returned_count": len(all_tickers),
+                            "explained_missing": list(missing),
+                        }
+                        msg = f"API health degraded: {len(missing)} tickers safely missing due to recognized localized failures: {missing}"
+                        logger.warning(msg)
+                        self._log_stage("API_HEALTH", "DEGRADED", msg, metrics=metrics)
+                        return
                 
             msg = f"API returned non-200 or unexpected structure: {resp.status_code}"
             self._log_stage("API_HEALTH", "FAILED", msg)
